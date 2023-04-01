@@ -1,0 +1,31 @@
+<div class="main">
+  <div class="table-container">
+    <table
+      mat-table
+      [dataSource]="dataSource"
+      class="mat-elevation-z8 demo-table"
+    >
+      <ng-container matColumnDef="Time">
+        <th mat-header-cell *matHeaderCellDef>Time</th>
+        <td mat-cell *matCellDef="let row">{{ row.time }}</td>
+      </ng-container>
+
+      <ng-container
+        *ngFor="let sectorName of sectorNames; index as i"
+        matColumnDef="{{ sectorName }}"
+      >
+        <th mat-header-cell *matHeaderCellDef>{{ sectorName }}</th>
+        <td mat-cell *matCellDef="let row">
+          <app-selectable-table-element
+            [time]="row.time"
+            [sectorName]="this.sectorName"
+            [index]="row.time"
+          ></app-selectable-table-element>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+  </div>
+</div>
