@@ -10,27 +10,23 @@ import { PlanningTableComponent } from '../planning-table.component';
 })
 export class SelectableTableElementComponent implements OnInit {
 
-  @Input() time : number | undefined;
-  @Input() sectorName : string | undefined;
-  @Input() index : number | undefined;
+  @Input() rowNumber : number | undefined;
+  @Input() columnNumber : number | undefined;
+
+
   employee: IEmployee = { id: undefined, name: 'No Employee', totalTime: undefined }
   availableEmployees : IEmployee[] = [];
 
   constructor(private planningTableComponent : PlanningTableComponent)
   {
-    this.availableEmployees = planningTableComponent.employees;
-    console.log(this.availableEmployees);    
+
   }
+
   setEmployee()
   {
-    this.employee = this.availableEmployees[0];
+
   }
   
   ngOnInit(): void {
-    console.log(this.time);
-    console.log(this.sectorName);
-    console.log(this.index + "!");
-    
-    
   }
 }

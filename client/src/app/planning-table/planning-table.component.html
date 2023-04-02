@@ -15,11 +15,10 @@
         matColumnDef="{{ sectorName }}"
       >
         <th mat-header-cell *matHeaderCellDef>{{ sectorName }}</th>
-        <td mat-cell *matCellDef="let row">
+        <td mat-cell *matCellDef="let row; index as j">
           <app-selectable-table-element
-            [time]="row.time"
-            [sectorName]="this.sectorName"
-            [index]="row.time"
+            [rowNumber]="j"
+            [columnNumber]="i"
           ></app-selectable-table-element>
         </td>
       </ng-container>

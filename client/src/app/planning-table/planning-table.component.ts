@@ -1,40 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { IEmployee } from '../models/IEmployee';
+import { PlanningTableService } from './planning-table.service';
+import { MatTable } from '@angular/material/table';
 
 
-
-let e1: IEmployee = {
-  id: 1,
-  name: 'Anton',
-  totalTime: 0
-}
-
-let e2: IEmployee = {
-  id: 2,
-  name: 'John',
-  totalTime: 0
-}
-
-let e3: IEmployee = {
-  id: 3,
-  name: 'Mary',
-  totalTime: 0
-}
-
-let e4: IEmployee = {
-  id: 4,
-  name: 'Jane',
-  totalTime: 0
-}
 
 let defaultEmployee: IEmployee = { id: undefined, name: undefined, totalTime: undefined }
 
-export interface employeeTableCell extends Record<string, IEmployee | number> {
+export interface ITableRow extends Record<string, IEmployee | number> {
 }
-
-
-let time: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-let sectors: string[] = ['G12R', 'G12P'];
 
 @Component({
   selector: 'app-planning-table',
@@ -42,35 +16,46 @@ let sectors: string[] = ['G12R', 'G12P'];
   templateUrl: './planning-table.component.html',
 })
 export class PlanningTableComponent implements OnInit {
-  dataSource: employeeTableCell[] = [];
+  time: number[] = [];
+  
+  sectors: string[] = [];
+  dataSource: ITableRow[] = [];
   sectorNames: string[] = [];
-  displayedColumns: string[] = ['Time', ...sectors];
-
+  displayedColumns: string[] = [];
   employees: IEmployee[] = [];
 
-  ngOnInit(): void {
-    this.dataSource = this.buildDefaultEmployeeTable(time, sectors);
-    this.employees.push(e1, e2, e3, e4);
+  @ViewChild(MatTable) table!: MatTable<any>;
+
+  constructor(private planningTableService: PlanningTableService) {
   }
 
-  buildDefaultEmployeeTable(time: number[], sectors: string[]): employeeTableCell[] {
-    let table: employeeTableCell[] = [];
+  ngOnInit(): void {
+    this.time = this.planningTableService.getTimeIntervals();
+    this.sectors = this.planningTableService.getSectors();
+    this.displayedColumns = ['Time', ...this.sectors];
+    this.dataSource = this.buildDefaultEmployeeTable(this.time, this.sectors);
+    this.employees = this.planningTableService.getAvailableEmployees();
+    this.setAndCheckEmployee(this.employees[0], 0, 0);
+  }
+
+  buildDefaultEmployeeTable(time: number[], sectors: string[]): ITableRow[] {
+    let table: ITableRow[] = [];
     this.sectorNames = sectors;
 
     time.forEach(timePeriod => {
-      let row: employeeTableCell = {};
+      let row: ITableRow = {};
       row["time"] = timePeriod;
       sectors.forEach(sector => {
         row[sector] = defaultEmployee;
       });
       table.push(row);
     });
-
     return table;
   }
 
-  setEmployee()
-  {
-    
+  setAndCheckEmployee(employee: IEmployee, rowNumber: number, columnNumber: number) {
+    let employees = this.dataSource.map(({ time, ...employees }) => employees);
+    let employeeToChange = employees[rowNumber][columnNumber];
+
   }
 }
