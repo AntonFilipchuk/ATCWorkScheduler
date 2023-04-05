@@ -1,7 +1,19 @@
 import { Component, OnInit } from '@angular/core';
+import { PlanningTableService } from '../planning-table/planning-table.service';
 
 
-const sectors : string[] = ['G12R', 'G12P']; 
+const sectors: string[] = ['G12R', 'G12P'];
+
+export interface PeriodicElement {
+  name: string;
+  position: number;
+  weight: number;
+  symbol: string;
+}
+const ELEMENT_DATA: PeriodicElement[] = [
+  { position: 1, name: 'Hydrogen', weight: 1.0079, symbol: 'H' },
+  { position: 2, name: 'Helium', weight: 4.0026, symbol: 'He' },
+];
 
 @Component({
   selector: 'app-test',
@@ -11,32 +23,17 @@ const sectors : string[] = ['G12R', 'G12P'];
 
 
 export class TestComponent implements OnInit {
+  
+  constructor(private planningTableService: PlanningTableService)
+  {
 
-
-
-  data = [
-    { name: 'bill', co: '1', addr: '123', other: "12333" },
-    { name: 'bob', co: '2', addr: '123', other: "12333" },
-    { name: 'bo3', co: '32', addr: 'x123', other: "12333" },
-    { name: 'bo4', co: '32', addr: 'x123', other: "12333" },
-    { name: 'bo5', co: '32', addr: 'x123', other: "12333" }
-  ];
-  displayedColumns: any[] = [];
-
-  dataSource: any[] = [];
+  }
+ 
+  displayedColumns: string[] = ['Time', 'G1', 'G2'];
+  dataSource = this.planningTableService.table;
 
   ngOnInit() {
-
-    const head = this.data.map(x => x.name)
-    const data: any[] = [];
-    this.data.forEach((x, index) => { //  { name: 'bill', co: '1', addr: '123', other: "12333" }
-      Object.keys(x).forEach((k, index2) => { //  name: 'bill'
-        data[index2] = data[index2] || {}
-        data[index2][head[index]] = x[k as keyof typeof x]
-
-      })
-    })
-    this.displayedColumns = head;
-    this.dataSource = data.slice(1);
+    console.log(this.planningTableService.table);
+    
   }
 }

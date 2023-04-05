@@ -1,14 +1,17 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ViewChildren } from '@angular/core';
 import { IEmployee } from '../models/IEmployee';
 import { PlanningTableService } from './planning-table.service';
-import { MatTable } from '@angular/material/table';
+import { MatTable, MatTableDataSource } from '@angular/material/table';
 
 
 
 let defaultEmployee: IEmployee = { id: undefined, name: undefined, totalTime: undefined }
 
-export interface ITableRow extends Record<string, IEmployee | number> {
+
+export interface ITableRow {
+  [key: string]: any;
 }
+
 
 @Component({
   selector: 'app-planning-table',
@@ -16,46 +19,50 @@ export interface ITableRow extends Record<string, IEmployee | number> {
   templateUrl: './planning-table.component.html',
 })
 export class PlanningTableComponent implements OnInit {
-  time: number[] = [];
   
+  time: number[] = [];
   sectors: string[] = [];
-  dataSource: ITableRow[] = [];
+  dataSource: MatTableDataSource<ITableRow> = new MatTableDataSource<ITableRow>();
   sectorNames: string[] = [];
   displayedColumns: string[] = [];
   employees: IEmployee[] = [];
 
-  @ViewChild(MatTable) table!: MatTable<any>;
+
 
   constructor(private planningTableService: PlanningTableService) {
   }
 
   ngOnInit(): void {
+
     this.time = this.planningTableService.getTimeIntervals();
     this.sectors = this.planningTableService.getSectors();
+
     this.displayedColumns = ['Time', ...this.sectors];
-    this.dataSource = this.buildDefaultEmployeeTable(this.time, this.sectors);
-    this.employees = this.planningTableService.getAvailableEmployees();
-    this.setAndCheckEmployee(this.employees[0], 0, 0);
-  }
-
-  buildDefaultEmployeeTable(time: number[], sectors: string[]): ITableRow[] {
-    let table: ITableRow[] = [];
-    this.sectorNames = sectors;
-
-    time.forEach(timePeriod => {
-      let row: ITableRow = {};
-      row["time"] = timePeriod;
-      sectors.forEach(sector => {
-        row[sector] = defaultEmployee;
-      });
-      table.push(row);
-    });
-    return table;
-  }
-
-  setAndCheckEmployee(employee: IEmployee, rowNumber: number, columnNumber: number) {
-    let employees = this.dataSource.map(({ time, ...employees }) => employees);
-    let employeeToChange = employees[rowNumber][columnNumber];
+    this.sectorNames = [...this.sectors];
+    this.dataSource.data = this.planningTableService.table;
+    let a = this.planningTableService.table;
+    console.log(a, 'Table');
 
   }
+
+
+  setAndCheckEmployee(rowNumber: number, columnNumber: number) {
+    let employee: IEmployee = {
+      id: 1,
+      name: 'Anton',
+      totalTime: 0
+    }
+    let employees = this.dataSource.data.map(({ time, ...employees }) => employees);
+    let employeeToChange: IEmployee | undefined = employees[rowNumber][columnNumber];
+
+    if (Object.values(employees).includes(employee)) {
+      console.log("Cannot set employee to the same time!");
+      return;
+    }
+
+    this.dataSource.data[rowNumber][columnNumber] = employee;
+    console.log(this.dataSource.data[rowNumber][columnNumber]);
+    console.log(this.dataSource.data);
+  }
+
 }

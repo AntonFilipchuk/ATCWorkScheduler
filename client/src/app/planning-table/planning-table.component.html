@@ -1,13 +1,9 @@
 <div class="main">
   <div class="table-container">
-    <table
-      mat-table
-      [dataSource]="dataSource"
-      class="mat-elevation-z8 demo-table"
-    >
+    <table mat-table [dataSource]="dataSource">
       <ng-container matColumnDef="Time">
-        <th mat-header-cell *matHeaderCellDef>Time</th>
-        <td mat-cell *matCellDef="let row">{{ row.time }}</td>
+        <th mat-header-cell *matHeaderCellDef="let row">Time</th>
+        <td mat-cell *matCellDef="let row">{{ row.Time }}</td>
       </ng-container>
 
       <ng-container
@@ -16,6 +12,7 @@
       >
         <th mat-header-cell *matHeaderCellDef>{{ sectorName }}</th>
         <td mat-cell *matCellDef="let row; index as j">
+          <p>Works</p>
           <app-selectable-table-element
             [rowNumber]="j"
             [columnNumber]="i"
@@ -28,3 +25,5 @@
     </table>
   </div>
 </div>
+
+<button (click)="setAndCheckEmployee(0, 0)">CLICK</button>
