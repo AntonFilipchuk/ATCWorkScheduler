@@ -1,13 +1,14 @@
-table {
-  width: 100%;
+.tablesContainer {
+  display: flex;
+  flex-direction: row;
 }
 
-.table-container {
+.timeTable {
   display: flex;
-  width: 85%;
+  flex: 1;
 }
 
-.main {
+.employeesTable {
   display: flex;
-  justify-content: center;
+  flex: 80%;
 }

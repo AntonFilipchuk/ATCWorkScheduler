@@ -6,13 +6,19 @@ const sectors: string[] = ['G12R', 'G12P'];
 
 export interface PeriodicElement {
   name: string;
-  position: number;
   weight: number;
   symbol: string;
 }
+
+const POSITION_DATA =
+[
+  {position: 1},
+  {position: 2}
+]
+
 const ELEMENT_DATA: PeriodicElement[] = [
-  { position: 1, name: 'Hydrogen', weight: 1.0079, symbol: 'H' },
-  { position: 2, name: 'Helium', weight: 4.0026, symbol: 'He' },
+  {  name: 'Hydrogen', weight: 1.0079, symbol: 'H' },
+  {  name: 'Helium', weight: 4.0026, symbol: 'He' },
 ];
 
 @Component({
@@ -24,16 +30,18 @@ const ELEMENT_DATA: PeriodicElement[] = [
 
 export class TestComponent implements OnInit {
   
-  constructor(private planningTableService: PlanningTableService)
+  constructor()
   {
 
   }
  
-  displayedColumns: string[] = ['Time', 'G1', 'G2'];
-  dataSource = this.planningTableService.table;
+  displayedColumns: string[] = ['Name', 'weight', 'symbol'];
+  positionDisplayedColumn: string[] = ['Position'];
+  elementsDataSource = ELEMENT_DATA;
+  positionsDataSource = POSITION_DATA;
 
   ngOnInit() {
-    console.log(this.planningTableService.table);
+    
     
   }
 }

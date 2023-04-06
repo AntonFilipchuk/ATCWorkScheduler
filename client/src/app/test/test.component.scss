@@ -1,0 +1,14 @@
+.tablesContainer {
+  display: flex;
+  flex-direction: row;
+}
+
+.posTable {
+  display: flex;
+  flex: 1;
+}
+
+.dataTable {
+  display: flex;
+  flex: 80%;
+}

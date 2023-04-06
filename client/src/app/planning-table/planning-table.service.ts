@@ -1,6 +1,9 @@
 import { Injectable } from '@angular/core';
 import { IEmployee } from '../models/IEmployee';
 import { interval } from 'rxjs';
+import { ITableRow } from './planning-table.component';
+import { IEmployeesRow } from '../models/IEmployeesRow';
+import { ITimeRow } from '../models/ITimeRow';
 
 /**
  *  _____________________
@@ -13,10 +16,6 @@ import { interval } from 'rxjs';
  *       
  *       | e1| e2| e3| e4| -> ISectorsRow 
  */
-
-export interface ITableRow {
-  [key: string]: any;
-}
 
 let e1: IEmployee = {
   id: 1,
@@ -42,13 +41,6 @@ let e4: IEmployee = {
   totalTime: 0
 }
 
-let rowExample: ITableRow = {
-  time: 1,
-  s1: e1,
-  s2: e2,
-  s3: e3,
-  s4: e4
-}
 
 let defaultEmployee: IEmployee =
 {
@@ -57,32 +49,42 @@ let defaultEmployee: IEmployee =
   totalTime: 0,
 }
 
-export interface ISectorsRow {
-  [sectorName: string]: IEmployee
-}
-
 @Injectable({
   providedIn: 'root'
 })
 export class PlanningTableService {
 
   constructor() {
-    this.buildDefaultEmployeesTable()
+    this.buildDefaultTable();
   }
 
-  private _table: ITableRow[] = [];
+  //Employees table
+  private _employeesTable: ITableRow[] = [];
 
-  get table(): ITableRow[] {
-    return this._table;
+  get employeesTable(): ITableRow[] {
+    return this._employeesTable;
   }
 
-  set table(newTable: ITableRow[]) {
-    this._table = newTable;
+  set employeesTable(newTable: ITableRow[]) {
+    this._employeesTable = newTable;
   }
 
-  private _onlySectorColumns: ISectorsRow[] = [];
+  //Time table
+  private _timeTable: ITimeRow[] = [];
 
-  get onlySectorColumns(): ISectorsRow[] {
+  get timeTable(): ITimeRow[] {
+    return this._timeTable;
+  }
+
+  set timeTable(newTable: ITimeRow[]) {
+    this._timeTable = newTable;
+  }
+
+  //
+  private _onlySectorColumns: IEmployeesRow[] = [];
+
+  get onlySectorColumns(): IEmployeesRow[] {
+
     return this._onlySectorColumns;
   }
 
@@ -96,26 +98,48 @@ export class PlanningTableService {
   }
 
   getSectors(): string[] {
-    return ['G12R', 'G12P', 'G345R'];
+    return ['G12R', 'G12P'];
   }
 
+  buildDefaultTable() {
+    let sectors: string[] = this.getSectors();
+    let timeIntervals: number[] = this.getTimeIntervals();
+    timeIntervals.forEach(time => {
+      this._timeTable.push(
+        {
+          time: time,
+        }
+      );
+
+      let employeesRow: IEmployeesRow = {};
+      sectors.forEach(sector => {
+        employeesRow[sector] = defaultEmployee;
+      });
+
+      this._employeesTable.push(employeesRow);
+    });
+  }
   buildDefaultEmployeesTable() {
     let sectors: string[] = this.getSectors();
     let timeIntervals: number[] = this.getTimeIntervals();
 
     timeIntervals.forEach(interval => {
-      let sectorsRow: ISectorsRow = {};
+      let sectorsRow: IEmployeesRow = {};
       sectors.forEach(sector => {
         sectorsRow[sector] = defaultEmployee;
       });
       this._onlySectorColumns.push(sectorsRow);
-      this._table.push(
+      this._employeesTable.push(
         {
           Time: interval,
           ...sectorsRow
         }
       );
     });
+  }
+
+  setEmployee(employee: IEmployee, rowNumber: number, employeeNumber: number) {
+    let employeeToSet: IEmployee = this._onlySectorColumns[rowNumber][employeeNumber];
 
   }
 }
