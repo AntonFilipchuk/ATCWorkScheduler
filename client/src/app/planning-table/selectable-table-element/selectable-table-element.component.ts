@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { IEmployee } from 'src/app/models/IEmployee';
 import { PlanningTableComponent } from '../planning-table.component';
+import { PlanningTableService } from '../planning-table.service';
 
 
 @Component({
@@ -10,23 +11,23 @@ import { PlanningTableComponent } from '../planning-table.component';
 })
 export class SelectableTableElementComponent implements OnInit {
 
-  @Input() rowNumber : number | undefined;
-  @Input() columnNumber : number | undefined;
+  @Input() rowNumber: number | undefined;
+  @Input() sectorName: string | undefined;
+  @Input() employee: IEmployee = { id: undefined, name: 'No Employee', totalTime: undefined };
 
 
-  employee: IEmployee = { id: undefined, name: 'No Employee', totalTime: undefined }
-  availableEmployees : IEmployee[] = [];
-
-  constructor(private planningTableComponent : PlanningTableComponent)
-  {
+  constructor(private planningTableService: PlanningTableService) {
 
   }
 
-  setEmployee()
-  {
-
+  setEmployee() {
+    this.planningTableService.setEmployee({
+      id: 4,
+      name: 'Jane',
+      totalTime: 0
+    }, this.rowNumber!, this.sectorName!);
   }
-  
+
   ngOnInit(): void {
   }
 }

@@ -1,3 +1,4 @@
 export interface ITableRow {
-    [key: string]: any;
-  }
+  time: number;
+  [key: string]: any;
+}

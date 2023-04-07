@@ -23,31 +23,26 @@ export interface ITableRow {
 export class PlanningTableComponent implements OnInit {
 
   time: number[] = [];
-  sectors: string[] = [];
   sectorNames: string[] = [];
   displayedColumns: string[] = [];
   employees: IEmployee[] = [];
 
-  employeesTableDataSource: MatTableDataSource<IEmployeesRow> = new MatTableDataSource<ITableRow>();
-  timeTableDataSource: MatTableDataSource<ITimeRow> = new MatTableDataSource<ITimeRow>();
-  employeesColumns: string[] = [];
-  timeColumn: string[] = ['Time'];
+  tableDataSource: MatTableDataSource<ITableRow> = new MatTableDataSource<ITableRow>();
 
 
   constructor(private planningTableService: PlanningTableService) {
+
   }
 
   ngOnInit(): void {
 
-    this.time = this.planningTableService.getTimeIntervals();
-    this.sectors = this.planningTableService.getSectors();
+    let pTS = this.planningTableService;
+    this.planningTableService.buildDefaultTable();
+    this.displayedColumns = ['time', ...pTS.getSectors()];
 
-
-    this.employeesColumns = [...this.sectors];
-    this.sectorNames = [...this.sectors];
-
-    this.employeesTableDataSource.data = this.planningTableService.employeesTable;
-    this.timeTableDataSource.data = this.planningTableService.timeTable;
+    pTS.foo();
+    this.sectorNames = [...pTS.getSectors()];
+    this.tableDataSource.data = pTS.table;
 
 
   }
