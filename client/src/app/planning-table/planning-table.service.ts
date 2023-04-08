@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { IEmployee } from '../models/IEmployee';
 import { ITableRow } from './planning-table.component';
 import { IEmployeesRow } from '../models/IEmployeesRow';
+import { Observable, ReplaySubject, interval } from 'rxjs';
+import { CollectionViewer, DataSource } from '@angular/cdk/collections';
 
 
 /**
@@ -55,10 +57,29 @@ let defaultEmployee: IEmployee =
 })
 
 
-export class PlanningTableService {
+export class PlanningTableService extends DataSource<ITableRow>   {
+
+
 
   constructor() {
+    super();
+    this.buildEmployeesTableAs2DArray();
+    this.buildTable();
   }
+
+  public getAvailableEmployees(): IEmployee[] {
+    return [e1, e2, e3, e4];
+  }
+
+  public getTimeIntervals(): number[] {
+    return [1, 2, 3];
+  }
+
+  public getSectors(): string[] {
+    return ['G12R', 'G12P'];
+  }
+
+  private _tableDataStream = new ReplaySubject<ITableRow[]>();
 
   //Full table
   private _table: ITableRow[] = [];
@@ -71,68 +92,82 @@ export class PlanningTableService {
     this._table = newTable;
   }
 
-  //Employees sub table
-  private _employeesSubTable: IEmployeesRow[] = [];
+  private _employees: IEmployee[][] = [];
 
-  get employeesSubTable(): IEmployeesRow[] {
-    let fullTable: ITableRow[] = this.table;
-    let employeesSubTable: IEmployeesRow[] = [];
-    fullTable.forEach(row => {
-      let rowWithoutTime = (({ time, ...restObjects }) => restObjects)(row);
-      employeesSubTable.push(rowWithoutTime);
-    });
-    this._employeesSubTable = employeesSubTable;
-    return this._employeesSubTable;
+
+  connect(): Observable<readonly ITableRow[]> {
+    return this._tableDataStream;
   }
 
-
-  public getAvailableEmployees(): IEmployee[] {
-    return [e1, e2, e3, e4];
+  setTableData(data: ITableRow[]) {
+    this._tableDataStream.next(data);
   }
 
-  public getTimeIntervals(): number[] {
-    return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-  }
-
-  public getSectors(): string[] {
-    return ['G12R', 'G12P'];
-  }
-
-  public foo() {
-    let guid = crypto.randomUUID();
-    console.log(`Called Foo ${guid}`);
+  disconnect(): void {
 
   }
 
-  public buildDefaultTable() {
-
-    console.log("Called");
-
+  public buildEmployeesTableAs2DArray() {
     let sectors: string[] = this.getSectors();
     let timeIntervals: number[] = this.getTimeIntervals();
 
     timeIntervals.forEach(interval => {
-      let sectorsRow: IEmployeesRow = {};
+      let employeesRow: IEmployee[] = [];
       sectors.forEach(sector => {
-        sectorsRow[sector] = defaultEmployee;
+        employeesRow.push(defaultEmployee);
       });
-      this._table.push(
+      this._employees.push(employeesRow);
+    });
+  };
+
+  public buildTable() {
+
+    let timeIntervals: number[] = this.getTimeIntervals();
+    let sectors: string[] = this.getSectors();
+    let table: ITableRow[] = [];
+    for (let i = 0; i < timeIntervals.length; i++) {
+      let sectorsRow: IEmployeesRow = {};
+      for (let j = 0; j < sectors.length; j++) {
+        sectorsRow[sectors[j]] = this._employees[i][j];
+      };
+      table.push(
         {
-          time: interval,
+          time: timeIntervals[i],
           ...sectorsRow
         }
       );
-    });
+    };
+
+    this.setTableData(table);
   }
 
-  public setEmployee(employee: IEmployee, rowNumber: number, sectorName: string) {
-    let employeesSubTable = this.employeesSubTable;
-    let rowToCheck = employeesSubTable[rowNumber];
+  getTableForSubscription(): Observable<ITableRow[]> {
+    let table = new Observable<ITableRow[]>(observer => observer.next(this._table));
+    return table;
+  }
 
-    let rowCheckSector = (({ sectorName, ...restObjects }) => restObjects)(rowToCheck);
 
-    console.log(rowCheckSector);
-    this._table[rowNumber][sectorName] = employee;
+  public setEmployee(employee: IEmployee, rowNumber: number, sectorNumber: number) {
+
+    let rowToChange = this._employees[rowNumber];
+
+    let employeeEntriesCount: number = 0;
+
+    for (let i = 0; i < rowToChange.length; i++) {
+      if (employee === rowToChange[i]) {
+        employeeEntriesCount++;
+      }
+
+      if (employeeEntriesCount > 0) {
+        console.log("Error adding employee");
+        break;
+      }
+
+      rowToChange[sectorNumber] = employee;
+    }
+
+    this._employees[rowNumber] = rowToChange;
+    this.buildTable();
   }
 
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ViewChildren } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild, ViewChildren } from '@angular/core';
 import { IEmployee } from '../models/IEmployee';
 import { PlanningTableService } from './planning-table.service';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
@@ -20,7 +20,7 @@ export interface ITableRow {
   styleUrls: ['./planning-table.component.scss'],
   templateUrl: './planning-table.component.html',
 })
-export class PlanningTableComponent implements OnInit {
+export class PlanningTableComponent implements OnInit, AfterViewInit {
 
   time: number[] = [];
   sectorNames: string[] = [];
@@ -29,22 +29,47 @@ export class PlanningTableComponent implements OnInit {
 
   tableDataSource: MatTableDataSource<ITableRow> = new MatTableDataSource<ITableRow>();
 
-
+  @ViewChild(MatTable) table!: MatTable<ITableRow>;
   constructor(private planningTableService: PlanningTableService) {
 
+  }
+  ngAfterViewInit(): void {
+    console.log(this.table);
   }
 
   ngOnInit(): void {
 
     let pTS = this.planningTableService;
-    this.planningTableService.buildDefaultTable();
     this.displayedColumns = ['time', ...pTS.getSectors()];
 
-    pTS.foo();
     this.sectorNames = [...pTS.getSectors()];
-    this.tableDataSource.data = pTS.table;
+  }
 
+  getTableWithSubscription() {
+    this.planningTableService.getTableForSubscription().subscribe(
+      {
+        next: (response: ITableRow[]) => {
+          this.tableDataSource.data = response;
+          console.log(response);
+        },
+        error: (e: any) => {
+          console.log(e);
+        }
+      }
+    );
+  }
 
+  test() {
+    this.planningTableService.setEmployee(
+      {
+        id: 2,
+        name: "Test",
+        totalTime: 0
+      },
+      0, 0
+    );
+    this.getTableWithSubscription();
+    this.table.renderRows();
   }
 
 }

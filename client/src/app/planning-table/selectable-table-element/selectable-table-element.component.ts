@@ -12,7 +12,7 @@ import { PlanningTableService } from '../planning-table.service';
 export class SelectableTableElementComponent implements OnInit {
 
   @Input() rowNumber: number | undefined;
-  @Input() sectorName: string | undefined;
+  @Input() sectorNumber: number | undefined;
   @Input() employee: IEmployee = { id: undefined, name: 'No Employee', totalTime: undefined };
 
 
@@ -25,7 +25,7 @@ export class SelectableTableElementComponent implements OnInit {
       id: 4,
       name: 'Jane',
       totalTime: 0
-    }, this.rowNumber!, this.sectorName!);
+    }, this.rowNumber!, this.sectorNumber!);
   }
 
   ngOnInit(): void {
