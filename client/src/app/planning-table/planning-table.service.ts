@@ -50,19 +50,17 @@ let defaultEmployee: IEmployee =
   totalTime: 0,
 }
 
-
-
 @Injectable({
   providedIn: 'root'
 })
 
 
-export class PlanningTableService extends DataSource<ITableRow>   {
+export class PlanningTableService {
 
 
+  public $table = new ReplaySubject<ITableRow[]>();
 
   constructor() {
-    super();
     this.buildEmployeesTableAs2DArray();
     this.buildTable();
   }
@@ -72,14 +70,13 @@ export class PlanningTableService extends DataSource<ITableRow>   {
   }
 
   public getTimeIntervals(): number[] {
-    return [1, 2, 3];
+    return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
   }
 
   public getSectors(): string[] {
-    return ['G12R', 'G12P'];
+    return ['G12R', 'G12P', 'G345R', 'G345P'];
   }
 
-  private _tableDataStream = new ReplaySubject<ITableRow[]>();
 
   //Full table
   private _table: ITableRow[] = [];
@@ -94,18 +91,7 @@ export class PlanningTableService extends DataSource<ITableRow>   {
 
   private _employees: IEmployee[][] = [];
 
-
-  connect(): Observable<readonly ITableRow[]> {
-    return this._tableDataStream;
-  }
-
-  setTableData(data: ITableRow[]) {
-    this._tableDataStream.next(data);
-  }
-
-  disconnect(): void {
-
-  }
+  //
 
   public buildEmployeesTableAs2DArray() {
     let sectors: string[] = this.getSectors();
@@ -138,12 +124,11 @@ export class PlanningTableService extends DataSource<ITableRow>   {
       );
     };
 
-    this.setTableData(table);
+    this.$table.next(table);
   }
 
   getTableForSubscription(): Observable<ITableRow[]> {
-    let table = new Observable<ITableRow[]>(observer => observer.next(this._table));
-    return table;
+    return this.$table;
   }
 
 
@@ -151,19 +136,11 @@ export class PlanningTableService extends DataSource<ITableRow>   {
 
     let rowToChange = this._employees[rowNumber];
 
-    let employeeEntriesCount: number = 0;
-
-    for (let i = 0; i < rowToChange.length; i++) {
-      if (employee === rowToChange[i]) {
-        employeeEntriesCount++;
-      }
-
-      if (employeeEntriesCount > 0) {
-        console.log("Error adding employee");
-        break;
-      }
-
+    if (rowToChange.filter(e => JSON.stringify(e) == JSON.stringify(employee)).length < 1) {
       rowToChange[sectorNumber] = employee;
+    }
+    else {
+      console.log("Error adding employee");
     }
 
     this._employees[rowNumber] = rowToChange;

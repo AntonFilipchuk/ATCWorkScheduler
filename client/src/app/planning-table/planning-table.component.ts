@@ -43,6 +43,8 @@ export class PlanningTableComponent implements OnInit, AfterViewInit {
     this.displayedColumns = ['time', ...pTS.getSectors()];
 
     this.sectorNames = [...pTS.getSectors()];
+
+    this.getTableWithSubscription();
   }
 
   getTableWithSubscription() {
@@ -50,26 +52,12 @@ export class PlanningTableComponent implements OnInit, AfterViewInit {
       {
         next: (response: ITableRow[]) => {
           this.tableDataSource.data = response;
-          console.log(response);
         },
         error: (e: any) => {
           console.log(e);
         }
       }
     );
-  }
-
-  test() {
-    this.planningTableService.setEmployee(
-      {
-        id: 2,
-        name: "Test",
-        totalTime: 0
-      },
-      0, 0
-    );
-    this.getTableWithSubscription();
-    this.table.renderRows();
   }
 
 }

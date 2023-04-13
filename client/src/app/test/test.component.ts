@@ -1,25 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { PlanningTableService } from '../planning-table/planning-table.service';
-
-
-const sectors: string[] = ['G12R', 'G12P'];
-
-export interface PeriodicElement {
-  name: string;
-  weight: number;
-  symbol: string;
-}
-
-const POSITION_DATA =
-[
-  {position: 1},
-  {position: 2}
-]
-
-const ELEMENT_DATA: PeriodicElement[] = [
-  {  name: 'Hydrogen', weight: 1.0079, symbol: 'H' },
-  {  name: 'Helium', weight: 4.0026, symbol: 'He' },
-];
+import { TestService } from './test.service';
+import { Observable } from 'rxjs';
+import { MatTableDataSource } from '@angular/material/table';
 
 @Component({
   selector: 'app-test',
@@ -29,19 +12,13 @@ const ELEMENT_DATA: PeriodicElement[] = [
 
 
 export class TestComponent implements OnInit {
-  
-  constructor()
-  {
 
+
+  constructor(private testService: TestService) {
   }
- 
-  displayedColumns: string[] = ['Name', 'weight', 'symbol'];
-  positionDisplayedColumn: string[] = ['Position'];
-  elementsDataSource = ELEMENT_DATA;
-  positionsDataSource = POSITION_DATA;
 
   ngOnInit() {
     
-    
   }
+
 }
