@@ -4,6 +4,7 @@ import { ITableRow } from './planning-table.component';
 import { IEmployeesRow } from '../models/IEmployeesRow';
 import { Observable, ReplaySubject, interval } from 'rxjs';
 import { CollectionViewer, DataSource } from '@angular/cdk/collections';
+import { TimeConfigurator } from './TimeConfigurator';
 
 
 /**
@@ -69,8 +70,9 @@ export class PlanningTableService {
     return [e1, e2, e3, e4];
   }
 
-  public getTimeIntervals(): number[] {
-    return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+  public getTimeIntervals(): any[] {
+    let timeConfigurator : TimeConfigurator = new TimeConfigurator(22, 40, 8, 10, new Date(), 10);
+    return timeConfigurator.time;
   }
 
   public getSectors(): string[] {
@@ -95,7 +97,7 @@ export class PlanningTableService {
 
   public buildEmployeesTableAs2DArray() {
     let sectors: string[] = this.getSectors();
-    let timeIntervals: number[] = this.getTimeIntervals();
+    let timeIntervals: any[] = this.getTimeIntervals();
 
     timeIntervals.forEach(interval => {
       let employeesRow: IEmployee[] = [];
@@ -108,7 +110,7 @@ export class PlanningTableService {
 
   public buildTable() {
 
-    let timeIntervals: number[] = this.getTimeIntervals();
+    let timeIntervals: any[] = this.getTimeIntervals();
     let sectors: string[] = this.getSectors();
     let table: ITableRow[] = [];
     for (let i = 0; i < timeIntervals.length; i++) {

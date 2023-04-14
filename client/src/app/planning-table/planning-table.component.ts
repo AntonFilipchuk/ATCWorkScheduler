@@ -21,8 +21,6 @@ export interface ITableRow {
   templateUrl: './planning-table.component.html',
 })
 export class PlanningTableComponent implements OnInit, AfterViewInit {
-
-  time: number[] = [];
   sectorNames: string[] = [];
   displayedColumns: string[] = [];
   employees: IEmployee[] = [];
@@ -59,5 +57,4 @@ export class PlanningTableComponent implements OnInit, AfterViewInit {
       }
     );
   }
-
 }
