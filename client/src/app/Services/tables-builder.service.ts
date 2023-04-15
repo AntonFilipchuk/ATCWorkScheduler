@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { IEmployee } from '../models/IEmployee';
-import { ITableRow } from './planning-table.component';
 import { IEmployeesRow } from '../models/IEmployeesRow';
 import { Observable, ReplaySubject, interval } from 'rxjs';
 import { CollectionViewer, DataSource } from '@angular/cdk/collections';
-import { TimeConfigurator } from './TimeConfigurator';
+import { TimeConfigurator } from '../Helpers/TimeConfigurator';
+import { ITableRow } from '../models/ITableRow';
 
 
 /**
@@ -46,8 +46,8 @@ let e4: IEmployee = {
 
 let defaultEmployee: IEmployee =
 {
-  id: 1,
-  name: "Anton",
+  id: -1,
+  name: "No",
   totalTime: 0,
 }
 
@@ -56,7 +56,7 @@ let defaultEmployee: IEmployee =
 })
 
 
-export class PlanningTableService {
+export class TablesBuilderService {
 
 
   public $table = new ReplaySubject<ITableRow[]>();
@@ -71,12 +71,12 @@ export class PlanningTableService {
   }
 
   public getTimeIntervals(): any[] {
-    let timeConfigurator : TimeConfigurator = new TimeConfigurator(22, 40, 8, 10, new Date(), 10);
+    let timeConfigurator : TimeConfigurator = new TimeConfigurator(22, 40, 1, 10, new Date(), 10);
     return timeConfigurator.time;
   }
 
   public getSectors(): string[] {
-    return ['G12R', 'G12P', 'G345R', 'G345P'];
+    return ['G12R', 'G12P',];
   }
 
 

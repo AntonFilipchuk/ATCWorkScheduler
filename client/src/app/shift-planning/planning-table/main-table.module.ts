@@ -1,21 +1,22 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
-import { PlanningTableComponent } from './planning-table.component';
+import { MainTableComponent } from './main-table.component';
 import { SelectableTableElementComponent } from './selectable-table-element/selectable-table-element.component';
 
 
 
+
 @NgModule({
-  declarations: [PlanningTableComponent, SelectableTableElementComponent],
+  declarations: [MainTableComponent, SelectableTableElementComponent],
   imports: [
     CommonModule,
     MatTableModule
   ],
   exports:
     [
-      PlanningTableComponent
+      MainTableComponent
     ],
 
 })
-export class PlanningTableModule { }
+export class MainTableModule { }

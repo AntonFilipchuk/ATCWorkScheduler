@@ -1,0 +1,12 @@
+.selectable-element-container {
+  display: flex;
+}
+
+.selectable-element {
+  display: flex;
+  flex: 1;
+  background-color: green;
+  align-items: center;
+  justify-content: center;
+
+}

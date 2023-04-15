@@ -1,7 +1,8 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { IEmployee } from 'src/app/models/IEmployee';
-import { PlanningTableComponent } from '../planning-table.component';
-import { PlanningTableService } from '../planning-table.service';
+import { MainTableComponent } from '../main-table.component';
+import { TablesBuilderService } from 'src/app/Services/tables-builder.service';
+
 
 
 @Component({
@@ -16,7 +17,7 @@ export class SelectableTableElementComponent implements OnInit {
   @Input() employee: IEmployee = { id: undefined, name: 'No Employee', totalTime: undefined };
 
 
-  constructor(private planningTableService: PlanningTableService) {
+  constructor(private planningTableService: TablesBuilderService) {
 
   }
 

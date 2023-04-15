@@ -1,13 +1,7 @@
 import { AfterViewInit, Component, OnInit, ViewChild, ViewChildren } from '@angular/core';
-import { IEmployee } from '../models/IEmployee';
-import { PlanningTableService } from './planning-table.service';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
-import { IEmployeesRow } from '../models/IEmployeesRow';
-import { ITimeRow } from '../models/ITimeRow';
-
-
-
-let defaultEmployee: IEmployee = { id: undefined, name: undefined, totalTime: undefined }
+import { TablesBuilderService } from 'src/app/Services/tables-builder.service';
+import { IEmployee } from 'src/app/models/IEmployee';
 
 
 export interface ITableRow {
@@ -16,11 +10,11 @@ export interface ITableRow {
 
 
 @Component({
-  selector: 'app-planning-table',
-  styleUrls: ['./planning-table.component.scss'],
-  templateUrl: './planning-table.component.html',
+  selector: 'app-main-table',
+  styleUrls: ['./main-table.component.scss'],
+  templateUrl: './main-table.component.html',
 })
-export class PlanningTableComponent implements OnInit, AfterViewInit {
+export class MainTableComponent implements OnInit, AfterViewInit {
   sectorNames: string[] = [];
   displayedColumns: string[] = [];
   employees: IEmployee[] = [];
@@ -28,7 +22,7 @@ export class PlanningTableComponent implements OnInit, AfterViewInit {
   tableDataSource: MatTableDataSource<ITableRow> = new MatTableDataSource<ITableRow>();
 
   @ViewChild(MatTable) table!: MatTable<ITableRow>;
-  constructor(private planningTableService: PlanningTableService) {
+  constructor(private planningTableService: TablesBuilderService) {
 
   }
   ngAfterViewInit(): void {
