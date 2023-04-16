@@ -1,14 +1,21 @@
 .planning-workspace {
-    display: flex;
+  display: flex;
 }
 
 .main-table-container {
-    display: flex;
-    width: 35%;
+  display: flex;
+  width: 35%;
 }
 
-.tables-for-each-employee-container
-{
-    display: flex;
-    width: 65%;
+.tables-for-each-employee-container {
+  padding-left: 10px;
+  display: flex;
+  width: 65%;
+  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: flex-start;
+  align-content: flex-start;
+  row-gap: 10px;
+  gap: 10px;
 }

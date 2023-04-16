@@ -14,7 +14,6 @@ import { MainTableModule } from './shift-planning/planning-table/main-table.modu
 @NgModule({
   declarations: [
     AppComponent,
-    EmployeeInfoTableComponent,
   ],
   imports: [
     BrowserModule,

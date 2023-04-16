@@ -9,7 +9,8 @@ export class TimeConfigurator {
     private _shiftEndTime: Date = new Date();
     private _shiftDate: Date = new Date();
 
-    public time: string[] = [];
+    public timeColumnAsStringArray: string[] = [];
+    public timeColumnAsDateArray: Date[] = [];
 
 
     constructor(startingHour: number, startingMinutes: number,
@@ -21,7 +22,7 @@ export class TimeConfigurator {
             this._endingHour = endingHour;
         }
         this._startingHour = startingHour;
-        
+
         this._startingMinutes = startingMinutes;
         this._endingMinutes = endingMinutes;
         this._shiftDate = shiftDate;
@@ -39,12 +40,14 @@ export class TimeConfigurator {
             timeToAdd = new Date(startInMilliseconds);
 
             if ((startInMilliseconds + timeIntervalInMilliseconds) > endInMilliseconds) {
-                this.time.push(this.timeToString(timeToAdd.getHours()) + ':' + this.timeToString(timeToAdd.getMinutes()));
+                this.timeColumnAsStringArray.push(this.timeToString(timeToAdd.getHours()) + ':' + this.timeToString(timeToAdd.getMinutes()));
+                this.timeColumnAsDateArray.push(timeToAdd);
                 break;
             }
             else {
                 startInMilliseconds += timeIntervalInMilliseconds;
-                this.time.push(this.timeToString(timeToAdd.getHours()) + ':' + this.timeToString(timeToAdd.getMinutes()));
+                this.timeColumnAsStringArray.push(this.timeToString(timeToAdd.getHours()) + ':' + this.timeToString(timeToAdd.getMinutes()));
+                this.timeColumnAsDateArray.push(timeToAdd);
             }
         }
     }
