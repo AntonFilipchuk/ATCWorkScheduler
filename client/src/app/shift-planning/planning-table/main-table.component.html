@@ -28,9 +28,9 @@
       *matCellDef="let employeesRow; index as j"
       [ngClass]="{ sectorColumn: true }"
     >
-      <app-selectable-table-element
+      <app-selectable-table-element class="selectable-table-element"
         [rowNumber]="j"
-        [sectorNumber]="i"
+        [columnNumber]="i"
         [employee]="employeesRow[sectorName]"
       ></app-selectable-table-element>
     </td>

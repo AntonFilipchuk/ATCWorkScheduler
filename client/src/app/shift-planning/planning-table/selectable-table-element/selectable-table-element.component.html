@@ -1,5 +1,13 @@
-<div class="selectable-element-container">
-  <div class="selectable-element">
-    <h1>1</h1>
-  </div>
+<div class="selectable-element-container" (click)="toggleSelectorVisibility()">
+  <mat-select class="selector" *ngIf="showSelector" style="cursor: pointer">
+    <mat-option
+      *ngFor="let food of foods"
+      [value]="food.value"
+      (onSelectionChange)="selectorChange($event)"
+      (click)="test()"
+      style="cursor: pointer"
+    >
+      {{ food.viewValue }}
+    </mat-option>
+  </mat-select>
 </div>

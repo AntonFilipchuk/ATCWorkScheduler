@@ -1,17 +1,13 @@
 .selectable-element-container {
   display: flex;
-  height: 100%;
+  flex: 1;
+  background-color: gray;
+  min-height: 2em;
+  cursor: pointer;
 }
 
-.selectable-element {
+.selector
+{
   display: flex;
   flex: 1;
-  background-color: green;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
 }
-
-
-
-
