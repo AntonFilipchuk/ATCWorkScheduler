@@ -18,6 +18,7 @@ interface IDefaultTableRow {
 import { IEmployee } from "../models/IEmployee";
 import { IEmployeesRow } from "../models/IEmployeesRow";
 import { ISector } from "../models/ISector";
+import { ITableRow } from "../models/ITableRow";
 import { TimeConfigurator } from "./TimeConfigurator";
 
 export class DefaultTableBuilder {
@@ -31,7 +32,7 @@ export class DefaultTableBuilder {
 
     public tableForEmployeesAs2DArray: IEmployeesRow[];
 
-    public defaultTableForMatTable: IDefaultTableRow[];
+    public defaultTableForMatTable: ITableRow[];
 
     public displayedColumns: string[];
 
@@ -65,6 +66,8 @@ export class DefaultTableBuilder {
         }
     }
 
+    //Display columns for Mat Table string[]
+    // ['time', 'G12R', ... , 'G345P']
     configureDisplayedColumns(): string[] {
         let sectorNames: string[] = [];
         this._sectors.forEach(sector => {
@@ -75,15 +78,17 @@ export class DefaultTableBuilder {
 
     //Table row:
     // {time: Date, undefined, undefined, ... , undefined}
-    private buildDefaultTableForMatTable(): IDefaultTableRow[] {
-        let table: IDefaultTableRow[] = [];
+    private buildDefaultTableForMatTable(): ITableRow[] {
+        let table: ITableRow[] = [];
         for (let i = 0; i < this.timeColumnAsDateArray.length; i++) {
-            let defaultTableRow: IDefaultTableRow = { time: this.timeColumnAsStringArray[i], ...this.tableForEmployeesAs2DArray[i] }
+            let defaultTableRow: ITableRow = { time: this.timeColumnAsStringArray[i], ...this.tableForEmployeesAs2DArray[i] }
             table.push(defaultTableRow)
         }
         return table;
     }
 
+    
+    //IEmployee row = {G12R : undefined}
     private buildTableForEmployeesAs2DArray(): IEmployeesRow[] {
         let employeesTable: IEmployeesRow[] = [];
         this.timeColumnAsDateArray.forEach(time => {

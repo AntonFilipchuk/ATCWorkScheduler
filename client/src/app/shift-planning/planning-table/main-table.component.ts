@@ -32,9 +32,8 @@ export class MainTableComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
 
     let pTS = this.planningTableService;
-    this.displayedColumns = ['time', ...pTS.getSectors()];
-
-    this.sectorNames = [...pTS.getSectors()];
+    this.displayedColumns = pTS.displayColumns;
+    this.sectorNames = ['G12R', 'G12P'];
 
     this.getTableWithSubscription();
   }

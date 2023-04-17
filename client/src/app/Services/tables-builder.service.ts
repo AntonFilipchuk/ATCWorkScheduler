@@ -77,79 +77,41 @@ let shiftEndTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), tod
 export class TablesBuilderService {
 
   public $table = new ReplaySubject<ITableRow[]>();
+  public displayColumns: string[];
+  private _employeesTableAs2DArray: IEmployeesRow[];
+  private _tableForMatTable: ITableRow[];
 
   constructor() {
-    this.buildEmployeesTableAs2DArray();
-    this.buildTable();
     let defaultTableBuilder = new DefaultTableBuilder(sectors, employees, shiftStartTime, shiftEndTime, new Date(), 10);
-    defaultTableBuilder.checkIfAllEmployeesCanWorkAtLeastOnOneSectors();
-    defaultTableBuilder.checkForMinimumAmountOfEmployees();
-    console.log(this._table);
-  }
-
-  public getAvailableEmployees(): IEmployee[] {
-    return [e1, e2, e3, e4];
-  }
-
-  public getTimeIntervals(): any[] {
-    let timeConfigurator: TimeConfigurator = new TimeConfigurator(22, 40, 1, 10, new Date(), 10);
-    return timeConfigurator.timeColumnAsStringArray;
-  }
-
-  public getSectors(): string[] {
-    return ['G12R', 'G12P',];
+    this._employeesTableAs2DArray = defaultTableBuilder.tableForEmployeesAs2DArray;
+    this._tableForMatTable = defaultTableBuilder.defaultTableForMatTable;
+    this.displayColumns = defaultTableBuilder.displayedColumns;
   }
 
 
-  //Full table
-  private _table: ITableRow[] = [];
+  // public buildTable() {
 
-  get table(): ITableRow[] {
-    return this._table;
-  }
-
-  set table(newTable: ITableRow[]) {
-    this._table = newTable;
-  }
-
-  private _employees: IEmployee[][] = [];
-  //
-
-  public buildEmployeesTableAs2DArray() {
-    let sectors: string[] = this.getSectors();
-    let timeIntervals: any[] = this.getTimeIntervals();
-
-    timeIntervals.forEach(interval => {
-      let employeesRow: IEmployee[] = [];
-      sectors.forEach(sector => {
-        employeesRow.push(defaultEmployee);
-      });
-      this._employees.push(employeesRow);
-    });
-  };
-
-  public buildTable() {
-
-    let timeIntervals: any[] = this.getTimeIntervals();
-    let sectors: string[] = this.getSectors();
-    let table: ITableRow[] = [];
-    for (let i = 0; i < timeIntervals.length; i++) {
-      let sectorsRow: IEmployeesRow = {};
-      for (let j = 0; j < sectors.length; j++) {
-        sectorsRow[sectors[j]] = this._employees[i][j];
-      };
-      table.push(
-        {
-          time: timeIntervals[i],
-          ...sectorsRow
-        }
-      );
-    };
-    this._table = table;
-    this.$table.next(table);
-  }
+  //   let timeIntervals: any[] = this.getTimeIntervals();
+  //   let sectors: string[] = this.getSectors();
+  //   let table: ITableRow[] = [];
+  //   for (let i = 0; i < timeIntervals.length; i++) {
+  //     let sectorsRow: IEmployeesRow = {};
+  //     for (let j = 0; j < sectors.length; j++) {
+  //       sectorsRow[sectors[j]] = this._employees[i][j];
+  //     };
+  //     table.push(
+  //       {
+  //         time: timeIntervals[i],
+  //         ...sectorsRow
+  //       }
+  //     );
+  //   };
+  //   this._table = table;
+  //   this.$table.next(table);
+  // }
 
   getTableForSubscription(): Observable<ITableRow[]> {
+    this.$table.next(this._tableForMatTable);
     return this.$table;
   }
 
