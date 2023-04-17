@@ -9,12 +9,6 @@
 //Default employees table as 2d Array
 //Full build default table for mat table to consume
 
-interface IDefaultTableRow {
-    time: string;
-    [key: string]: any;
-}
-
-
 import { IEmployee } from "../models/IEmployee";
 import { IEmployeesRow } from "../models/IEmployeesRow";
 import { ISector } from "../models/ISector";

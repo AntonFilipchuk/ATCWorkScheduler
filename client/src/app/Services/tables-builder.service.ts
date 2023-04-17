@@ -57,14 +57,6 @@ let e4: IEmployee = {
 
 let employees: IEmployee[] = [e1, e2, e3, e4];
 
-let defaultEmployee: IEmployee =
-{
-  id: -1,
-  name: "No",
-  totalTime: 0,
-  sectorPermits: []
-}
-
 let todayDate: Date = new Date();
 let shiftStartTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 8, 10);
 let shiftEndTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 14, 40);
@@ -77,12 +69,17 @@ let shiftEndTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), tod
 export class TablesBuilderService {
 
   public $table = new ReplaySubject<ITableRow[]>();
-  public displayColumns: string[];
-  private _employeesTableAs2DArray: IEmployeesRow[];
-  private _tableForMatTable: ITableRow[];
+  public displayColumns: string[] = [];
+  private _employeesTableAs2DArray: IEmployeesRow[] = [];
+  private _tableForMatTable: ITableRow[] = [];
 
   constructor() {
-    let defaultTableBuilder = new DefaultTableBuilder(sectors, employees, shiftStartTime, shiftEndTime, new Date(), 10);
+    this.buildDefaultTable(sectors, employees, shiftStartTime, shiftEndTime, new Date(), 10);
+  }
+
+
+  buildDefaultTable(sectors: ISector[], employees: IEmployee[], shiftStartTime: Date, shiftEndTime: Date, shiftDate: Date, timeIntervalInMinutes: number) {
+    let defaultTableBuilder = new DefaultTableBuilder(sectors, employees, shiftStartTime, shiftEndTime, shiftDate, timeIntervalInMinutes);
     this._employeesTableAs2DArray = defaultTableBuilder.tableForEmployeesAs2DArray;
     this._tableForMatTable = defaultTableBuilder.defaultTableForMatTable;
     this.displayColumns = defaultTableBuilder.displayedColumns;

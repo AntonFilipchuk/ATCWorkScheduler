@@ -1,5 +1,6 @@
 .selectable-element-container {
   display: flex;
+  height: 100%;
 }
 
 .selectable-element {
@@ -8,5 +9,9 @@
   background-color: green;
   align-items: center;
   justify-content: center;
-
+  height: 100%;
 }
+
+
+
+
