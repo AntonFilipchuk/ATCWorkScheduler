@@ -55,7 +55,7 @@ let e4: IEmployee = {
   sectorPermits: [g12r, g12p, t1R, t1P]
 }
 
-let employees: IEmployee[] = [e1, e2, e3, e4];
+let employees: IEmployee[] = [e1, e2, e3, e4,];
 
 let todayDate: Date = new Date();
 let shiftStartTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 8, 10);
@@ -89,6 +89,7 @@ export class TablesBuilderService {
 
   public $table = new ReplaySubject<ITableRow[]>();
   public displayColumns: string[] = [];
+  public employeesForShift: IEmployee[] = [];
   private _employeesTableAs2DArray: IEmployeesRow[] = [];
   private _tableForMatTable: ITableRow[] = [];
 
@@ -102,6 +103,7 @@ export class TablesBuilderService {
     this._employeesTableAs2DArray = defaultTableBuilder.tableForEmployeesAs2DArray;
     this._tableForMatTable = defaultTableBuilder.defaultTableForMatTable;
     this.displayColumns = defaultTableBuilder.displayedColumns;
+    this.employeesForShift = defaultTableBuilder.employeesForShift;
   }
 
   getEmployees() {

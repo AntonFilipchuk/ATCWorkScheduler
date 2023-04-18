@@ -4,10 +4,11 @@
 //Check if each employee can work at least at one workplace
 //Check if there are enough employees for the shift
 
-//Expose :
+//Return :
 //time array ['8:10'. '8.20']
 //Default employees table as 2d Array
 //Full build default table for mat table to consume
+//
 
 import { IEmployee } from "../models/IEmployee";
 import { IEmployeesRow } from "../models/IEmployeesRow";
@@ -16,10 +17,6 @@ import { ITableRow } from "../models/ITableRow";
 import { TimeConfigurator } from "./TimeConfigurator";
 
 export class DefaultTableBuilder {
-    private _sectors: ISector[];
-    private _employees: IEmployee[];
-    private _shiftStartTime!: Date;
-    private _shiftEndTime!: Date;
 
     public timeColumnAsStringArray: string[];
 
@@ -31,6 +28,8 @@ export class DefaultTableBuilder {
 
     public displayedColumns: string[];
 
+    public employeesForShift: IEmployee[];
+
     constructor(
         private sectors: ISector[],
         private employees: IEmployee[],
@@ -38,10 +37,6 @@ export class DefaultTableBuilder {
         private shiftEndTime: Date,
         private shiftDate: Date, timeIntervalInMinutes: number) {
 
-        this._sectors = sectors;
-        this._employees = employees;
-        this._shiftStartTime = shiftStartTime;
-        this._shiftEndTime = shiftEndTime;
         let timeConfigurator: TimeConfigurator = new TimeConfigurator
             (shiftStartTime.getHours(),
                 shiftStartTime.getMinutes(),
@@ -52,13 +47,14 @@ export class DefaultTableBuilder {
         this.timeColumnAsStringArray = timeConfigurator.timeColumnAsStringArray;
         this.timeColumnAsDateArray = timeConfigurator.timeColumnAsDateArray;
 
-        if (this.checkForMinimumAmountOfEmployees() &&
-            this.checkIfAllEmployeesCanWorkAtLeastOnOneSectors() &&
-            this.checkNoDuplicatesInArray(this._employees) && 
-            this.checkNoDuplicatesInArray(this.sectors)) {
-            this.tableForEmployeesAs2DArray = this.buildTableForEmployeesAs2DArray();
+        if (this.checkForMinimumAmountOfEmployees(sectors, employees) &&
+            this.checkIfAllEmployeesCanWorkAtLeastOnOneSectors(sectors) &&
+            this.checkNoDuplicatesInArray(employees) &&
+            this.checkNoDuplicatesInArray(sectors)) {
+            this.employeesForShift = employees;
+            this.tableForEmployeesAs2DArray = this.buildTableForEmployeesAs2DArray(sectors);
             this.defaultTableForMatTable = this.buildDefaultTableForMatTable();
-            this.displayedColumns = this.buildDisplayedColumns();
+            this.displayedColumns = this.buildDisplayedColumns(sectors);
         }
         else {
             throw Error();
@@ -67,9 +63,9 @@ export class DefaultTableBuilder {
 
     //Display columns for Mat Table string[]
     // ['time', 'G12R', ... , 'G345P']
-    private buildDisplayedColumns(): string[] {
+    private buildDisplayedColumns(sectors: ISector[]): string[] {
         let sectorNames: string[] = [];
-        this._sectors.forEach(sector => {
+        sectors.forEach(sector => {
             sectorNames.push(sector.name);
         });
         return ['time', ...sectorNames];
@@ -88,11 +84,11 @@ export class DefaultTableBuilder {
 
 
     //IEmployee row = {G12R : undefined}
-    private buildTableForEmployeesAs2DArray(): IEmployeesRow[] {
+    private buildTableForEmployeesAs2DArray(sectors: ISector[]): IEmployeesRow[] {
         let employeesTable: IEmployeesRow[] = [];
         this.timeColumnAsDateArray.forEach(time => {
             let employeesRow: IEmployeesRow = {};
-            this._sectors.forEach(sector => {
+            sectors.forEach(sector => {
                 employeesRow[sector.name] = undefined;
             });
             employeesTable.push(employeesRow);
@@ -102,21 +98,31 @@ export class DefaultTableBuilder {
 
 
     private checkNoDuplicatesInArray(array: any[]): boolean {
-        return new Set(array).size < array.length;
+        const result: any[] = [];
+        for (const item of array) {
+            if (!result.includes(item)) {
+                result.push(item);
+            }
+            else {
+                console.log(`Error: an array ${JSON.stringify(array)} has a duplicate ${JSON.stringify(item)} !`);
+                return false;
+            }
+        }
+        return true;
     }
 
     //employeesSectors = [{name: 'G12R'}, {name: 'G12P'}]
     //_sectors = [{name: 'G12R'}, {name: 'G12P'}, {name: 'G345R'}, {name: 'G345P'}]
-    private checkIfAllEmployeesCanWorkAtLeastOnOneSectors(): boolean {
+    private checkIfAllEmployeesCanWorkAtLeastOnOneSectors(sectors: ISector[]): boolean {
         let allCanWork = true;
         this.employees.forEach(employee => {
-            if (!this._sectors.some(sector => employee.sectorPermits.some(s => s.name === sector.name))) {
+            if (!sectors.some(sector => employee.sectorPermits.some(s => s.name === sector.name))) {
                 let employeePermitsWhoCantWork: string[] = [];
                 employee.sectorPermits.forEach(sector => {
                     employeePermitsWhoCantWork.push(sector.name);
                 });
                 let neededPermits: string[] = [];
-                this._sectors.forEach(sector => {
+                sectors.forEach(sector => {
                     neededPermits.push(sector.name);
                 });
                 console.log(`Employee ${employee.name} cannot work`);
@@ -131,9 +137,9 @@ export class DefaultTableBuilder {
     //Calculate if we have enough employees for the shift
     //We need at least 5 people for 4 workplaces
     //So if we have less then 1.25 people per sector => can't work
-    private checkForMinimumAmountOfEmployees(): boolean {
-        let numberOfSectors: number = this._sectors.length;
-        let numberOfEmployees: number = this._employees.length;
+    private checkForMinimumAmountOfEmployees(sectors: ISector[], employees: IEmployee[]): boolean {
+        let numberOfSectors: number = sectors.length;
+        let numberOfEmployees: number = employees.length;
         let ifCanWork: boolean = numberOfEmployees / numberOfSectors >= 1.25;
 
         if (!ifCanWork) {

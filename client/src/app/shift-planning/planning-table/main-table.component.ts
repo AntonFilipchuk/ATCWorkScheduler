@@ -34,7 +34,7 @@ export class MainTableComponent implements OnInit {
     this.sectorNames = ['G12R', 'G12P'];
 
     this.getTableWithSubscription();
-    this.employees = pTS.getEmployees();
+    this.employees = pTS.employeesForShift;
   }
 
   getTableWithSubscription() {
