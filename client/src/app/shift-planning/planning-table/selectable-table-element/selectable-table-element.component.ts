@@ -4,12 +4,16 @@ import { MainTableComponent } from '../main-table.component';
 import { TablesBuilderService } from 'src/app/Services/tables-builder.service';
 import { MatOptionSelectionChange } from '@angular/material/core';
 import { BehaviorSubject } from 'rxjs';
+import { IEmployeesRow } from 'src/app/models/IEmployeesRow';
 
 
-interface Food {
-  value: string;
-  viewValue: string;
-}
+//Target: to display available employees for selection
+//Get the full array of employees
+//Get the sector
+//filter employees by sector and by time (who can work)
+//display employees 
+
+
 
 @Component({
   selector: 'app-selectable-table-element',
@@ -21,46 +25,38 @@ export class SelectableTableElementComponent implements OnInit {
   @Input() rowNumber: number | undefined;
   @Input() columnNumber: number | undefined;
   @Input() employee!: IEmployee;
+  @Input() employees!: IEmployee[];
 
-  color: string = 'red';
   showSelector: boolean = false;
   ifSelected: boolean = false;
+  showBorder: boolean = false;
 
   constructor(private planningTableService: TablesBuilderService) {
   }
 
-  setEmployee() {
-  }
-
   ngOnInit(): void {
-    console.log(this.rowNumber + ' ' + this.columnNumber);
+    console.log(this.employees);
   }
 
-  toggleSelectorVisibility() {
-    if (!this.showSelector && !this.ifSelected) {
+  toggleShowBorder() {
+    this.showBorder = !this.showBorder;
+  }
+  toggle() {
+    if (!this.ifSelected) {
       this.showSelector = true;
-      this.ifSelected = true;
     }
-    else if (this.ifSelected) {
-      this.ifSelected = !this.ifSelected;
+    else {
+      this.showSelector = !this.showSelector;
+      this.ifSelected = false;
     }
   }
 
-  foods: Food[] = [
-    { value: 'steak-0', viewValue: 'Steak' },
-    { value: 'pizza-1', viewValue: 'Pizza' },
-    { value: 'tacos-2', viewValue: 'Tacos' },
-    { value: 'tacos-2', viewValue: 'Tacos' },
-    { value: 'tacos-2', viewValue: 'Tacos' },
-    { value: 'tacos-2', viewValue: 'Tacos' },
-  ];
+  onSelection() {
 
-  selectorChange($event: MatOptionSelectionChange) {
-    this.ifSelected = false;
-    this.showSelector = false;
+    this.ifSelected = true;
+    this.toggle();
   }
 
-  test() {
-    console.log('Test')
-  }
+
+
 }

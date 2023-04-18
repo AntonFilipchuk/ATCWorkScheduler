@@ -66,6 +66,25 @@ let shiftEndTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), tod
 })
 
 
+//This service is for validating input,
+//building initial table
+//and performing actions with this table
+//The input:
+//1)Sectors - validate there are no duplicates
+//2)Employees - validate there are enough employees for the shift,
+//every employee can work at least at one sector, 
+//there are no duplicate employees
+//3)Time - get the start end the end of the shift, also the time interval in minutes
+//for building a table
+//We will delegate validating input and building initial default tables to the external class 
+//DefaultTableBuilder.ts
+//What we need: 
+//1)A table for the Mat table to render
+//2)A table of employees as 2D Array - it's easier to perform actions in this way
+//3)A function that rebuild the table for the Mat table when we change the Employees table
+//4)A function that takes an employee, the position in the table and decides if and employee 
+//can be set there. 
+
 export class TablesBuilderService {
 
   public $table = new ReplaySubject<ITableRow[]>();
@@ -83,6 +102,10 @@ export class TablesBuilderService {
     this._employeesTableAs2DArray = defaultTableBuilder.tableForEmployeesAs2DArray;
     this._tableForMatTable = defaultTableBuilder.defaultTableForMatTable;
     this.displayColumns = defaultTableBuilder.displayedColumns;
+  }
+
+  getEmployees() {
+    return employees;
   }
 
 

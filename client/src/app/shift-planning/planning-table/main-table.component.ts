@@ -2,6 +2,7 @@ import { AfterViewInit, Component, OnInit, ViewChild, ViewChildren } from '@angu
 import { MatTable, MatTableDataSource } from '@angular/material/table';
 import { TablesBuilderService } from 'src/app/Services/tables-builder.service';
 import { IEmployee } from 'src/app/models/IEmployee';
+import { IEmployeesRow } from 'src/app/models/IEmployeesRow';
 
 
 export interface ITableRow {
@@ -14,7 +15,7 @@ export interface ITableRow {
   styleUrls: ['./main-table.component.scss'],
   templateUrl: './main-table.component.html',
 })
-export class MainTableComponent implements OnInit, AfterViewInit {
+export class MainTableComponent implements OnInit {
   sectorNames: string[] = [];
   displayedColumns: string[] = [];
   employees: IEmployee[] = [];
@@ -23,11 +24,8 @@ export class MainTableComponent implements OnInit, AfterViewInit {
 
   @ViewChild(MatTable) table!: MatTable<ITableRow>;
   constructor(private planningTableService: TablesBuilderService) {
+  }
 
-  }
-  ngAfterViewInit(): void {
-    console.log(this.table);
-  }
 
   ngOnInit(): void {
 
@@ -36,6 +34,7 @@ export class MainTableComponent implements OnInit, AfterViewInit {
     this.sectorNames = ['G12R', 'G12P'];
 
     this.getTableWithSubscription();
+    this.employees = pTS.getEmployees();
   }
 
   getTableWithSubscription() {
