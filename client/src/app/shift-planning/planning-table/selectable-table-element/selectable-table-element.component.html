@@ -1,23 +1,31 @@
 <div
   class="selectable-element-container"
   (click)="toggle()"
-  [ngStyle]="{ border: showBorder ? '5px solid green' : '' }"
+  [ngStyle]="{
+    border: showBorder ? '5px solid green' : '',
+    background: color ? color : 'grey'
+  }"
   (mouseenter)="toggleShowBorder()"
   (mouseleave)="toggleShowBorder()"
 >
-  <!-- <mat-select
+  <p>{{ color }} {{ showBorder }}</p>
+
+  <!-- <div
+    style="height: 50px; width: 100px; background-color: blue"
+    (click)="test()"
+  ></div> -->
+  <mat-select
     class="selector"
     *ngIf="showSelector"
-    style="cursor: pointer"
-    (closed)="onSelection()"
+    (closed)="toggleSelection()"
   >
     <mat-option
-      (onSelectionChange)="onSelection()"
-      *ngFor="let food of foods"
-      [value]="food.value"
+      (onSelectionChange)="onSelection($event)"
+      *ngFor="let employee of employeesToSelectFrom"
+      [value]="employee"
       style="cursor: pointer"
     >
-      {{ food.viewValue }}
+      {{ employee.name }}
     </mat-option>
-  </mat-select> -->
+  </mat-select>
 </div>

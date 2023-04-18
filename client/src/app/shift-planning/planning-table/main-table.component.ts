@@ -3,6 +3,7 @@ import { MatTable, MatTableDataSource } from '@angular/material/table';
 import { TablesBuilderService } from 'src/app/Services/tables-builder.service';
 import { IEmployee } from 'src/app/models/IEmployee';
 import { IEmployeesRow } from 'src/app/models/IEmployeesRow';
+import { ISector } from 'src/app/models/ISector';
 
 
 export interface ITableRow {
@@ -16,7 +17,7 @@ export interface ITableRow {
   templateUrl: './main-table.component.html',
 })
 export class MainTableComponent implements OnInit {
-  sectorNames: string[] = [];
+  sectorsForShift: ISector[] = [];
   displayedColumns: string[] = [];
   employees: IEmployee[] = [];
 
@@ -31,7 +32,7 @@ export class MainTableComponent implements OnInit {
 
     let pTS = this.planningTableService;
     this.displayedColumns = pTS.displayColumns;
-    this.sectorNames = ['G12R', 'G12P'];
+    this.sectorsForShift = pTS.sectorsForShift;
 
     this.getTableWithSubscription();
     this.employees = pTS.employeesForShift;

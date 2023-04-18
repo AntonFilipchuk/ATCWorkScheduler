@@ -30,6 +30,9 @@ export class DefaultTableBuilder {
 
     public employeesForShift: IEmployee[];
 
+    public sectorsForShift: ISector[];
+
+
     constructor(
         private sectors: ISector[],
         private employees: IEmployee[],
@@ -52,6 +55,7 @@ export class DefaultTableBuilder {
             this.checkNoDuplicatesInArray(employees) &&
             this.checkNoDuplicatesInArray(sectors)) {
             this.employeesForShift = employees;
+            this.sectorsForShift = sectors;
             this.tableForEmployeesAs2DArray = this.buildTableForEmployeesAs2DArray(sectors);
             this.defaultTableForMatTable = this.buildDefaultTableForMatTable();
             this.displayedColumns = this.buildDisplayedColumns(sectors);

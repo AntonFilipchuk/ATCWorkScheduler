@@ -17,22 +17,24 @@
   </ng-container>
 
   <ng-container
-    *ngFor="let sectorName of sectorNames; index as i"
-    matColumnDef="{{ sectorName }}"
+    *ngFor="let sector of sectorsForShift; index as i"
+    matColumnDef="{{ sector.name }}"
   >
     <th mat-header-cell *matHeaderCellDef [ngClass]="{ sectorColumn: true }">
-      {{ sectorName }}
+      {{ sector.name }}
     </th>
     <td
       mat-cell
       *matCellDef="let employeesRow; index as j"
       [ngClass]="{ sectorColumn: true }"
     >
-      <app-selectable-table-element class="selectable-table-element"
+      <app-selectable-table-element
+        class="selectable-table-element"
         [rowNumber]="j"
         [columnNumber]="i"
-        [employee]="employeesRow[sectorName]"
+        [employee]="employeesRow[sector.name]"
         [employees]="employees"
+        [sector]="sector"
       ></app-selectable-table-element>
     </td>
   </ng-container>

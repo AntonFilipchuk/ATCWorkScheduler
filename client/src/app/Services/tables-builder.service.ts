@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnInit } from '@angular/core';
 import { IEmployee } from '../models/IEmployee';
 import { IEmployeesRow } from '../models/IEmployeesRow';
-import { Observable, ReplaySubject, interval } from 'rxjs';
+import { Observable, ReplaySubject, interval, timeInterval } from 'rxjs';
 import { CollectionViewer, DataSource } from '@angular/cdk/collections';
 import { TimeConfigurator } from '../Helpers/TimeConfigurator';
 import { ITableRow } from '../models/ITableRow';
@@ -31,28 +31,32 @@ let e1: IEmployee = {
   id: 1,
   name: 'Anton',
   totalTime: 0,
-  sectorPermits: [g12r, g12p]
+  sectorPermits: [g12r,],
+  color: 'red'
 }
 
 let e2: IEmployee = {
   id: 2,
   name: 'John',
   totalTime: 0,
-  sectorPermits: [g12r, g12p]
+  sectorPermits: [g12r,],
+  color: 'green'
 }
 
 let e3: IEmployee = {
   id: 3,
   name: 'Mary',
   totalTime: 0,
-  sectorPermits: [g12r, g12p]
+  sectorPermits: [g12r, g12p],
+  color: 'yellow'
 }
 
 let e4: IEmployee = {
   id: 4,
   name: 'Jane',
   totalTime: 0,
-  sectorPermits: [g12r, g12p, t1R, t1P]
+  sectorPermits: [g12r, g12p, t1R, t1P],
+  color: 'blue'
 }
 
 let employees: IEmployee[] = [e1, e2, e3, e4,];
@@ -85,16 +89,24 @@ let shiftEndTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), tod
 //4)A function that takes an employee, the position in the table and decides if and employee 
 //can be set there. 
 
-export class TablesBuilderService {
+export class TablesBuilderService implements OnInit {
 
   public $table = new ReplaySubject<ITableRow[]>();
   public displayColumns: string[] = [];
+
   public employeesForShift: IEmployee[] = [];
+  public sectorsForShift: ISector[] = [];
+
   private _employeesTableAs2DArray: IEmployeesRow[] = [];
   private _tableForMatTable: ITableRow[] = [];
+  private _timeColumnAsStringArray: string[] = [];
+  private _timeColumnAsDateArray: Date[] = [];
 
   constructor() {
     this.buildDefaultTable(sectors, employees, shiftStartTime, shiftEndTime, new Date(), 10);
+  }
+  ngOnInit(): void {
+    this.buildTable();
   }
 
 
@@ -102,35 +114,37 @@ export class TablesBuilderService {
     let defaultTableBuilder = new DefaultTableBuilder(sectors, employees, shiftStartTime, shiftEndTime, shiftDate, timeIntervalInMinutes);
     this._employeesTableAs2DArray = defaultTableBuilder.tableForEmployeesAs2DArray;
     this._tableForMatTable = defaultTableBuilder.defaultTableForMatTable;
+    this._timeColumnAsDateArray = defaultTableBuilder.timeColumnAsDateArray;
+    this._timeColumnAsStringArray = defaultTableBuilder.timeColumnAsStringArray;
+
     this.displayColumns = defaultTableBuilder.displayedColumns;
     this.employeesForShift = defaultTableBuilder.employeesForShift;
+    this.sectorsForShift = defaultTableBuilder.sectorsForShift;
   }
 
   getEmployees() {
     return employees;
   }
 
+  //Call this method every time we change _employeesTableAs2DArray
+  private buildTable() {
+    let table: ITableRow[] = [];
 
-  // public buildTable() {
+    for (let i = 0; i < this._timeColumnAsStringArray.length; i++) {
+      let sectorsRow: IEmployeesRow = {};
+      for (let j = 0; j < this.sectorsForShift.length; j++) {
+        sectorsRow[this.sectorsForShift[j].name] = this._employeesTableAs2DArray[i][j];
+      };
+      table.push(
+        {
+          time: this._timeColumnAsStringArray[i],
+          ...sectorsRow
+        }
+      );
+      this.$table.next(table);
+    }
+  }
 
-  //   let timeIntervals: any[] = this.getTimeIntervals();
-  //   let sectors: string[] = this.getSectors();
-  //   let table: ITableRow[] = [];
-  //   for (let i = 0; i < timeIntervals.length; i++) {
-  //     let sectorsRow: IEmployeesRow = {};
-  //     for (let j = 0; j < sectors.length; j++) {
-  //       sectorsRow[sectors[j]] = this._employees[i][j];
-  //     };
-  //     table.push(
-  //       {
-  //         time: timeIntervals[i],
-  //         ...sectorsRow
-  //       }
-  //     );
-  //   };
-  //   this._table = table;
-  //   this.$table.next(table);
-  // }
 
   getTableForSubscription(): Observable<ITableRow[]> {
     this.$table.next(this._tableForMatTable);
@@ -138,19 +152,20 @@ export class TablesBuilderService {
   }
 
 
-  // public setEmployee(employee: IEmployee, rowNumber: number, sectorNumber: number) {
+  public setEmployee(employee: IEmployee, rowNumber: number, sectorName: string) {
 
-  //   let rowToChange = this._employees[rowNumber];
+    //{ G12R: undefined, G12P: undefined }
+    let rowToChange: IEmployeesRow = this._employeesTableAs2DArray[rowNumber];
 
-  //   if (rowToChange.filter(e => JSON.stringify(e) == JSON.stringify(employee)).length < 1) {
-  //     rowToChange[sectorNumber] = employee;
-  //   }
-  //   else {
-  //     console.log("Error adding employee");
-  //   }
+    if (rowToChange[sectorName] !== employee) {
+      rowToChange[sectorName] = employee;
+    }
+    else {
+      console.log("Error adding employee");
+    }
 
-  //   this._employees[rowNumber] = rowToChange;
-  //   this.buildTable();
-  // }
+    // this._employees[rowNumber] = rowToChange;
+    this.buildTable();
+  }
 
 }

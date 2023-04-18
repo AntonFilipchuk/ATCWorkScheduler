@@ -5,5 +5,5 @@ export interface IEmployee {
     name: string | undefined,
     totalTime: number | undefined,
     sectorPermits : ISector[],
-    
+    color : string;
 }
