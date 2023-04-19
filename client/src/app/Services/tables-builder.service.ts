@@ -8,7 +8,7 @@ import { ITableRow } from '../models/ITableRow';
 import { DefaultTableBuilder } from '../Helpers/DefaultTableBuilder';
 import { ISector } from '../models/ISector';
 import { ObjectsComparisonHelper } from '../Helpers/ObjectsComparisonHelper';
-import { ITimeOfWorkInfo } from '../models/ITimeOfWorkInfo';
+import { IWorkAndRestTimeInfo } from '../models/ITimeOfWorkInfo';
 
 
 /**
@@ -183,89 +183,99 @@ export class TablesBuilderService implements OnInit {
   //[e1, e2]
   //[e3, e1]
   //[e3, e2]
-  private calculateMinutesOfPreviousWorkTime(employee: IEmployee, rowNumber: number, columnNumber: number): ITimeOfWorkInfo {
 
-    let totalMinutesWorked: number = 0;
-    let lastWorkingSessionTimeInMinutes: number = 0;
-    let currentWorkingSessionTimeInMinutes: number = 0;
-    let lastRestTimeInMinutes: number = 0;
-    let currentRestTimeInMinutes: number = 0;
-
-    this._employeesTableAs2DArray.forEach(employeesRow => {
-      if (this._objComparisonHelper.ifArrayHasAnObject(employeesRow, employee)) {
-        totalMinutesWorked += this._timeIntervalInMinutes;
-      }
-    });
-
-
-    let timeOfWorkInfo: ITimeOfWorkInfo = {
-      currentRestTimeInMinutes: currentRestTimeInMinutes,
-      currentWorkingSessionTimeInMinutes: currentWorkingSessionTimeInMinutes,
-      lastRestTimeInMinutes: lastRestTimeInMinutes,
-      lastWorkingSessionTimeInMinutes: lastWorkingSessionTimeInMinutes,
-      totalMinutesWorked: totalMinutesWorked
-    }
-
-    return timeOfWorkInfo;
-  }
-
-  public calculateTotalWorkingTime(employee: IEmployee, rowNumber: number, columnNumber: number): number {
+  public getWorkAndRestTimeInfo(employee: IEmployee, rowNumber: number): IWorkAndRestTimeInfo {
 
     let totalWorkingTime: number = 0;
+    let lastWorkTime: number = 0;
+
+    let totalRestTime: number = 0;
+    let lastRestTime: number = 0;
+
+    //Total Work and Rest Time
     this._employeesTableAs2DArray.forEach(employeesRow => {
       if (this._objComparisonHelper.ifArrayHasAnObject(employeesRow, employee)) {
         totalWorkingTime += this._timeIntervalInMinutes;
       }
-    });
-    return totalWorkingTime;
-  }
-
-  public calculateTimeOfWorkSession(employee: IEmployee, rowNumber: number, columnNumber: number) {
-
-    let workTimeForSession: number = 0;
-
-    if (this._objComparisonHelper.ifArrayHasAnObject(this._employeesTableAs2DArray[rowNumber], employee)) {
-      workTimeForSession += this._timeIntervalInMinutes;
-    }
-
-    for (let i = rowNumber; i > 0; i--) {
-      const employeesRow = this._employeesTableAs2DArray[i - 1];
-      if (this._objComparisonHelper.ifArrayHasAnObject(employeesRow, employee)) {
-        workTimeForSession += this._timeIntervalInMinutes;
-      }
       else {
-        return workTimeForSession;
-      }
-    }
-    return workTimeForSession;
-  }
-
-  public calculateTotalRestTime(employee: IEmployee): number {
-    let totalRestTime: number = 0;
-
-    this._employeesTableAs2DArray.forEach(employeesRow => {
-      if (!this._objComparisonHelper.ifArrayHasAnObject(employeesRow, employee)) {
         totalRestTime += this._timeIntervalInMinutes;
       }
     });
 
-    return totalRestTime;
-  }
+    [lastWorkTime, lastRestTime] = this.calculateLastWorkTime(employee, rowNumber);
 
-  public calculateLastRestTime(employee: IEmployee, rowNumber: number, columnNumber: number): number {
-    let lastRestTime: number = 0;
 
+    //Last Rest Time
     for (let i = rowNumber; i > 0; i--) {
       const previousEmployeesRow = this._employeesTableAs2DArray[i - 1];
       if (!this._objComparisonHelper.ifArrayHasAnObject(previousEmployeesRow, employee)) {
         lastRestTime += this._timeIntervalInMinutes;
       }
       else {
-        return lastRestTime;
+        break;
       }
     }
 
+    let workAndRestInfo: IWorkAndRestTimeInfo =
+    {
+      lastRestTimeInMinutes: lastRestTime,
+      lastWorkTimeInMinutes: lastWorkTime,
+      totalRestTimeInMinutes: totalRestTime,
+      totalWorkingTimeInMinutes: totalWorkingTime
+    }
+    return workAndRestInfo;
+  }
+
+  private calculateLastRestTime(employee: IEmployee, rowNumber: number): number {
+    let lastRestTime: number = 0;
+    let row: number = rowNumber - 1;
+
+    while (!this._objComparisonHelper.ifArrayHasAnObject(this._employeesTableAs2DArray[row], employee) && row > 0) {
+      lastRestTime += this._timeIntervalInMinutes;
+      row = row - 1;
+    }
     return lastRestTime;
+  }
+  private calculateLastWorkTime(employee: IEmployee, rowNumber: number): [number, number] {
+    let lastWorkTime: number = 0;
+    let lastRestTime: number = 0;
+    //Last Work time
+    //If an employee worked on previous time period
+    //Decrement row to find when was a last rest time period
+    //[e1, e2] 
+    //[e3, e2] <-- end here (for e1)
+    //[e1, e2]
+    //[e1, e2]
+    //[e1, e2] <-- start here
+    let row: number = rowNumber - 1;
+    if (this._objComparisonHelper.ifArrayHasAnObject(this._employeesTableAs2DArray[row], employee) && row > 0) {
+      while (this._objComparisonHelper.ifArrayHasAnObject(this._employeesTableAs2DArray[row], employee) && row > 0) {
+        row = row - 1;
+      }
+    }
+
+    //Than skip all rest time periods
+    //[e1, e2] <-- end here
+    //[e3, e2] 
+    //[e3, e2]
+    //[e3, e2] <-- start here
+    //[e1, e2]
+    while (!this._objComparisonHelper.ifArrayHasAnObject(this._employeesTableAs2DArray[row], employee) && row > 0) {
+      lastRestTime += this._timeIntervalInMinutes;
+      row = row - 1;
+    }
+
+    //Now count previous time work
+    //[e1, e2] <-- end here
+    //[e1, e2] 
+    //[e1, e2]
+    //[e1, e2] 
+    //[e1, e2] <-- start here
+    while (this._objComparisonHelper.ifArrayHasAnObject(this._employeesTableAs2DArray[row], employee) && row > 0) {
+      lastWorkTime += this._timeIntervalInMinutes;
+      row = row - 1;
+    }
+    return [lastWorkTime, lastRestTime];
   }
 
   public getEmployeeByRowNumberAndSectorName(rowNumber: number, columnNumber: number): IEmployee | undefined {

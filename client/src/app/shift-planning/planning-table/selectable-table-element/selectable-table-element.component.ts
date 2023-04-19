@@ -6,6 +6,7 @@ import { MatOptionSelectionChange } from '@angular/material/core';
 import { BehaviorSubject } from 'rxjs';
 import { IEmployeesRow } from 'src/app/models/IEmployeesRow';
 import { ISector } from 'src/app/models/ISector';
+import { IWorkAndRestTimeInfo } from 'src/app/models/ITimeOfWorkInfo';
 
 
 //Target: to display available employees for selection
@@ -33,8 +34,10 @@ export class SelectableTableElementComponent implements OnInit, OnChanges {
   public employeesToSelectFrom: IEmployee[] = [];
   public employee: IEmployee | undefined;
   public color: string | undefined;
-  public totalTimeWorked: number = 0;
-  public workTimeOfSession: number = 0;
+
+  public workAndRestTime : IWorkAndRestTimeInfo | undefined;
+  public totalWorkTime: number = 0;
+  public lastWorkTime: number = 0;
   public totalRestTime: number = 0;
   public lastRestTime: number = 0;
 
@@ -53,13 +56,8 @@ export class SelectableTableElementComponent implements OnInit, OnChanges {
     this.employee = this.planningTableService.getEmployeeByRowNumberAndSectorName(this.rowNumber, this.columnNumber);
     if (this.employee) {
       this.color = this.employee?.color;
-      this.totalTimeWorked = this.planningTableService.calculateTotalWorkingTime(this.employee!, this.rowNumber, this.columnNumber)
-      this.workTimeOfSession = this.planningTableService.calculateTimeOfWorkSession(this.employee!, this.rowNumber, this.columnNumber);
-      this.totalRestTime = this.planningTableService.calculateTotalRestTime(this.employee!);
-      this.lastRestTime = this.planningTableService.calculateLastRestTime(this.employee, this.rowNumber, this.columnNumber);
+      this.workAndRestTime = this.planningTableService.getWorkAndRestTimeInfo(this.employee, this.rowNumber);
     }
-    console.log(this.employee?.name, this.workTimeOfSession);
-
   }
 
   getStyleForCell(): any {

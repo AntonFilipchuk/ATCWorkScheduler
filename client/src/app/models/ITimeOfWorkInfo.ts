@@ -1,7 +1,6 @@
-export interface ITimeOfWorkInfo {
-    totalMinutesWorked: number;
-    lastWorkingSessionTimeInMinutes: number;
-    currentWorkingSessionTimeInMinutes: number;
+export interface IWorkAndRestTimeInfo {
+    totalWorkingTimeInMinutes: number;
+    lastWorkTimeInMinutes: number;
     lastRestTimeInMinutes: number;
-    currentRestTimeInMinutes: number;
+    totalRestTimeInMinutes: number;
 }
