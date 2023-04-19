@@ -8,6 +8,7 @@ import { ITableRow } from '../models/ITableRow';
 import { DefaultTableBuilder } from '../Helpers/DefaultTableBuilder';
 import { ISector } from '../models/ISector';
 import { ObjectsComparisonHelper } from '../Helpers/ObjectsComparisonHelper';
+import { ITimeOfWorkInfo } from '../models/ITimeOfWorkInfo';
 
 
 /**
@@ -57,14 +58,14 @@ let e4: IEmployee = {
   name: 'Jane',
   totalTime: 0,
   sectorPermits: [g12r, g12p, t1R, t1P],
-  color: 'blue'
+  color: 'orange'
 }
 
 let employees: IEmployee[] = [e1, e2, e3, e4,];
 
 let todayDate: Date = new Date();
-let shiftStartTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 8, 10);
-let shiftEndTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 14, 40);
+let shiftStartTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 8, 0);
+let shiftEndTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 8, 40);
 
 @Injectable({
   providedIn: 'root'
@@ -102,6 +103,7 @@ export class TablesBuilderService implements OnInit {
   private _tableForMatTable: ITableRow[] = [];
   private _timeColumnAsStringArray: string[] = [];
   private _timeColumnAsDateArray: Date[] = [];
+  private _timeIntervalInMinutes: number = 0;
 
   private _objComparisonHelper: ObjectsComparisonHelper;
 
@@ -120,7 +122,7 @@ export class TablesBuilderService implements OnInit {
     this._tableForMatTable = defaultTableBuilder.defaultTableForMatTable;
     this._timeColumnAsDateArray = defaultTableBuilder.timeColumnAsDateArray;
     this._timeColumnAsStringArray = defaultTableBuilder.timeColumnAsStringArray;
-
+    this._timeIntervalInMinutes = defaultTableBuilder.timeIntervalInMinutes;
     this.displayColumns = defaultTableBuilder.displayedColumns;
     this.employeesForShift = defaultTableBuilder.employeesForShift;
     this.sectorsForShift = defaultTableBuilder.sectorsForShift;
@@ -151,14 +153,17 @@ export class TablesBuilderService implements OnInit {
     return this.$table;
   }
 
-
+  //Check if an employee is not at another sector at the same time
+  //Check if an employee had enough rest:
+  //If he worked less then one hour 
+  //He can be set after 10 mins
+  //Else after 20 mins 
   public setEmployeeInRow(employee: IEmployee, rowNumber: number, columnNumber: number) {
 
-    //{ G12R: undefined, G12P: undefined }
     let rowToChange: (IEmployee | undefined)[] = this._employeesTableAs2DArray[rowNumber];
     let employeeToChange: IEmployee | undefined = rowToChange[columnNumber];
 
-    if (this._objComparisonHelper.ifArrayHasDuplicateObject(rowToChange, employee)) {
+    if (this._objComparisonHelper.ifArrayHasAnObject(rowToChange, employee)) {
       console.log(`Can not set ${employee.name} at the same time on different sector!`);
       return;
     }
@@ -173,8 +178,81 @@ export class TablesBuilderService implements OnInit {
     }
   }
 
+  //[e1, e2]
+  //[e2, e1]
+  //[e1, e2]
+  //[e3, e1]
+  //[e3, e2]
+  private calculateMinutesOfPreviousWorkTime(employee: IEmployee, rowNumber: number, columnNumber: number): ITimeOfWorkInfo {
+
+    let totalMinutesWorked: number = 0;
+    let lastWorkingSessionTimeInMinutes: number = 0;
+    let currentWorkingSessionTimeInMinutes: number = 0;
+    let lastRestTimeInMinutes: number = 0;
+    let currentRestTimeInMinutes: number = 0;
+
+    this._employeesTableAs2DArray.forEach(employeesRow => {
+      if (this._objComparisonHelper.ifArrayHasAnObject(employeesRow, employee)) {
+        totalMinutesWorked += this._timeIntervalInMinutes;
+      }
+    });
+
+
+    let timeOfWorkInfo: ITimeOfWorkInfo = {
+      currentRestTimeInMinutes: currentRestTimeInMinutes,
+      currentWorkingSessionTimeInMinutes: currentWorkingSessionTimeInMinutes,
+      lastRestTimeInMinutes: lastRestTimeInMinutes,
+      lastWorkingSessionTimeInMinutes: lastWorkingSessionTimeInMinutes,
+      totalMinutesWorked: totalMinutesWorked
+    }
+
+    return timeOfWorkInfo;
+  }
+
+  public calculateTotalWorkingTime(employee: IEmployee, rowNumber: number, columnNumber: number): number {
+    if (!employee) {
+      return 0;
+    }
+
+    let totalWorkingTime: number = 0;
+    this._employeesTableAs2DArray.forEach(employeesRow => {
+      if (this._objComparisonHelper.ifArrayHasAnObject(employeesRow, employee)) {
+        totalWorkingTime += this._timeIntervalInMinutes;
+      }
+    });
+    return totalWorkingTime;
+  }
+
+  public calculateTimeOfWorkSession(employee: IEmployee, rowNumber: number, columnNumber: number) {
+    if (!employee) {
+      return 0;
+    }
+
+    let workTimeForSession: number = 0;
+
+    if (this._objComparisonHelper.ifArrayHasAnObject(this._employeesTableAs2DArray[rowNumber], employee)) {
+      workTimeForSession += this._timeIntervalInMinutes;
+    }
+
+    for (let i = rowNumber; i > 0; i--) {
+      const employeesRow = this._employeesTableAs2DArray[i - 1];
+      if (this._objComparisonHelper.ifArrayHasAnObject(employeesRow, employee)) {
+        workTimeForSession += this._timeIntervalInMinutes;
+      }
+      else
+      {
+        return workTimeForSession;
+      }
+    }
+    return workTimeForSession;
+  }
+
   public getEmployeeByRowNumberAndSectorName(rowNumber: number, columnNumber: number): IEmployee | undefined {
     return this._employeesTableAs2DArray[rowNumber][columnNumber];
   }
 
+
+  private minutesToMilliseconds(minutes: number): number {
+    return minutes * 60000;
+  }
 }

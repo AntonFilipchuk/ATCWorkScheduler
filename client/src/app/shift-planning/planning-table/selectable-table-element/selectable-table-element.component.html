@@ -8,7 +8,11 @@
   (mouseenter)="toggleShowBorder()"
   (mouseleave)="toggleShowBorder()"
 >
-  <p>{{ employee ? employee.name : '' }}</p>
+  <p>
+    {{ employee ? employee.name : "" }}
+    {{ totalTimeWorked ? "Total time: " + totalTimeWorked : "" }}
+    {{ workTimeOfSession ? "Session time: " + workTimeOfSession : "" }}
+  </p>
 
   <!-- <div
     style="height: 50px; width: 100px; background-color: blue"

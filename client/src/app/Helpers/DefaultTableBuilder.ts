@@ -33,7 +33,8 @@ export class DefaultTableBuilder {
 
     public sectorsForShift: ISector[];
 
-
+    public timeIntervalInMinutes: number;
+    
     private _objComparisonHelper: ObjectsComparisonHelper;
 
     constructor(
@@ -41,20 +42,21 @@ export class DefaultTableBuilder {
         private employees: IEmployee[],
         private shiftStartTime: Date,
         private shiftEndTime: Date,
-        private shiftDate: Date, timeIntervalInMinutes: number) {
+        private shiftDate: Date,
+        private intervalInMinutes: number) {
 
         this._objComparisonHelper = new ObjectsComparisonHelper;
-        
+
         let timeConfigurator: TimeConfigurator = new TimeConfigurator
             (shiftStartTime.getHours(),
                 shiftStartTime.getMinutes(),
                 shiftEndTime.getHours(),
                 shiftEndTime.getMinutes(),
                 shiftDate,
-                timeIntervalInMinutes);
+                intervalInMinutes);
+        this.timeIntervalInMinutes = intervalInMinutes;
         this.timeColumnAsStringArray = timeConfigurator.timeColumnAsStringArray;
         this.timeColumnAsDateArray = timeConfigurator.timeColumnAsDateArray;
-
         let ifDuplicatesInSectorsOrEmployees: boolean = this.checkNoDuplicatesInArray(employees) && this.checkNoDuplicatesInArray(sectors)
 
         if (this.checkForMinimumAmountOfEmployees(sectors, employees) &&
