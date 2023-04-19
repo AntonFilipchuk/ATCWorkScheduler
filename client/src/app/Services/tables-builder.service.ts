@@ -65,7 +65,7 @@ let employees: IEmployee[] = [e1, e2, e3, e4,];
 
 let todayDate: Date = new Date();
 let shiftStartTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 8, 0);
-let shiftEndTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 8, 40);
+let shiftEndTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 10, 0);
 
 @Injectable({
   providedIn: 'root'
@@ -210,9 +210,6 @@ export class TablesBuilderService implements OnInit {
   }
 
   public calculateTotalWorkingTime(employee: IEmployee, rowNumber: number, columnNumber: number): number {
-    if (!employee) {
-      return 0;
-    }
 
     let totalWorkingTime: number = 0;
     this._employeesTableAs2DArray.forEach(employeesRow => {
@@ -224,9 +221,6 @@ export class TablesBuilderService implements OnInit {
   }
 
   public calculateTimeOfWorkSession(employee: IEmployee, rowNumber: number, columnNumber: number) {
-    if (!employee) {
-      return 0;
-    }
 
     let workTimeForSession: number = 0;
 
@@ -239,12 +233,39 @@ export class TablesBuilderService implements OnInit {
       if (this._objComparisonHelper.ifArrayHasAnObject(employeesRow, employee)) {
         workTimeForSession += this._timeIntervalInMinutes;
       }
-      else
-      {
+      else {
         return workTimeForSession;
       }
     }
     return workTimeForSession;
+  }
+
+  public calculateTotalRestTime(employee: IEmployee): number {
+    let totalRestTime: number = 0;
+
+    this._employeesTableAs2DArray.forEach(employeesRow => {
+      if (!this._objComparisonHelper.ifArrayHasAnObject(employeesRow, employee)) {
+        totalRestTime += this._timeIntervalInMinutes;
+      }
+    });
+
+    return totalRestTime;
+  }
+
+  public calculateLastRestTime(employee: IEmployee, rowNumber: number, columnNumber: number): number {
+    let lastRestTime: number = 0;
+
+    for (let i = rowNumber; i > 0; i--) {
+      const previousEmployeesRow = this._employeesTableAs2DArray[i - 1];
+      if (!this._objComparisonHelper.ifArrayHasAnObject(previousEmployeesRow, employee)) {
+        lastRestTime += this._timeIntervalInMinutes;
+      }
+      else {
+        return lastRestTime;
+      }
+    }
+
+    return lastRestTime;
   }
 
   public getEmployeeByRowNumberAndSectorName(rowNumber: number, columnNumber: number): IEmployee | undefined {

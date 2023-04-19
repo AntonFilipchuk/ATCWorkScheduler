@@ -34,7 +34,9 @@ export class SelectableTableElementComponent implements OnInit, OnChanges {
   public employee: IEmployee | undefined;
   public color: string | undefined;
   public totalTimeWorked: number = 0;
-  public workTimeOfSession : number = 0;
+  public workTimeOfSession: number = 0;
+  public totalRestTime: number = 0;
+  public lastRestTime: number = 0;
 
   private _employeesForShift: IEmployee[] = [];
 
@@ -49,11 +51,15 @@ export class SelectableTableElementComponent implements OnInit, OnChanges {
     this._employeesForShift = this.planningTableService.employeesForShift;
     this.configureProperEmployees();
     this.employee = this.planningTableService.getEmployeeByRowNumberAndSectorName(this.rowNumber, this.columnNumber);
-    this.color = this.employee?.color;
-    this.totalTimeWorked = this.planningTableService.calculateTotalWorkingTime(this.employee!, this.rowNumber, this.columnNumber)
-    this.workTimeOfSession = this.planningTableService.calculateTimeOfWorkSession(this.employee!, this.rowNumber, this.columnNumber);
-    console.log(this.employee?.name,this.workTimeOfSession);
-    
+    if (this.employee) {
+      this.color = this.employee?.color;
+      this.totalTimeWorked = this.planningTableService.calculateTotalWorkingTime(this.employee!, this.rowNumber, this.columnNumber)
+      this.workTimeOfSession = this.planningTableService.calculateTimeOfWorkSession(this.employee!, this.rowNumber, this.columnNumber);
+      this.totalRestTime = this.planningTableService.calculateTotalRestTime(this.employee!);
+      this.lastRestTime = this.planningTableService.calculateLastRestTime(this.employee, this.rowNumber, this.columnNumber);
+    }
+    console.log(this.employee?.name, this.workTimeOfSession);
+
   }
 
   getStyleForCell(): any {
