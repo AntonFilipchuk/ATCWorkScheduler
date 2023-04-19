@@ -97,7 +97,7 @@ export class TablesBuilderService implements OnInit {
   public employeesForShift: IEmployee[] = [];
   public sectorsForShift: ISector[] = [];
 
-  private _employeesTableAs2DArray: IEmployeesRow[] = [];
+  private _employeesTableAs2DArray: (IEmployee | undefined)[][] = [];
   private _tableForMatTable: ITableRow[] = [];
   private _timeColumnAsStringArray: string[] = [];
   private _timeColumnAsDateArray: Date[] = [];
@@ -122,10 +122,6 @@ export class TablesBuilderService implements OnInit {
     this.sectorsForShift = defaultTableBuilder.sectorsForShift;
   }
 
-  getEmployees() {
-    return employees;
-  }
-
   //Call this method every time we change _employeesTableAs2DArray
   private buildTable() {
     let table: ITableRow[] = [];
@@ -146,26 +142,35 @@ export class TablesBuilderService implements OnInit {
   }
 
 
-  getTableForSubscription(): Observable<ITableRow[]> {
+  public getTableForSubscription(): Observable<ITableRow[]> {
     this.$table.next(this._tableForMatTable);
     return this.$table;
   }
 
 
-  public setEmployee(employee: IEmployee, rowNumber: number, sectorName: string) {
+  public setEmployeeInRow(employee: IEmployee, rowNumber: number, columnNumber: number) {
 
     //{ G12R: undefined, G12P: undefined }
-    let rowToChange: IEmployeesRow = this._employeesTableAs2DArray[rowNumber];
+    let rowToChange: (IEmployee | undefined)[] = this._employeesTableAs2DArray[rowNumber];
+    let employeeToChange: IEmployee | undefined = rowToChange[columnNumber];
 
-    if (rowToChange[sectorName] !== employee) {
-      rowToChange[sectorName] = employee;
+    if (rowToChange.filter(e => JSON.stringify(e) === JSON.stringify(employee)).length > 0) {
+      console.log(`Can not set an ${employee.name} at the same time on different sector!`);
+      return;
+    }
+    if (JSON.stringify(employeeToChange) !== JSON.stringify(employee)) {
+      employeeToChange = employee;
+      this._employeesTableAs2DArray[rowNumber][columnNumber] = employeeToChange;
+      this.buildTable();
     }
     else {
-      console.log("Error adding employee");
+      console.log("Error adding the same employee at the same time");
+      return;
     }
+  }
 
-    // this._employees[rowNumber] = rowToChange;
-    this.buildTable();
+  public getEmployeeByRowNumberAndSectorName(rowNumber: number, columnNumber: number): IEmployee | undefined {
+    return this._employeesTableAs2DArray[rowNumber][columnNumber];
   }
 
 }

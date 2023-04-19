@@ -23,29 +23,29 @@ import { ISector } from 'src/app/models/ISector';
 })
 export class SelectableTableElementComponent implements OnInit, OnChanges {
 
-  @Input() rowNumber: number | undefined;
-  @Input() columnNumber: number | undefined;
-  @Input() employee!: IEmployee;
-  @Input() employees!: IEmployee[];
+  @Input() rowNumber!: number;
+  @Input() columnNumber!: number;
   @Input() sector!: ISector;
 
   showSelector: boolean = false;
   ifSelected: boolean = false;
   showBorder: boolean = false;
   employeesToSelectFrom: IEmployee[] = [];
-  selectedEmployee: IEmployee | undefined;
-  l: boolean = true;
-  color!: string;
+  private _employeesForShift: IEmployee[] = [];
+  private _employee: IEmployee | undefined;
+  color: string | undefined;
 
-  constructor(private planningTableService: TablesBuilderService, private cdr: ChangeDetectorRef) {
+  constructor(private planningTableService: TablesBuilderService) {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
   }
 
   ngOnInit(): void {
+    this._employeesForShift = this.planningTableService.employeesForShift;
     this.configureProperEmployees();
-    this.color = 'grey'
+    this._employee = this.planningTableService.getEmployeeByRowNumberAndSectorName(this.rowNumber, this.columnNumber);
+    this.color = this._employee?.color;
   }
 
   getStyleForCell(): any {
@@ -74,22 +74,15 @@ export class SelectableTableElementComponent implements OnInit, OnChanges {
 
   onSelection($event: MatOptionSelectionChange) {
     this.toggleSelection();
-    this.selectedEmployee = $event.source.value;
-    this.color = this.selectedEmployee!.color;
-    //this.planningTableService.setEmployee(this.selectedEmployee!, this.rowNumber!, this.sector.name);
+    this._employee = $event.source.value;
+    this.planningTableService.setEmployeeInRow(this._employee!, this.rowNumber!, this.columnNumber);
   }
 
   configureProperEmployees() {
-    this.employees.forEach(e => {
+    this._employeesForShift.forEach(e => {
       if (e.sectorPermits.some(s => s.name === this.sector.name)) {
         this.employeesToSelectFrom.push(e);
       }
     });
-  }
-
-  test() {
-    this.color = 'pink';
-    console.log(this.color);
-
   }
 }

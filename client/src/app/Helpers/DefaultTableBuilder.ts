@@ -22,7 +22,7 @@ export class DefaultTableBuilder {
 
     public timeColumnAsDateArray: Date[];
 
-    public tableForEmployeesAs2DArray: IEmployeesRow[];
+    public tableForEmployeesAs2DArray: (IEmployee | undefined)[][] = [];
 
     public defaultTableForMatTable: ITableRow[];
 
@@ -56,7 +56,7 @@ export class DefaultTableBuilder {
             this.checkNoDuplicatesInArray(sectors)) {
             this.employeesForShift = employees;
             this.sectorsForShift = sectors;
-            this.tableForEmployeesAs2DArray = this.buildTableForEmployeesAs2DArray(sectors);
+            this.tableForEmployeesAs2DArray = this.buildTableForEmployeesAs2DArray(sectors, this.timeColumnAsStringArray);
             this.defaultTableForMatTable = this.buildDefaultTableForMatTable();
             this.displayedColumns = this.buildDisplayedColumns(sectors);
         }
@@ -86,19 +86,30 @@ export class DefaultTableBuilder {
         return table;
     }
 
+    private buildTableForEmployeesAs2DArray(sectors: ISector[], timeColumn: string[] | Date[]): (IEmployee | undefined)[][] {
+        let employees2DTable: (IEmployee | undefined)[][] = [];
+        timeColumn.forEach(time => {
+            let employeeRow: (IEmployee | undefined)[] = [];
+            sectors.forEach(sector => {
+                employeeRow.push(undefined);
+            })
+            employees2DTable.push(employeeRow);
+        });
+        return employees2DTable;
+    }
 
     //IEmployee row = {G12R : undefined}
-    private buildTableForEmployeesAs2DArray(sectors: ISector[]): IEmployeesRow[] {
-        let employeesTable: IEmployeesRow[] = [];
-        this.timeColumnAsDateArray.forEach(time => {
-            let employeesRow: IEmployeesRow = {};
-            sectors.forEach(sector => {
-                employeesRow[sector.name] = undefined;
-            });
-            employeesTable.push(employeesRow);
-        });
-        return employeesTable;
-    };
+    // private buildTableForEmployeesAs2DArray(sectors: ISector[]): IEmployeesRow[] {
+    //     let employeesTable: IEmployeesRow[] = [];
+    //     this.timeColumnAsDateArray.forEach(time => {
+    //         let employeesRow: IEmployeesRow = {};
+    //         sectors.forEach(sector => {
+    //             employeesRow[sector.name] = undefined;
+    //         });
+    //         employeesTable.push(employeesRow);
+    //     });
+    //     return employeesTable;
+    // };
 
 
     private checkNoDuplicatesInArray(array: any[]): boolean {
