@@ -27,13 +27,15 @@ export class SelectableTableElementComponent implements OnInit, OnChanges {
   @Input() columnNumber!: number;
   @Input() sector!: ISector;
 
-  showSelector: boolean = false;
-  ifSelected: boolean = false;
-  showBorder: boolean = false;
-  employeesToSelectFrom: IEmployee[] = [];
+  public showSelector: boolean = false;
+  public ifSelected: boolean = false;
+  public showBorder: boolean = false;
+  public employeesToSelectFrom: IEmployee[] = [];
+  public employee: IEmployee | undefined;
+  public color: string | undefined;
+
   private _employeesForShift: IEmployee[] = [];
-  private _employee: IEmployee | undefined;
-  color: string | undefined;
+
 
   constructor(private planningTableService: TablesBuilderService) {
   }
@@ -44,8 +46,8 @@ export class SelectableTableElementComponent implements OnInit, OnChanges {
   ngOnInit(): void {
     this._employeesForShift = this.planningTableService.employeesForShift;
     this.configureProperEmployees();
-    this._employee = this.planningTableService.getEmployeeByRowNumberAndSectorName(this.rowNumber, this.columnNumber);
-    this.color = this._employee?.color;
+    this.employee = this.planningTableService.getEmployeeByRowNumberAndSectorName(this.rowNumber, this.columnNumber);
+    this.color = this.employee?.color;
   }
 
   getStyleForCell(): any {
@@ -69,13 +71,12 @@ export class SelectableTableElementComponent implements OnInit, OnChanges {
   toggleSelection() {
     this.ifSelected = true;
     this.toggle();
-    console.log('EColor', this.color);
   }
 
   onSelection($event: MatOptionSelectionChange) {
     this.toggleSelection();
-    this._employee = $event.source.value;
-    this.planningTableService.setEmployeeInRow(this._employee!, this.rowNumber!, this.columnNumber);
+    this.planningTableService.setEmployeeInRow($event.source.value, this.rowNumber!, this.columnNumber);
+    this.employee = this.planningTableService.getEmployeeByRowNumberAndSectorName(this.rowNumber, this.columnNumber);
   }
 
   configureProperEmployees() {

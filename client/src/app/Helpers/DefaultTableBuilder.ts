@@ -14,6 +14,7 @@ import { IEmployee } from "../models/IEmployee";
 import { IEmployeesRow } from "../models/IEmployeesRow";
 import { ISector } from "../models/ISector";
 import { ITableRow } from "../models/ITableRow";
+import { ObjectsComparisonHelper } from "./ObjectsComparisonHelper";
 import { TimeConfigurator } from "./TimeConfigurator";
 
 export class DefaultTableBuilder {
@@ -33,6 +34,8 @@ export class DefaultTableBuilder {
     public sectorsForShift: ISector[];
 
 
+    private _objComparisonHelper: ObjectsComparisonHelper;
+
     constructor(
         private sectors: ISector[],
         private employees: IEmployee[],
@@ -40,6 +43,8 @@ export class DefaultTableBuilder {
         private shiftEndTime: Date,
         private shiftDate: Date, timeIntervalInMinutes: number) {
 
+        this._objComparisonHelper = new ObjectsComparisonHelper;
+        
         let timeConfigurator: TimeConfigurator = new TimeConfigurator
             (shiftStartTime.getHours(),
                 shiftStartTime.getMinutes(),
@@ -50,14 +55,15 @@ export class DefaultTableBuilder {
         this.timeColumnAsStringArray = timeConfigurator.timeColumnAsStringArray;
         this.timeColumnAsDateArray = timeConfigurator.timeColumnAsDateArray;
 
+        let ifDuplicatesInSectorsOrEmployees: boolean = this.checkNoDuplicatesInArray(employees) && this.checkNoDuplicatesInArray(sectors)
+
         if (this.checkForMinimumAmountOfEmployees(sectors, employees) &&
             this.checkIfAllEmployeesCanWorkAtLeastOnOneSectors(sectors) &&
-            this.checkNoDuplicatesInArray(employees) &&
-            this.checkNoDuplicatesInArray(sectors)) {
+            ifDuplicatesInSectorsOrEmployees) {
             this.employeesForShift = employees;
             this.sectorsForShift = sectors;
             this.tableForEmployeesAs2DArray = this.buildTableForEmployeesAs2DArray(sectors, this.timeColumnAsStringArray);
-            this.defaultTableForMatTable = this.buildDefaultTableForMatTable();
+            this.defaultTableForMatTable = this.buildDefaultTableForMatTable(this.timeColumnAsStringArray, this.tableForEmployeesAs2DArray);
             this.displayedColumns = this.buildDisplayedColumns(sectors);
         }
         else {
@@ -77,10 +83,10 @@ export class DefaultTableBuilder {
 
     //Table row:
     // {time: Date, undefined, undefined, ... , undefined}
-    private buildDefaultTableForMatTable(): ITableRow[] {
+    private buildDefaultTableForMatTable(timeColumnAsStringArray: string[], tableForEmployeesAs2DArray: (IEmployee | undefined)[][]): ITableRow[] {
         let table: ITableRow[] = [];
         for (let i = 0; i < this.timeColumnAsDateArray.length; i++) {
-            let defaultTableRow: ITableRow = { time: this.timeColumnAsStringArray[i], ...this.tableForEmployeesAs2DArray[i] }
+            let defaultTableRow: ITableRow = { time: timeColumnAsStringArray[i], ...tableForEmployeesAs2DArray[i] }
             table.push(defaultTableRow)
         }
         return table;
@@ -97,20 +103,6 @@ export class DefaultTableBuilder {
         });
         return employees2DTable;
     }
-
-    //IEmployee row = {G12R : undefined}
-    // private buildTableForEmployeesAs2DArray(sectors: ISector[]): IEmployeesRow[] {
-    //     let employeesTable: IEmployeesRow[] = [];
-    //     this.timeColumnAsDateArray.forEach(time => {
-    //         let employeesRow: IEmployeesRow = {};
-    //         sectors.forEach(sector => {
-    //             employeesRow[sector.name] = undefined;
-    //         });
-    //         employeesTable.push(employeesRow);
-    //     });
-    //     return employeesTable;
-    // };
-
 
     private checkNoDuplicatesInArray(array: any[]): boolean {
         const result: any[] = [];

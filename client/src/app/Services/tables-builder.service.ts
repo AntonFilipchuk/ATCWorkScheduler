@@ -7,6 +7,7 @@ import { TimeConfigurator } from '../Helpers/TimeConfigurator';
 import { ITableRow } from '../models/ITableRow';
 import { DefaultTableBuilder } from '../Helpers/DefaultTableBuilder';
 import { ISector } from '../models/ISector';
+import { ObjectsComparisonHelper } from '../Helpers/ObjectsComparisonHelper';
 
 
 /**
@@ -102,8 +103,11 @@ export class TablesBuilderService implements OnInit {
   private _timeColumnAsStringArray: string[] = [];
   private _timeColumnAsDateArray: Date[] = [];
 
+  private _objComparisonHelper: ObjectsComparisonHelper;
+
   constructor() {
     this.buildDefaultTable(sectors, employees, shiftStartTime, shiftEndTime, new Date(), 10);
+    this._objComparisonHelper = new ObjectsComparisonHelper;
   }
   ngOnInit(): void {
     this.buildTable();
@@ -154,8 +158,8 @@ export class TablesBuilderService implements OnInit {
     let rowToChange: (IEmployee | undefined)[] = this._employeesTableAs2DArray[rowNumber];
     let employeeToChange: IEmployee | undefined = rowToChange[columnNumber];
 
-    if (rowToChange.filter(e => JSON.stringify(e) === JSON.stringify(employee)).length > 0) {
-      console.log(`Can not set an ${employee.name} at the same time on different sector!`);
+    if (this._objComparisonHelper.ifArrayHasDuplicateObject(rowToChange, employee)) {
+      console.log(`Can not set ${employee.name} at the same time on different sector!`);
       return;
     }
     if (JSON.stringify(employeeToChange) !== JSON.stringify(employee)) {
