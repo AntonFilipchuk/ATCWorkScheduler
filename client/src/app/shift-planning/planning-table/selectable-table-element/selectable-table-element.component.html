@@ -10,8 +10,11 @@
 >
   <p>
     {{ employee ? employee.name : "" }}
-    {{ workAndRestTime ? "Last work: " + workAndRestTime!.lastWorkTimeInMinutes  : "" }}
-    {{ workAndRestTime ? "Last rest: " + workAndRestTime!.lastRestTimeInMinutes : '' }}
+    {{ workAndRestTime ? "TW: " + workAndRestTime!.totalWorkingTimeInMinutes : "" }}
+    {{ workAndRestTime ? "LW: " + workAndRestTime!.lastWorkTimeInMinutes  : "" }}
+    {{ workAndRestTime ? "TR: " + workAndRestTime!.totalRestTimeInMinutes : "" }}
+    {{ workAndRestTime ? "LR: " + workAndRestTime!.lastRestTimeInMinutes : '' }}
+    {{ workAndRestTime ? "CW: " + workAndRestTime!.currentWorkTimeInMinutes : '' }}
   </p>
 
   <!-- <div

@@ -35,7 +35,7 @@ export class SelectableTableElementComponent implements OnInit, OnChanges {
   public employee: IEmployee | undefined;
   public color: string | undefined;
 
-  public workAndRestTime : IWorkAndRestTimeInfo | undefined;
+  public workAndRestTime: IWorkAndRestTimeInfo | undefined;
   public totalWorkTime: number = 0;
   public lastWorkTime: number = 0;
   public totalRestTime: number = 0;
@@ -53,7 +53,7 @@ export class SelectableTableElementComponent implements OnInit, OnChanges {
   ngOnInit(): void {
     this._employeesForShift = this.planningTableService.employeesForShift;
     this.configureProperEmployees();
-    this.employee = this.planningTableService.getEmployeeByRowNumberAndSectorName(this.rowNumber, this.columnNumber);
+    this.employee = this.planningTableService.getEmployeeByRowAnColumnNumber(this.rowNumber, this.columnNumber);
     if (this.employee) {
       this.color = this.employee?.color;
       this.workAndRestTime = this.planningTableService.getWorkAndRestTimeInfo(this.employee, this.rowNumber);
@@ -86,14 +86,12 @@ export class SelectableTableElementComponent implements OnInit, OnChanges {
   onSelection($event: MatOptionSelectionChange) {
     this.toggleSelection();
     this.planningTableService.setEmployeeInRow($event.source.value, this.rowNumber!, this.columnNumber);
-    this.employee = this.planningTableService.getEmployeeByRowNumberAndSectorName(this.rowNumber, this.columnNumber);
+    this.employee = this.planningTableService.getEmployeeByRowAnColumnNumber(this.rowNumber, this.columnNumber);
   }
 
   configureProperEmployees() {
-    this._employeesForShift.forEach(e => {
-      if (e.sectorPermits.some(s => s.name === this.sector.name)) {
-        this.employeesToSelectFrom.push(e);
-      }
-    });
+    this.employeesToSelectFrom = this.planningTableService.getEmployeesForSelection(this.rowNumber, this.sector); 
+    //console.log(`Row ${this.rowNumber}, Column ${this.columnNumber}, Sector ${this.sector.name}`,this.employeesToSelectFrom);
+    
   }
 }

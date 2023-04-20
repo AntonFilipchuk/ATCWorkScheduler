@@ -1,7 +1,7 @@
 import { Injectable, OnInit } from '@angular/core';
 import { IEmployee } from '../models/IEmployee';
 import { IEmployeesRow } from '../models/IEmployeesRow';
-import { Observable, ReplaySubject, interval, timeInterval } from 'rxjs';
+import { Observable, ReplaySubject, interval, timeInterval, withLatestFrom } from 'rxjs';
 import { CollectionViewer, DataSource } from '@angular/cdk/collections';
 import { TimeConfigurator } from '../Helpers/TimeConfigurator';
 import { ITableRow } from '../models/ITableRow';
@@ -9,6 +9,7 @@ import { DefaultTableBuilder } from '../Helpers/DefaultTableBuilder';
 import { ISector } from '../models/ISector';
 import { ObjectsComparisonHelper } from '../Helpers/ObjectsComparisonHelper';
 import { IWorkAndRestTimeInfo } from '../models/ITimeOfWorkInfo';
+import { StickyDirection } from '@angular/cdk/table';
 
 
 /**
@@ -65,7 +66,7 @@ let employees: IEmployee[] = [e1, e2, e3, e4,];
 
 let todayDate: Date = new Date();
 let shiftStartTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 8, 0);
-let shiftEndTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 10, 0);
+let shiftEndTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 12, 0);
 
 @Injectable({
   providedIn: 'root'
@@ -108,7 +109,7 @@ export class TablesBuilderService implements OnInit {
   private _objComparisonHelper: ObjectsComparisonHelper;
 
   constructor() {
-    this.buildDefaultTable(sectors, employees, shiftStartTime, shiftEndTime, new Date(), 15);
+    this.buildDefaultTable(sectors, employees, shiftStartTime, shiftEndTime, new Date(), 30);
     this._objComparisonHelper = new ObjectsComparisonHelper;
   }
   ngOnInit(): void {
@@ -178,44 +179,177 @@ export class TablesBuilderService implements OnInit {
     }
   }
 
-  //[e1, e2]
-  //[e2, e1]
-  //[e1, e2]
-  //[e3, e1]
-  //[e3, e2]
+  public getEmployeesForSelection(rowNumber: number, sector: ISector): IEmployee[] {
+    let validEmployeesForSelection: IEmployee[] = [];
+
+
+    for (let i = 0; i < this.employeesForShift.length; i++) {
+      const employee: IEmployee = this.employeesForShift[i];
+
+      //Check if an employee has a permit for sector
+      const employeeSectorPermits: ISector[] = employee.sectorPermits;
+      const ifEmployeeHasPermitForSector = this._objComparisonHelper.ifArrayHasAnObject(employeeSectorPermits, sector);
+      if (!ifEmployeeHasPermitForSector) {
+        continue;
+      }
+
+      //Check in an employee had enough rest
+      const workAndRestTime: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, rowNumber);
+      const currentWorkTime: number = workAndRestTime.currentWorkTimeInMinutes;
+      const lastRestTime: number = workAndRestTime.lastRestTimeInMinutes;
+
+      if (rowNumber === 0 || (currentWorkTime < 60 && lastRestTime >= 10)) {
+        validEmployeesForSelection.push(employee);
+      }
+      else if (currentWorkTime < 120 && lastRestTime >= 20) {
+        validEmployeesForSelection.push(employee);
+      }
+      else {
+        continue;
+      }
+    }
+
+    return validEmployeesForSelection;
+  }
 
   public getWorkAndRestTimeInfo(employee: IEmployee, rowNumber: number): IWorkAndRestTimeInfo {
 
-    let totalWorkingTime: number = 0;
+    let currentWorkTime: number = 0;
+
+    let totalWorkTime: number = 0;
     let lastWorkTime: number = 0;
 
     let totalRestTime: number = 0;
     let lastRestTime: number = 0;
 
     //Total Work and Rest Time
-    this._employeesTableAs2DArray.forEach(employeesRow => {
-      if (this._objComparisonHelper.ifArrayHasAnObject(employeesRow, employee)) {
-        totalWorkingTime += this._timeIntervalInMinutes;
-      }
-      else {
-        totalRestTime += this._timeIntervalInMinutes;
-      }
-    });
+    [totalWorkTime, totalRestTime] = this.calculateTotalWorkAndRestTime(employee);
 
-    //Last Rest Time
+    //Last Work and Rest Time
     [lastWorkTime, lastRestTime] = this.calculateLastWorkAndRestTime(employee, rowNumber);
+
+    //CurrentWorkTime
+    currentWorkTime = this.calculateCurrentWorkTime(employee, rowNumber);
 
     let workAndRestInfo: IWorkAndRestTimeInfo =
     {
       lastRestTimeInMinutes: lastRestTime,
       lastWorkTimeInMinutes: lastWorkTime,
       totalRestTimeInMinutes: totalRestTime,
-      totalWorkingTimeInMinutes: totalWorkingTime
+      totalWorkingTimeInMinutes: totalWorkTime,
+      currentWorkTimeInMinutes: currentWorkTime
     }
     return workAndRestInfo;
   }
 
+  private calculateTotalWorkAndRestTime(employee: IEmployee): [number, number] {
+    let totalWorkTime: number = 0;
+    let totalRestTime: number = 0;
+
+    this._employeesTableAs2DArray.forEach(employeesRow => {
+      if (this._objComparisonHelper.ifArrayHasAnObject(employeesRow, employee)) {
+        totalWorkTime += this._timeIntervalInMinutes;
+      }
+      else {
+        totalRestTime += this._timeIntervalInMinutes;
+      }
+    });
+
+    return [totalWorkTime, totalRestTime];
+  }
+
+  private calculateCurrentWorkTime(employee: IEmployee, rowNumber: number): number {
+    //0 [e1, e2]
+    //1 [e1, e2] 
+    //2 [e1, e2]
+    //3 [e1, e2] <-- start here
+    //4 [e1, e2]
+    //5 [e3, e2] 
+    let currentWorkTime: number = 0;
+    let rowWithLastTimeOfWork = rowNumber;
+
+    //0 [e1, e2]
+    //1 [e1, e2] 
+    //2 [e1, e2]
+    //3 [e1, e2] 
+    //4 [e1, e2] 
+    //5 [e3, e2] <-- end here
+    while (rowWithLastTimeOfWork < this._employeesTableAs2DArray.length
+      && this._objComparisonHelper.ifArrayHasAnObject(this._employeesTableAs2DArray[rowWithLastTimeOfWork], employee)) {
+      rowWithLastTimeOfWork += 1;
+      console.log(`${employee.name}`, rowWithLastTimeOfWork);
+    }
+
+    //0 [e1, e2]
+    //1 [e1, e2] 
+    //2 [e1, e2]
+    //3 [e1, e2] 
+    //4 [e1, e2] <-- back here
+    //5 [e3, e2] 
+    rowWithLastTimeOfWork -= 1;
+
+    //0 [e1, e2] <-- end here
+    //1 [e1, e2] 
+    //2 [e1, e2]
+    //3 [e1, e2] 
+    //4 [e1, e2] <--start here
+    //5 [e3, e2] 
+    while (rowWithLastTimeOfWork >= 0 && this._objComparisonHelper.ifArrayHasAnObject(this._employeesTableAs2DArray[rowWithLastTimeOfWork], employee)) {
+      currentWorkTime += this._timeIntervalInMinutes;
+      rowWithLastTimeOfWork -= 1;
+    }
+
+    return currentWorkTime;
+  }
+
+  private ifFirstWorkSession(employee: IEmployee, rowNumber: number): boolean {
+    //0 [e1, e2]
+    //1 [e1, e2] 
+    //2 [e1, e2]
+    //3 [e1, e2] <-- start here
+    //4 [e1, e2]
+    //5 [e3, e2] 
+
+    let rowWithLastTimeOfWork = rowNumber;
+
+    //0 [e1, e2]
+    //1 [e1, e2] 
+    //2 [e1, e2]
+    //3 [e1, e2] 
+    //4 [e1, e2] 
+    //5 [e3, e2] <-- end here
+    while (rowWithLastTimeOfWork < this._employeesTableAs2DArray.length
+      && this._objComparisonHelper.ifArrayHasAnObject(this._employeesTableAs2DArray[rowWithLastTimeOfWork], employee)) {
+      rowWithLastTimeOfWork += 1;
+      console.log(`${employee.name}`, rowWithLastTimeOfWork);
+    }
+
+    //0 [e1, e2]
+    //1 [e1, e2] 
+    //2 [e1, e2]
+    //3 [e1, e2] 
+    //4 [e1, e2] <-- back here
+    //5 [e3, e2] 
+    rowWithLastTimeOfWork -= 1
+
+    //0 [e1, e2] <-- end here
+    //1 [e1, e2] 
+    //2 [e1, e2]
+    //3 [e1, e2] 
+    //4 [e1, e2] <--start here
+    //5 [e3, e2] 
+    while (rowWithLastTimeOfWork >= 0 && this._objComparisonHelper.ifArrayHasAnObject(this._employeesTableAs2DArray[rowWithLastTimeOfWork], employee)) {
+      if (rowWithLastTimeOfWork === 0) {
+        return true;
+      }
+      rowWithLastTimeOfWork -= 1;
+    }
+    return false;
+  }
+
   private calculateLastWorkAndRestTime(employee: IEmployee, rowNumber: number): [number, number] {
+
+
     let lastWorkTime: number = 0;
     let lastRestTime: number = 0;
     //Last Work time
@@ -255,10 +389,14 @@ export class TablesBuilderService implements OnInit {
       lastWorkTime += this._timeIntervalInMinutes;
       row = row - 1;
     }
+    //Check if it's first work session
+    if (this.ifFirstWorkSession(employee, rowNumber)) {
+      lastRestTime = 20;
+    }
     return [lastWorkTime, lastRestTime];
   }
 
-  public getEmployeeByRowNumberAndSectorName(rowNumber: number, columnNumber: number): IEmployee | undefined {
+  public getEmployeeByRowAnColumnNumber(rowNumber: number, columnNumber: number): IEmployee | undefined {
     return this._employeesTableAs2DArray[rowNumber][columnNumber];
   }
 
