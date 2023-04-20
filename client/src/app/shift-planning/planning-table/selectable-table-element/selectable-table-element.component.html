@@ -10,9 +10,7 @@
 >
   <p>
     {{ employee ? employee.name : "" }}
-    {{ workAndRestTime ? "Total time: " + workAndRestTime!.totalWorkingTimeInMinutes : "" }}
     {{ workAndRestTime ? "Last work: " + workAndRestTime!.lastWorkTimeInMinutes  : "" }}
-    {{ workAndRestTime ? "Rest time: " + workAndRestTime!.totalRestTimeInMinutes : "" }}
     {{ workAndRestTime ? "Last rest: " + workAndRestTime!.lastRestTimeInMinutes : '' }}
   </p>
 

@@ -108,7 +108,7 @@ export class TablesBuilderService implements OnInit {
   private _objComparisonHelper: ObjectsComparisonHelper;
 
   constructor() {
-    this.buildDefaultTable(sectors, employees, shiftStartTime, shiftEndTime, new Date(), 10);
+    this.buildDefaultTable(sectors, employees, shiftStartTime, shiftEndTime, new Date(), 15);
     this._objComparisonHelper = new ObjectsComparisonHelper;
   }
   ngOnInit(): void {
@@ -202,19 +202,8 @@ export class TablesBuilderService implements OnInit {
       }
     });
 
-    [lastWorkTime, lastRestTime] = this.calculateLastWorkTime(employee, rowNumber);
-
-
     //Last Rest Time
-    for (let i = rowNumber; i > 0; i--) {
-      const previousEmployeesRow = this._employeesTableAs2DArray[i - 1];
-      if (!this._objComparisonHelper.ifArrayHasAnObject(previousEmployeesRow, employee)) {
-        lastRestTime += this._timeIntervalInMinutes;
-      }
-      else {
-        break;
-      }
-    }
+    [lastWorkTime, lastRestTime] = this.calculateLastWorkAndRestTime(employee, rowNumber);
 
     let workAndRestInfo: IWorkAndRestTimeInfo =
     {
@@ -226,17 +215,7 @@ export class TablesBuilderService implements OnInit {
     return workAndRestInfo;
   }
 
-  private calculateLastRestTime(employee: IEmployee, rowNumber: number): number {
-    let lastRestTime: number = 0;
-    let row: number = rowNumber - 1;
-
-    while (!this._objComparisonHelper.ifArrayHasAnObject(this._employeesTableAs2DArray[row], employee) && row > 0) {
-      lastRestTime += this._timeIntervalInMinutes;
-      row = row - 1;
-    }
-    return lastRestTime;
-  }
-  private calculateLastWorkTime(employee: IEmployee, rowNumber: number): [number, number] {
+  private calculateLastWorkAndRestTime(employee: IEmployee, rowNumber: number): [number, number] {
     let lastWorkTime: number = 0;
     let lastRestTime: number = 0;
     //Last Work time
@@ -248,19 +227,20 @@ export class TablesBuilderService implements OnInit {
     //[e1, e2]
     //[e1, e2] <-- start here
     let row: number = rowNumber - 1;
-    if (this._objComparisonHelper.ifArrayHasAnObject(this._employeesTableAs2DArray[row], employee) && row > 0) {
+    if (row >= 0 && this._objComparisonHelper.ifArrayHasAnObject(this._employeesTableAs2DArray[row], employee)) {
       while (this._objComparisonHelper.ifArrayHasAnObject(this._employeesTableAs2DArray[row], employee) && row > 0) {
         row = row - 1;
       }
     }
 
     //Than skip all rest time periods
+    //But for each rest time period add rest time
     //[e1, e2] <-- end here
     //[e3, e2] 
     //[e3, e2]
     //[e3, e2] <-- start here
     //[e1, e2]
-    while (!this._objComparisonHelper.ifArrayHasAnObject(this._employeesTableAs2DArray[row], employee) && row > 0) {
+    while (row >= 0 && !this._objComparisonHelper.ifArrayHasAnObject(this._employeesTableAs2DArray[row], employee)) {
       lastRestTime += this._timeIntervalInMinutes;
       row = row - 1;
     }
@@ -271,7 +251,7 @@ export class TablesBuilderService implements OnInit {
     //[e1, e2]
     //[e1, e2] 
     //[e1, e2] <-- start here
-    while (this._objComparisonHelper.ifArrayHasAnObject(this._employeesTableAs2DArray[row], employee) && row > 0) {
+    while (row >= 0 && this._objComparisonHelper.ifArrayHasAnObject(this._employeesTableAs2DArray[row], employee)) {
       lastWorkTime += this._timeIntervalInMinutes;
       row = row - 1;
     }
