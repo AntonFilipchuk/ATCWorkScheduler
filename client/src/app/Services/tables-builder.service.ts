@@ -66,7 +66,7 @@ let employees: IEmployee[] = [e1, e2, e3, e4,];
 
 let todayDate: Date = new Date();
 let shiftStartTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 8, 0);
-let shiftEndTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 12, 0);
+let shiftEndTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 14, 0);
 
 @Injectable({
   providedIn: 'root'
@@ -109,7 +109,7 @@ export class TablesBuilderService implements OnInit {
   private _objComparisonHelper: ObjectsComparisonHelper;
 
   constructor() {
-    this.buildDefaultTable(sectors, employees, shiftStartTime, shiftEndTime, new Date(), 30);
+    this.buildDefaultTable(sectors, employees, shiftStartTime, shiftEndTime, new Date(), 25);
     this._objComparisonHelper = new ObjectsComparisonHelper;
   }
   ngOnInit(): void {
@@ -117,7 +117,13 @@ export class TablesBuilderService implements OnInit {
   }
 
 
-  buildDefaultTable(sectors: ISector[], employees: IEmployee[], shiftStartTime: Date, shiftEndTime: Date, shiftDate: Date, timeIntervalInMinutes: number) {
+  buildDefaultTable(
+    sectors: ISector[],
+    employees: IEmployee[],
+    shiftStartTime: Date,
+    shiftEndTime: Date,
+    shiftDate: Date,
+    timeIntervalInMinutes: number) {
     let defaultTableBuilder = new DefaultTableBuilder(sectors, employees, shiftStartTime, shiftEndTime, shiftDate, timeIntervalInMinutes);
     this._employeesTableAs2DArray = defaultTableBuilder.tableForEmployeesAs2DArray;
     this._tableForMatTable = defaultTableBuilder.defaultTableForMatTable;
@@ -182,10 +188,12 @@ export class TablesBuilderService implements OnInit {
   public getEmployeesForSelection(rowNumber: number, sector: ISector): IEmployee[] {
     let validEmployeesForSelection: IEmployee[] = [];
 
-
     for (let i = 0; i < this.employeesForShift.length; i++) {
       const employee: IEmployee = this.employeesForShift[i];
 
+      if (!employee) {
+        continue;
+      }
       //Check if an employee has a permit for sector
       const employeeSectorPermits: ISector[] = employee.sectorPermits;
       const ifEmployeeHasPermitForSector = this._objComparisonHelper.ifArrayHasAnObject(employeeSectorPermits, sector);
@@ -198,18 +206,136 @@ export class TablesBuilderService implements OnInit {
       const currentWorkTime: number = workAndRestTime.currentWorkTimeInMinutes;
       const lastRestTime: number = workAndRestTime.lastRestTimeInMinutes;
 
-      if (rowNumber === 0 || (currentWorkTime < 60 && lastRestTime >= 10)) {
-        validEmployeesForSelection.push(employee);
-      }
-      else if (currentWorkTime < 120 && lastRestTime >= 20) {
+      let ifEmployeeCanBeAddedForSelection = this.ifEmployeeCanBeAddedForSelection(
+        employee,
+        rowNumber,
+        this._employeesTableAs2DArray,
+        60,
+        120,
+        10,
+        20,
+        this._timeIntervalInMinutes);
+
+      if (rowNumber === 0 || ifEmployeeCanBeAddedForSelection) {
         validEmployeesForSelection.push(employee);
       }
       else {
         continue;
       }
     }
-
     return validEmployeesForSelection;
+  }
+
+  private ifEmployeeCanBeAddedForSelection(
+    employee: IEmployee,
+    rowNumber: number,
+    employeesTableAs2DArray: (IEmployee | undefined)[][],
+    firstMaxWorkTime: number | undefined,
+    secondMaxWorkTime: number,
+    firstMinRestTimeInMinutes: number | undefined,
+    secondMinRestTimeInMinutes: number,
+    timeIntervalInMinutes: number): boolean {
+
+    if (this.ifEmployeeAlreadyWorks(employee, rowNumber, employeesTableAs2DArray)) {
+      return false;
+    }
+
+    let employeesTableAs2DArrayLength: number = employeesTableAs2DArray.length - 1;
+    let previousRow = rowNumber - 1;
+    let nextRow = rowNumber + 1;
+    //Check if trying to set an employee in the middle
+    // length = 6
+    //0 [e1, e2]
+    //1 [e1, e2] 
+    //2 [e1, e2]
+    //3 [undefined, undefined] <-- trying to set e1 here
+    //4 [e1, e2]
+    //5 [e1, e2] 
+    //Check if we do not exceed the boundaries of employeesAs2DArray
+    //Then check if the next and the previous rows have the same employee 
+    if ((previousRow >= 0 && nextRow <= employeesTableAs2DArrayLength) &&
+      (this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[nextRow], employee)
+        && this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[previousRow], employee))) {
+      let previousWorkTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, previousRow);
+      let nextWorkTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, nextRow);
+
+      //Check if the sum of workTime t1 + t2 and if 
+      //0 [e1, e2] -\
+      //1 [e1, e2] ---> t1
+      //2 [e1, e2] -/
+      //3 [undefined, undefined] <-- trying to set e1 here
+      //4 [e1, e2] -\ _> t2
+      //5 [e1, e2] -/ 
+      let sumOfPreviousAndFutureWorkTime: number =
+        previousWorkTimeInfo.currentWorkTimeInMinutes + nextWorkTimeInfo.currentWorkTimeInMinutes;
+
+      return this.ifEmployeeHadRestAndCanWork(
+        sumOfPreviousAndFutureWorkTime,
+        previousWorkTimeInfo.lastRestTimeInMinutes,
+        firstMaxWorkTime,
+        secondMaxWorkTime,
+        firstMinRestTimeInMinutes,
+        secondMinRestTimeInMinutes,
+        timeIntervalInMinutes);
+    }
+
+    //If we are trying to add employee before
+    //0 [undefined, undefined] <-- trying to set e1 here
+    //1 [e1, e2]
+    //2 [e1, e2] 
+    if ((rowNumber + 1 <= employeesTableAs2DArrayLength) && this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[nextRow], employee)) {
+      let nextWorkTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, nextRow);
+      let previousWorkTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, rowNumber);
+      return this.ifEmployeeHadRestAndCanWork(
+        nextWorkTimeInfo.currentWorkTimeInMinutes,
+        previousWorkTimeInfo.lastRestTimeInMinutes,
+        firstMaxWorkTime,
+        secondMaxWorkTime,
+        firstMinRestTimeInMinutes,
+        secondMinRestTimeInMinutes,
+        timeIntervalInMinutes);
+    }
+
+    //If we are not trying to set employee after    
+    //0 [e1, e2] 
+    //1 [e1, e2]
+    //2 [undefined, undefined] <-- trying to set e1 here
+    const workAndRestTime: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, rowNumber);
+    const currentWorkTime: number = workAndRestTime.currentWorkTimeInMinutes;
+    const lastRestTime: number = workAndRestTime.lastRestTimeInMinutes;
+
+    return this.ifEmployeeHadRestAndCanWork(
+      currentWorkTime,
+      lastRestTime,
+      firstMaxWorkTime,
+      secondMaxWorkTime,
+      firstMinRestTimeInMinutes,
+      secondMinRestTimeInMinutes,
+      timeIntervalInMinutes);
+  }
+
+  private ifEmployeeAlreadyWorks(employee: IEmployee, rowNumber: number, employeesAs2DArray: (IEmployee | undefined)[][]) {
+    let ifRowAlreadyHasEmployee = this._objComparisonHelper.ifArrayHasAnObject(employeesAs2DArray[rowNumber], employee);
+    return ifRowAlreadyHasEmployee;
+  }
+
+  private ifEmployeeHadRestAndCanWork(
+    currentWorkTime: number,
+    lastRestTime: number,
+    firstMaxWorkTime: number | undefined,
+    secondMaxWorkTime: number,
+    firstMinRestTimeInMinutes: number | undefined,
+    secondMinRestTimeInMinutes: number,
+    timeIntervalInMinutes: number): boolean {
+
+    if ((firstMinRestTimeInMinutes && firstMaxWorkTime) &&
+      ((currentWorkTime + timeIntervalInMinutes < firstMaxWorkTime) && lastRestTime >= firstMinRestTimeInMinutes)) {
+      return true;
+    }
+    if ((currentWorkTime + timeIntervalInMinutes < secondMaxWorkTime) && lastRestTime >= secondMinRestTimeInMinutes) {
+      return true;
+    }
+    return false;
   }
 
   public getWorkAndRestTimeInfo(employee: IEmployee, rowNumber: number): IWorkAndRestTimeInfo {
@@ -277,7 +403,6 @@ export class TablesBuilderService implements OnInit {
     while (rowWithLastTimeOfWork < this._employeesTableAs2DArray.length
       && this._objComparisonHelper.ifArrayHasAnObject(this._employeesTableAs2DArray[rowWithLastTimeOfWork], employee)) {
       rowWithLastTimeOfWork += 1;
-      console.log(`${employee.name}`, rowWithLastTimeOfWork);
     }
 
     //0 [e1, e2]
@@ -321,7 +446,6 @@ export class TablesBuilderService implements OnInit {
     while (rowWithLastTimeOfWork < this._employeesTableAs2DArray.length
       && this._objComparisonHelper.ifArrayHasAnObject(this._employeesTableAs2DArray[rowWithLastTimeOfWork], employee)) {
       rowWithLastTimeOfWork += 1;
-      console.log(`${employee.name}`, rowWithLastTimeOfWork);
     }
 
     //0 [e1, e2]
@@ -354,7 +478,7 @@ export class TablesBuilderService implements OnInit {
     let lastRestTime: number = 0;
     //Last Work time
     //If an employee worked on previous time period
-    //Decrement row to find when was a last rest time period
+    //Decrement row to find when was the last rest time period
     //[e1, e2] 
     //[e3, e2] <-- end here (for e1)
     //[e1, e2]
@@ -367,8 +491,8 @@ export class TablesBuilderService implements OnInit {
       }
     }
 
-    //Than skip all rest time periods
-    //But for each rest time period add rest time
+    //Than skip all the rest time periods
+    //But for the each rest time period add rest time
     //[e1, e2] <-- end here
     //[e3, e2] 
     //[e3, e2]
@@ -379,7 +503,7 @@ export class TablesBuilderService implements OnInit {
       row = row - 1;
     }
 
-    //Now count previous time work
+    //Now count the previous time work
     //[e1, e2] <-- end here
     //[e1, e2] 
     //[e1, e2]
