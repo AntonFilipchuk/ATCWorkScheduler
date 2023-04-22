@@ -10,6 +10,7 @@ import { ISector } from '../models/ISector';
 import { ObjectsComparisonHelper } from '../Helpers/ObjectsComparisonHelper';
 import { IWorkAndRestTimeInfo } from '../models/ITimeOfWorkInfo';
 import { StickyDirection } from '@angular/cdk/table';
+import { EmployeesWhoCanWorkEvaluator } from '../Helpers/EmployeesWhoCanWorkEvaluator';
 
 
 /**
@@ -66,7 +67,10 @@ let employees: IEmployee[] = [e1, e2, e3, e4,];
 
 let todayDate: Date = new Date();
 let shiftStartTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 8, 0);
-let shiftEndTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 9, 0);
+let shiftEndTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 14, 30);
+
+let testTime1: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 8, 0);
+let testTime2: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 9, 0);
 
 @Injectable({
   providedIn: 'root'
@@ -103,13 +107,13 @@ export class TablesBuilderService implements OnInit {
   private _employeesTableAs2DArray: (IEmployee | undefined)[][] = [];
   private _tableForMatTable: ITableRow[] = [];
   private _timeColumnAsStringArray: string[] = [];
-  private _timeColumnAsDateArray: Date[] = [];
+  private _timeColumnAsDateArray: Date[][] = [];
   private _timeIntervalInMinutes: number = 0;
 
   private _objComparisonHelper: ObjectsComparisonHelper;
 
   constructor() {
-    this.buildDefaultTable(sectors, employees, shiftStartTime, shiftEndTime, new Date(), 25);
+    this.buildDefaultTable(sectors, employees, shiftStartTime, shiftEndTime, new Date(), 10);
     this._objComparisonHelper = new ObjectsComparisonHelper;
   }
   ngOnInit(): void {
@@ -186,350 +190,33 @@ export class TablesBuilderService implements OnInit {
   }
 
   public getEmployeesForSelection(rowNumber: number, sector: ISector): IEmployee[] {
-    let validEmployeesForSelection: IEmployee[] = [];
 
-    for (let i = 0; i < this.employeesForShift.length; i++) {
-      const employee: IEmployee = this.employeesForShift[i];
+    return new EmployeesWhoCanWorkEvaluator().getEmployeesWhoCanWork(
+      this.employeesForShift,
+      rowNumber,
+      this._employeesTableAs2DArray,
+      60,
+      120,
+      10,
+      20,
+      this._timeIntervalInMinutes,
+      sector);
+  }
 
-      if (!employee) {
-        continue;
-      }
-      //Check if an employee has a permit for sector
-      const employeeSectorPermits: ISector[] = employee.sectorPermits;
-      const ifEmployeeHasPermitForSector = this._objComparisonHelper.ifArrayHasAnObject(employeeSectorPermits, sector);
-      if (!ifEmployeeHasPermitForSector) {
-        continue;
-      }
-
-      let ifEmployeeCanBeAddedForSelection = this.ifEmployeeCanBeAddedForSelection(
+  public getWorkAndRestTimeInfo(
+    employee: IEmployee,
+    rowNumber: number): IWorkAndRestTimeInfo {
+    return new EmployeesWhoCanWorkEvaluator()
+      .getWorkAndRestTimeInfo(
         employee,
         rowNumber,
         this._employeesTableAs2DArray,
-        60,
-        120,
-        10,
-        20,
-        this._timeIntervalInMinutes);
-
-      if (ifEmployeeCanBeAddedForSelection) {
-        validEmployeesForSelection.push(employee);
-      }
-      else {
-        continue;
-      }
-    }
-    return validEmployeesForSelection;
+        this._timeIntervalInMinutes)
   }
 
-  private ifEmployeeCanBeAddedForSelection(
-    employee: IEmployee,
-    rowNumber: number,
-    employeesTableAs2DArray: (IEmployee | undefined)[][],
-    firstMaxWorkTime: number | undefined,
-    secondMaxWorkTime: number,
-    firstMinRestTimeInMinutes: number | undefined,
-    secondMinRestTimeInMinutes: number,
-    timeIntervalInMinutes: number): boolean {
-
-    if (this.ifEmployeeAlreadyWorks(employee, rowNumber, employeesTableAs2DArray)) {
-      return false;
-    }
-
-    let employeesTableAs2DArrayLength: number = employeesTableAs2DArray.length - 1;
-    let previousRow = rowNumber - 1;
-    let nextRow = rowNumber + 1;
-    //Check if trying to set an employee in the middle
-    // length = 6
-    //0 [e1, e2]
-    //1 [e1, e2] 
-    //2 [e1, e2]
-    //3 [undefined, undefined] <-- trying to set e1 here
-    //4 [e1, e2]
-    //5 [e1, e2] 
-    //Check if we do not exceed the boundaries of employeesAs2DArray
-    //Then check if the next and the previous rows have the same employee 
-    if ((previousRow >= 0 && nextRow <= employeesTableAs2DArrayLength) &&
-      (this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[nextRow], employee)
-        && this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[previousRow], employee))) {
-      let previousWorkTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, previousRow);
-      let nextWorkTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, nextRow);
-
-      //Check if the sum of workTime t1 + t2 and if 
-      //0 [e1, e2] -\
-      //1 [e1, e2] ---> t1
-      //2 [e1, e2] -/
-      //3 [undefined, undefined] <-- trying to set e1 here
-      //4 [e1, e2] -\ _> t2
-      //5 [e1, e2] -/ 
-      let sumOfPreviousAndFutureWorkTime: number =
-        previousWorkTimeInfo.currentWorkTimeInMinutes + nextWorkTimeInfo.currentWorkTimeInMinutes;
-
-      return this.ifEmployeeHadRestAndCanWork(
-        sumOfPreviousAndFutureWorkTime,
-        previousWorkTimeInfo.lastRestTimeInMinutes,
-        firstMaxWorkTime,
-        secondMaxWorkTime,
-        firstMinRestTimeInMinutes,
-        secondMinRestTimeInMinutes,
-        timeIntervalInMinutes);
-    }
-
-    //If we are trying to add employee before
-    //0 [undefined, undefined] <-- trying to set e1 here
-    //1 [e1, e2]
-    //2 [e1, e2] 
-    if ((rowNumber + 1 <= employeesTableAs2DArrayLength) && this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[nextRow], employee)) {
-      let nextWorkTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, nextRow);
-      let previousWorkTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, rowNumber);
-      return this.ifEmployeeHadRestAndCanWork(
-        nextWorkTimeInfo.currentWorkTimeInMinutes,
-        previousWorkTimeInfo.lastRestTimeInMinutes,
-        firstMaxWorkTime,
-        secondMaxWorkTime,
-        firstMinRestTimeInMinutes,
-        secondMinRestTimeInMinutes,
-        timeIntervalInMinutes);
-    }
-
-    //If we are not trying to set employee after    
-    //0 [e1, e2] 
-    //1 [e1, e2]
-    //2 [undefined, undefined] <-- trying to set e1 here
-    const workAndRestTime: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, rowNumber);
-    const currentWorkTime: number = workAndRestTime.currentWorkTimeInMinutes;
-    const lastRestTime: number = workAndRestTime.lastRestTimeInMinutes;
-
-    return this.ifEmployeeHadRestAndCanWork(
-      currentWorkTime,
-      lastRestTime,
-      firstMaxWorkTime,
-      secondMaxWorkTime,
-      firstMinRestTimeInMinutes,
-      secondMinRestTimeInMinutes,
-      timeIntervalInMinutes);
-  }
-
-  private ifEmployeeAlreadyWorks(employee: IEmployee, rowNumber: number, employeesAs2DArray: (IEmployee | undefined)[][]) {
-    let ifRowAlreadyHasEmployee = this._objComparisonHelper.ifArrayHasAnObject(employeesAs2DArray[rowNumber], employee);
-    return ifRowAlreadyHasEmployee;
-  }
-
-  private ifEmployeeHadRestAndCanWork(
-    currentWorkTime: number,
-    lastRestTime: number,
-    firstMaxWorkTime: number | undefined,
-    secondMaxWorkTime: number,
-    firstMinRestTimeInMinutes: number | undefined,
-    secondMinRestTimeInMinutes: number,
-    timeIntervalInMinutes: number): boolean {
-
-    if ((firstMinRestTimeInMinutes && firstMaxWorkTime) &&
-      ((currentWorkTime + timeIntervalInMinutes < firstMaxWorkTime) && lastRestTime >= firstMinRestTimeInMinutes)) {
-      return true;
-    }
-    if ((currentWorkTime + timeIntervalInMinutes < secondMaxWorkTime) && lastRestTime >= secondMinRestTimeInMinutes) {
-      return true;
-    }
-    return false;
-  }
-
-  public getWorkAndRestTimeInfo(employee: IEmployee, rowNumber: number): IWorkAndRestTimeInfo {
-
-    let currentWorkTime: number = 0;
-
-    let totalWorkTime: number = 0;
-    let lastWorkTime: number = 0;
-
-    let totalRestTime: number = 0;
-    let lastRestTime: number = 0;
-
-    //Total Work and Rest Time
-    [totalWorkTime, totalRestTime] = this.calculateTotalWorkAndRestTime(employee);
-
-    //Last Work and Rest Time
-    [lastWorkTime, lastRestTime] = this.calculateLastWorkAndRestTime(employee, rowNumber);
-
-    //CurrentWorkTime
-    currentWorkTime = this.calculateCurrentWorkTime(employee, rowNumber);
-
-    let workAndRestInfo: IWorkAndRestTimeInfo =
-    {
-      lastRestTimeInMinutes: lastRestTime,
-      lastWorkTimeInMinutes: lastWorkTime,
-      totalRestTimeInMinutes: totalRestTime,
-      totalWorkingTimeInMinutes: totalWorkTime,
-      currentWorkTimeInMinutes: currentWorkTime
-    }
-    return workAndRestInfo;
-  }
-
-  private calculateTotalWorkAndRestTime(employee: IEmployee): [number, number] {
-    let totalWorkTime: number = 0;
-    let totalRestTime: number = 0;
-
-    this._employeesTableAs2DArray.forEach(employeesRow => {
-      if (this._objComparisonHelper.ifArrayHasAnObject(employeesRow, employee)) {
-        totalWorkTime += this._timeIntervalInMinutes;
-      }
-      else {
-        totalRestTime += this._timeIntervalInMinutes;
-      }
-    });
-
-    return [totalWorkTime, totalRestTime];
-  }
-
-  private calculateCurrentWorkTime(employee: IEmployee, rowNumber: number): number {
-    //0 [e1, e2]
-    //1 [e1, e2] 
-    //2 [e1, e2]
-    //3 [e1, e2] <-- start here
-    //4 [e1, e2]
-    //5 [e3, e2] 
-    let currentWorkTime: number = 0;
-    let rowWithLastTimeOfWork = rowNumber;
-
-    //0 [e1, e2]
-    //1 [e1, e2] 
-    //2 [e1, e2]
-    //3 [e1, e2] 
-    //4 [e1, e2] 
-    //5 [e3, e2] <-- end here
-    while (rowWithLastTimeOfWork < this._employeesTableAs2DArray.length
-      && this._objComparisonHelper.ifArrayHasAnObject(this._employeesTableAs2DArray[rowWithLastTimeOfWork], employee)) {
-      rowWithLastTimeOfWork += 1;
-    }
-
-    //0 [e1, e2]
-    //1 [e1, e2] 
-    //2 [e1, e2]
-    //3 [e1, e2] 
-    //4 [e1, e2] <-- back here
-    //5 [e3, e2] 
-    rowWithLastTimeOfWork -= 1;
-
-    //0 [e1, e2] <-- end here
-    //1 [e1, e2] 
-    //2 [e1, e2]
-    //3 [e1, e2] 
-    //4 [e1, e2] <--start here
-    //5 [e3, e2] 
-    while (rowWithLastTimeOfWork >= 0 && this._objComparisonHelper.ifArrayHasAnObject(this._employeesTableAs2DArray[rowWithLastTimeOfWork], employee)) {
-      currentWorkTime += this._timeIntervalInMinutes;
-      rowWithLastTimeOfWork -= 1;
-    }
-
-    return currentWorkTime;
-  }
-
-  private ifFirstWorkSession(employee: IEmployee, rowNumber: number): boolean {
-    
-    //Edge case
-    //It is *always* first work session
-    //If rowNumber is 0
-    if (rowNumber === 0) {
-      return true;
-    }
-
-    //0 [e1, e2]
-    //1 [e1, e2] 
-    //2 [e1, e2]
-    //3 [e1, e2] <-- start here
-    //4 [e1, e2]
-    //5 [e3, e2] 
-
-    let rowWithLastTimeOfWork = rowNumber;
-
-    //0 [e1, e2]
-    //1 [e1, e2] 
-    //2 [e1, e2]
-    //3 [e1, e2] 
-    //4 [e1, e2] 
-    //5 [e3, e2] <-- end here
-    while (rowWithLastTimeOfWork < this._employeesTableAs2DArray.length
-      && this._objComparisonHelper.ifArrayHasAnObject(this._employeesTableAs2DArray[rowWithLastTimeOfWork], employee)) {
-      rowWithLastTimeOfWork += 1;
-    }
-
-    //0 [e1, e2]
-    //1 [e1, e2] 
-    //2 [e1, e2]
-    //3 [e1, e2] 
-    //4 [e1, e2] <-- back here
-    //5 [e3, e2] 
-    rowWithLastTimeOfWork -= 1
-
-    //0 [e1, e2] <-- end here
-    //1 [e1, e2] 
-    //2 [e1, e2]
-    //3 [e1, e2] 
-    //4 [e1, e2] <--start here
-    //5 [e3, e2] 
-    while (rowWithLastTimeOfWork >= 0 && this._objComparisonHelper.ifArrayHasAnObject(this._employeesTableAs2DArray[rowWithLastTimeOfWork], employee)) {
-      if (rowWithLastTimeOfWork === 0) {
-        return true;
-      }
-      rowWithLastTimeOfWork -= 1;
-    }
-    return false;
-  }
-
-  private calculateLastWorkAndRestTime(employee: IEmployee, rowNumber: number): [number, number] {
-
-
-    let lastWorkTime: number = 0;
-    let lastRestTime: number = 0;
-    //Last Work time
-    //If an employee worked on previous time period
-    //Decrement row to find when was the last rest time period
-    //[e1, e2] 
-    //[e3, e2] <-- end here (for e1)
-    //[e1, e2]
-    //[e1, e2]
-    //[e1, e2] <-- start here
-    let row: number = rowNumber - 1;
-    if (row >= 0 && this._objComparisonHelper.ifArrayHasAnObject(this._employeesTableAs2DArray[row], employee)) {
-      while (this._objComparisonHelper.ifArrayHasAnObject(this._employeesTableAs2DArray[row], employee) && row > 0) {
-        row = row - 1;
-      }
-    }
-
-    //Than skip all the rest time periods
-    //But for the each rest time period add rest time
-    //[e1, e2] <-- end here
-    //[e3, e2] 
-    //[e3, e2]
-    //[e3, e2] <-- start here
-    //[e1, e2]
-    while (row >= 0 && !this._objComparisonHelper.ifArrayHasAnObject(this._employeesTableAs2DArray[row], employee)) {
-      lastRestTime += this._timeIntervalInMinutes;
-      row = row - 1;
-    }
-
-    //Now count the previous time work
-    //[e1, e2] <-- end here
-    //[e1, e2] 
-    //[e1, e2]
-    //[e1, e2] 
-    //[e1, e2] <-- start here
-    while (row >= 0 && this._objComparisonHelper.ifArrayHasAnObject(this._employeesTableAs2DArray[row], employee)) {
-      lastWorkTime += this._timeIntervalInMinutes;
-      row = row - 1;
-    }
-
-    //Check if it's first work session
-    if (this.ifFirstWorkSession(employee, rowNumber)) {
-      lastRestTime = 20;
-    }
-    return [lastWorkTime, lastRestTime];
-  }
 
   public getEmployeeByRowAnColumnNumber(rowNumber: number, columnNumber: number): IEmployee | undefined {
     return this._employeesTableAs2DArray[rowNumber][columnNumber];
   }
 
-
-  private minutesToMilliseconds(minutes: number): number {
-    return minutes * 60000;
-  }
 }

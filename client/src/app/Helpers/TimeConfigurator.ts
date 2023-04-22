@@ -10,7 +10,8 @@ export class TimeConfigurator {
     private _shiftDate: Date = new Date();
 
     public timeColumnAsStringArray: string[] = [];
-    public timeColumnAsDateArray: Date[] = [];
+    public timeColumnAsDateArray: Date[][] = [];
+
 
 
     constructor(startingHour: number, startingMinutes: number,
@@ -35,20 +36,23 @@ export class TimeConfigurator {
         let endInMilliseconds = this._shiftEndTime.valueOf();
         let timeIntervalInMilliseconds = this.minutesToMilliseconds(timeIntervalInMinutes);
 
-        let timeToAdd: Date = new Date();
-        while (startInMilliseconds <= endInMilliseconds) {
-            timeToAdd = new Date(startInMilliseconds);
+        //[8:00 - 8:10] 8:00 - firstTimeToAdd, 8:10 - secondTimeToAdd
+        let firstTimeToAdd: Date = new Date(startInMilliseconds);
+        let secondTimeToAdd: Date = new Date(startInMilliseconds + timeIntervalInMilliseconds);
 
-            if ((startInMilliseconds + timeIntervalInMilliseconds) > endInMilliseconds) {
-                this.timeColumnAsStringArray.push(this.timeToString(timeToAdd.getHours()) + ':' + this.timeToString(timeToAdd.getMinutes()));
-                this.timeColumnAsDateArray.push(timeToAdd);
-                break;
-            }
-            else {
-                startInMilliseconds += timeIntervalInMilliseconds;
-                this.timeColumnAsStringArray.push(this.timeToString(timeToAdd.getHours()) + ':' + this.timeToString(timeToAdd.getMinutes()));
-                this.timeColumnAsDateArray.push(timeToAdd);
-            }
+        while (secondTimeToAdd.valueOf() < endInMilliseconds) {
+            firstTimeToAdd.setTime(startInMilliseconds);
+            secondTimeToAdd.setTime(firstTimeToAdd.getTime() + timeIntervalInMilliseconds);
+
+            const timeIntervalToAdd = [new Date(firstTimeToAdd), new Date(secondTimeToAdd)];
+
+            this.timeColumnAsDateArray.push(timeIntervalToAdd);
+
+            this.timeColumnAsStringArray.push(
+                this.timeToString(firstTimeToAdd.getHours()) + ':' + this.timeToString(firstTimeToAdd.getMinutes())
+                + ' - ' +
+                this.timeToString(secondTimeToAdd.getHours()) + ':' + this.timeToString(secondTimeToAdd.getMinutes()));
+            startInMilliseconds += timeIntervalInMilliseconds;
         }
     }
 

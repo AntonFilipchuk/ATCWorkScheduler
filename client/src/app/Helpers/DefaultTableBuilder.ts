@@ -21,7 +21,7 @@ export class DefaultTableBuilder {
 
     public timeColumnAsStringArray: string[];
 
-    public timeColumnAsDateArray: Date[];
+    public timeColumnAsDateArray: Date[][];
 
     public tableForEmployeesAs2DArray: (IEmployee | undefined)[][] = [];
 
@@ -34,8 +34,24 @@ export class DefaultTableBuilder {
     public sectorsForShift: ISector[];
 
     public timeIntervalInMinutes: number;
-    
+
     private _objComparisonHelper: ObjectsComparisonHelper;
+
+    //------------------------
+    //Sectors - check if no duplicates and has at least 1 sector
+    //------------------------
+    //Employees - check if no duplicates 
+    //Enough employees for the shift 
+    //Employees have permits
+    //Enough employees for each sector 
+    //------------------------
+    //ShiftDate - check if it's not in the past
+    //ShiftStartTime - check if it's the same day as shiftDate and it's before ShiftEndTime
+    //ShiftEndTime - check if it's the same day as shiftDate or the next day, it's after shiftStartTime
+    //and shiftEndTime - shiftStartTime <= 12 hours
+    //------------------------
+    //FirstMaxWorkTimeInMinutes - check if it's less than SecondMaxWorkTimeInMinutes
+    //FirstMinRestTimeInMinutes - check if it's less than SecondMinRestTimeInMinutes
 
     constructor(
         private sectors: ISector[],
