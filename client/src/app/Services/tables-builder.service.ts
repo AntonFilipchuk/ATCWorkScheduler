@@ -66,7 +66,7 @@ let employees: IEmployee[] = [e1, e2, e3, e4,];
 
 let todayDate: Date = new Date();
 let shiftStartTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 8, 0);
-let shiftEndTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 14, 0);
+let shiftEndTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 9, 0);
 
 @Injectable({
   providedIn: 'root'
@@ -201,11 +201,6 @@ export class TablesBuilderService implements OnInit {
         continue;
       }
 
-      //Check in an employee had enough rest
-      const workAndRestTime: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, rowNumber);
-      const currentWorkTime: number = workAndRestTime.currentWorkTimeInMinutes;
-      const lastRestTime: number = workAndRestTime.lastRestTimeInMinutes;
-
       let ifEmployeeCanBeAddedForSelection = this.ifEmployeeCanBeAddedForSelection(
         employee,
         rowNumber,
@@ -216,7 +211,7 @@ export class TablesBuilderService implements OnInit {
         20,
         this._timeIntervalInMinutes);
 
-      if (rowNumber === 0 || ifEmployeeCanBeAddedForSelection) {
+      if (ifEmployeeCanBeAddedForSelection) {
         validEmployeesForSelection.push(employee);
       }
       else {
@@ -428,6 +423,14 @@ export class TablesBuilderService implements OnInit {
   }
 
   private ifFirstWorkSession(employee: IEmployee, rowNumber: number): boolean {
+    
+    //Edge case
+    //It is *always* first work session
+    //If rowNumber is 0
+    if (rowNumber === 0) {
+      return true;
+    }
+
     //0 [e1, e2]
     //1 [e1, e2] 
     //2 [e1, e2]
@@ -513,6 +516,7 @@ export class TablesBuilderService implements OnInit {
       lastWorkTime += this._timeIntervalInMinutes;
       row = row - 1;
     }
+
     //Check if it's first work session
     if (this.ifFirstWorkSession(employee, rowNumber)) {
       lastRestTime = 20;
