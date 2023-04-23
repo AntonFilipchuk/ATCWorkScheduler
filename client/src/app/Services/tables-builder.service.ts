@@ -67,7 +67,7 @@ let employees: IEmployee[] = [e1, e2, e3, e4,];
 
 let todayDate: Date = new Date();
 let shiftStartTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 8, 0);
-let shiftEndTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 14, 30);
+let shiftEndTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 11, 20);
 
 let testTime1: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 8, 0);
 let testTime2: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 9, 0);

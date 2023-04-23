@@ -28,6 +28,7 @@ export class EmployeesWhoCanWorkEvaluator {
             //Check if an employee has a permit for sector
             const employeeSectorPermits: ISector[] = employee.sectorPermits;
             const ifEmployeeHasPermitForSector = this._objComparisonHelper.ifArrayHasAnObject(employeeSectorPermits, sector);
+
             if (!ifEmployeeHasPermitForSector) {
                 continue;
             }
@@ -66,6 +67,8 @@ export class EmployeesWhoCanWorkEvaluator {
         let totalRestTime: number = 0;
         let lastRestTime: number = 0;
 
+        let nextWorkTime: number = 0;
+
         //Total Work and Rest Time
         [totalWorkTime, totalRestTime] = this.calculateTotalWorkAndRestTime(employee, employeesTableAs2DArray, timeIntervalInMinutes);
 
@@ -75,15 +78,55 @@ export class EmployeesWhoCanWorkEvaluator {
         //CurrentWorkTime
         currentWorkTime = this.calculateCurrentWorkTime(employee, rowNumber, employeesTableAs2DArray, timeIntervalInMinutes);
 
+        nextWorkTime = this.calculateNextWorkTime(employee, rowNumber, employeesTableAs2DArray, timeIntervalInMinutes);
+
         let workAndRestInfo: IWorkAndRestTimeInfo =
         {
             lastRestTimeInMinutes: lastRestTime,
             lastWorkTimeInMinutes: lastWorkTime,
             totalRestTimeInMinutes: totalRestTime,
             totalWorkingTimeInMinutes: totalWorkTime,
-            currentWorkTimeInMinutes: currentWorkTime
+            currentWorkTimeInMinutes: currentWorkTime,
+            nextWorkTimeInMinutes: nextWorkTime
         }
         return workAndRestInfo;
+    }
+
+    private calculateNextWorkTime(employee: IEmployee, rowNumber: number, employeesTableAs2DArray: (IEmployee | undefined)[][],
+        timeIntervalInMinutes: number): number {
+        let nextWorkTime: number = 0;
+        let nextRow = rowNumber + 1;
+        //Check if we are not the last row, if it is
+        //future work is always 0
+        if (nextRow >= employeesTableAs2DArray.length) {
+            return 0;
+        }
+
+        while (nextRow < employeesTableAs2DArray.length) {
+            //Check if the next row has employee
+            //if does, check next
+            if (this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[nextRow], employee)) {
+                nextRow += 1;
+            }
+            else {
+                //If it doesn't have
+                while (nextRow < employeesTableAs2DArray.length) {
+                    //Skip all rows that don't have an employee
+                    if (!this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[nextRow], employee)) {
+                        nextRow += 1;
+                    }
+                    //Find the row that has, and get it's current time of work
+                    else {
+                        return this.calculateCurrentWorkTime(employee, nextRow, employeesTableAs2DArray, timeIntervalInMinutes);
+                    }
+                }
+            }
+        }
+
+
+
+
+        return nextWorkTime;
     }
 
     private ifEmployeeCanBeAddedForSelection(
@@ -158,14 +201,14 @@ export class EmployeesWhoCanWorkEvaluator {
                 timeIntervalInMinutes);
         }
 
-        //If we are not trying to set employee after    
+        //If we are trying to set employee after    
         //0 [e1, e2] 
         //1 [e1, e2]
         //2 [undefined, undefined] <-- trying to set e1 here
         const workAndRestTime: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, rowNumber, employeesTableAs2DArray, timeIntervalInMinutes);
         const currentWorkTime: number = workAndRestTime.currentWorkTimeInMinutes;
         const lastRestTime: number = workAndRestTime.lastRestTimeInMinutes;
-        const lastWorkTime : number = workAndRestTime.lastWorkTimeInMinutes;
+        const lastWorkTime: number = workAndRestTime.lastWorkTimeInMinutes;
 
         return this.ifEmployeeHadRestAndCanWork(
             currentWorkTime,
@@ -186,7 +229,7 @@ export class EmployeesWhoCanWorkEvaluator {
     private ifEmployeeHadRestAndCanWork(
         currentWorkTime: number,
         lastRestTime: number,
-        lastWorkTime : number,
+        lastWorkTime: number,
         firstMaxWorkTime: number | undefined,
         secondMaxWorkTime: number,
         firstMinRestTimeInMinutes: number | undefined,
@@ -197,12 +240,15 @@ export class EmployeesWhoCanWorkEvaluator {
         //     ((currentWorkTime  < firstMaxWorkTime) && lastRestTime >= firstMinRestTimeInMinutes)) {
         //     return true;
         // }
-        if((currentWorkTime === 0) && (lastWorkTime >= secondMaxWorkTime) && (lastRestTime >= secondMinRestTimeInMinutes))
-        {
-            return true;
-        }
-        else if ((currentWorkTime  < secondMaxWorkTime) && lastRestTime >= secondMinRestTimeInMinutes) {
-            return true;
+        // if ((currentWorkTime === 0) && (lastWorkTime >= secondMaxWorkTime) && (lastRestTime >= secondMinRestTimeInMinutes)) {
+        //     return true;
+        // }
+        // else 
+
+        if (currentWorkTime < secondMaxWorkTime) {
+            if (lastRestTime >= secondMinRestTimeInMinutes) {
+                return true;
+            }
         }
         return false;
     }
@@ -279,53 +325,52 @@ export class EmployeesWhoCanWorkEvaluator {
         rowNumber: number,
         employeesTableAs2DArray: (IEmployee | undefined)[][]): boolean {
 
-        //Edge case
-        //It is *always* first work session
-        //If rowNumber is 0
-        if (rowNumber === 0) {
-            return true;
-        }
+        // This method checks for the edge case
+        // The problem - can not calculate last work and rest time
+        // if it's the fist work session
 
-        //0 [e1, e2]
-        //1 [e1, e2] 
-        //2 [e1, e2]
-        //3 [e1, e2] <-- start here
-        //4 [e1, e2]
+        //First check if it's the first row
+        if (rowNumber === 0) { return true; }
+
+        //Else we need to check rows that are above
+        rowNumber -= 1;
+
+        //Then we need to find if row, where we want to set an employee
+        //is the row of first time session
+        //If the row above has employee and the rowNumber is greater or equal to 0
+        //then check the next row
+        //0 [e3, e2]
+        //1 [e3, e2]
+        //2 [e1, e2] <-- end here
+        //3 [e1, e2] 
+        //4 [e1, e2] <-- start here
         //5 [e3, e2] 
 
-        let rowWithLastTimeOfWork = rowNumber;
 
-        //0 [e1, e2]
-        //1 [e1, e2] 
-        //2 [e1, e2]
-        //3 [e1, e2] 
-        //4 [e1, e2] 
-        //5 [e3, e2] <-- end here
-        while (rowWithLastTimeOfWork < employeesTableAs2DArray.length
-            && this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[rowWithLastTimeOfWork], employee)) {
-            rowWithLastTimeOfWork += 1;
-        }
-
-        //0 [e1, e2]
-        //1 [e1, e2] 
-        //2 [e1, e2]
-        //3 [e1, e2] 
-        //4 [e1, e2] <-- back here
-        //5 [e3, e2] 
-        rowWithLastTimeOfWork -= 1
-
-        //0 [e1, e2] <-- end here
-        //1 [e1, e2] 
-        //2 [e1, e2]
-        //3 [e1, e2] 
-        //4 [e1, e2] <--start here
-        //5 [e3, e2] 
-        while (rowWithLastTimeOfWork >= 0 && this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[rowWithLastTimeOfWork], employee)) {
-            if (rowWithLastTimeOfWork === 0) {
+        while (rowNumber >= 0 && this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[rowNumber], employee)) {
+            if (rowNumber === 0) {
                 return true;
             }
-            rowWithLastTimeOfWork -= 1;
+            rowNumber -= 1;
         }
+
+        //if the row is not 0, we might have 
+        //another row, where the employee is set
+        //0 [e1, e2] <-- like this
+        //1 [e3, e2]
+        //2 [e1, e2] <-- ended here
+        //3 [e1, e2] 
+        //4 [e1, e2] 
+        //5 [e3, e2] 
+        //So we need to confirm that there are no more rows with employee
+        while (rowNumber >= 0 && !this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[rowNumber], employee)) {
+            if (rowNumber === 0) {
+                return true;
+            }
+            rowNumber -= 1;
+        }
+
+        //Else if have a row with employee - that means it's not the first work session
         return false;
     }
 
@@ -335,11 +380,10 @@ export class EmployeesWhoCanWorkEvaluator {
         employeesTableAs2DArray: (IEmployee | undefined)[][],
         timeIntervalInMinutes: number): [number, number] {
 
-        //Check if it's first work session
+        //Check for edge case
         if (this.ifFirstWorkSession(employee, rowNumber, employeesTableAs2DArray)) {
-            return[0,20];
+            return [0, 20];
         }
-
 
         let lastWorkTime: number = 0;
         let lastRestTime: number = 0;
@@ -375,19 +419,16 @@ export class EmployeesWhoCanWorkEvaluator {
             row = row - 1;
         }
 
-
         //Now count the previous time work
         //0 [e1, e2] <-- end here
         //1 [e1, e2] 
         //2 [e1, e2]
         //3 [e1, e2] 
         //4 [e1, e2] <-- start here
-        while (row > 0 && this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[row], employee)) {
+        while (row >= 0 && this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[row], employee)) {
             lastWorkTime += timeIntervalInMinutes;
             row = row - 1;
         }
-
-
 
         return [lastWorkTime, lastRestTime];
     }

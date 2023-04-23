@@ -3,5 +3,6 @@ export interface IWorkAndRestTimeInfo {
     lastWorkTimeInMinutes: number;
     lastRestTimeInMinutes: number;
     totalRestTimeInMinutes: number;
-    currentWorkTimeInMinutes : number;
+    currentWorkTimeInMinutes: number;
+    nextWorkTimeInMinutes: number;
 }

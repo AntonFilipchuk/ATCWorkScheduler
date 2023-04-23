@@ -32,26 +32,27 @@ export class TimeConfigurator {
     }
 
     configureTimeIntervals(timeIntervalInMinutes: number) {
-        let startInMilliseconds = this._shiftStartTime.valueOf();
-        let endInMilliseconds = this._shiftEndTime.valueOf();
+
+        let startInMilliseconds = this._shiftStartTime.getTime();
+        let endInMilliseconds = this._shiftEndTime.getTime();
         let timeIntervalInMilliseconds = this.minutesToMilliseconds(timeIntervalInMinutes);
 
         //[8:00 - 8:10] 8:00 - firstTimeToAdd, 8:10 - secondTimeToAdd
-        let firstTimeToAdd: Date = new Date(startInMilliseconds);
-        let secondTimeToAdd: Date = new Date(startInMilliseconds + timeIntervalInMilliseconds);
+        let firstTime: Date = new Date(startInMilliseconds);
+        let secondTime: Date = new Date(startInMilliseconds + timeIntervalInMilliseconds);
 
-        while (secondTimeToAdd.valueOf() < endInMilliseconds) {
-            firstTimeToAdd.setTime(startInMilliseconds);
-            secondTimeToAdd.setTime(firstTimeToAdd.getTime() + timeIntervalInMilliseconds);
-
-            const timeIntervalToAdd = [new Date(firstTimeToAdd), new Date(secondTimeToAdd)];
+        while (secondTime.getTime() < endInMilliseconds) {
+            firstTime.setTime(startInMilliseconds);
+            secondTime.setTime(firstTime.getTime() + timeIntervalInMilliseconds);
+            const timeIntervalToAdd: Date[] = [new Date(firstTime), new Date(secondTime)];
 
             this.timeColumnAsDateArray.push(timeIntervalToAdd);
 
             this.timeColumnAsStringArray.push(
-                this.timeToString(firstTimeToAdd.getHours()) + ':' + this.timeToString(firstTimeToAdd.getMinutes())
+                this.timeToString(firstTime.getHours()) + ':' + this.timeToString(firstTime.getMinutes())
                 + ' - ' +
-                this.timeToString(secondTimeToAdd.getHours()) + ':' + this.timeToString(secondTimeToAdd.getMinutes()));
+                this.timeToString(secondTime.getHours()) + ':' + this.timeToString(secondTime.getMinutes()));
+
             startInMilliseconds += timeIntervalInMilliseconds;
         }
     }
