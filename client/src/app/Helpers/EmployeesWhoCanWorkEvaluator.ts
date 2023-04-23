@@ -143,7 +143,6 @@ export class EmployeesWhoCanWorkEvaluator {
             return false;
         }
 
-        let employeesTableAs2DArrayLength: number = employeesTableAs2DArray.length - 1;
         let previousRow = rowNumber - 1;
         let nextRow = rowNumber + 1;
         //Check if trying to set an employee in the middle
@@ -156,11 +155,11 @@ export class EmployeesWhoCanWorkEvaluator {
         //5 [e1, e2] 
         //Check if we do not exceed the boundaries of employeesAs2DArray
         //Then check if the next and the previous rows have the same employee 
-        if ((previousRow >= 0 && nextRow <= employeesTableAs2DArrayLength) &&
+        if ((previousRow >= 0 && nextRow < employeesTableAs2DArray.length) &&
             (this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[nextRow], employee)
                 && this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[previousRow], employee))) {
-            let previousWorkTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, previousRow, employeesTableAs2DArray, timeIntervalInMinutes);
-            let nextWorkTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, nextRow, employeesTableAs2DArray, timeIntervalInMinutes);
+
+            let workTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, rowNumber, employeesTableAs2DArray, timeIntervalInMinutes);
 
             //Check if the sum of workTime t1 + t2 and if 
             //0 [e1, e2] -\
@@ -170,55 +169,35 @@ export class EmployeesWhoCanWorkEvaluator {
             //4 [e1, e2] -\ _> t2
             //5 [e1, e2] -/ 
             let sumOfPreviousAndFutureWorkTime: number =
-                previousWorkTimeInfo.currentWorkTimeInMinutes + nextWorkTimeInfo.currentWorkTimeInMinutes;
+                workTimeInfo.currentWorkTimeInMinutes + workTimeInfo.nextWorkTimeInMinutes;
 
-            return this.ifEmployeeHadRestAndCanWork(
-                sumOfPreviousAndFutureWorkTime,
-                previousWorkTimeInfo.lastRestTimeInMinutes,
-                previousWorkTimeInfo.lastWorkTimeInMinutes,
-                firstMaxWorkTimeInMinutes,
-                secondMaxWorkTimeInMinutes,
-                firstMinRestTimeInMinutes,
-                secondMinRestTimeInMinutes,
-                timeIntervalInMinutes);
+            return sumOfPreviousAndFutureWorkTime < secondMaxWorkTimeInMinutes;
         }
 
-        //If we are trying to add employee before
-        //0 [undefined, undefined] <-- trying to set e1 here
-        //1 [e1, e2]
-        //2 [e1, e2] 
-        if ((rowNumber + 1 <= employeesTableAs2DArrayLength) && this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[nextRow], employee)) {
+        if (nextRow < employeesTableAs2DArray.length && this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[nextRow], employee)) {
+            
             let nextWorkTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, nextRow, employeesTableAs2DArray, timeIntervalInMinutes);
-            let previousWorkTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, rowNumber, employeesTableAs2DArray, timeIntervalInMinutes);
-            return this.ifEmployeeHadRestAndCanWork(
-                nextWorkTimeInfo.currentWorkTimeInMinutes,
-                previousWorkTimeInfo.lastRestTimeInMinutes,
-                previousWorkTimeInfo.lastWorkTimeInMinutes,
-                firstMaxWorkTimeInMinutes,
-                secondMaxWorkTimeInMinutes,
-                firstMinRestTimeInMinutes,
-                secondMinRestTimeInMinutes,
-                timeIntervalInMinutes);
+            let currentWorkTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, rowNumber, employeesTableAs2DArray, timeIntervalInMinutes);
+            
+            return nextWorkTimeInfo.currentWorkTimeInMinutes < secondMaxWorkTimeInMinutes && 
+            currentWorkTimeInfo.currentWorkTimeInMinutes < secondMaxWorkTimeInMinutes && 
+            currentWorkTimeInfo.lastRestTimeInMinutes >= secondMinRestTimeInMinutes;
+            
+          
         }
 
-        //If we are trying to set employee after    
-        //0 [e1, e2] 
-        //1 [e1, e2]
-        //2 [undefined, undefined] <-- trying to set e1 here
-        const workAndRestTime: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, rowNumber, employeesTableAs2DArray, timeIntervalInMinutes);
-        const currentWorkTime: number = workAndRestTime.currentWorkTimeInMinutes;
-        const lastRestTime: number = workAndRestTime.lastRestTimeInMinutes;
-        const lastWorkTime: number = workAndRestTime.lastWorkTimeInMinutes;
+        if (previousRow >= 0 && this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[previousRow], employee)) {
+            let workTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, rowNumber, employeesTableAs2DArray, timeIntervalInMinutes);
 
-        return this.ifEmployeeHadRestAndCanWork(
-            currentWorkTime,
-            lastRestTime,
-            lastWorkTime,
-            firstMaxWorkTimeInMinutes,
-            secondMaxWorkTimeInMinutes,
-            firstMinRestTimeInMinutes,
-            secondMinRestTimeInMinutes,
-            timeIntervalInMinutes);
+            return workTimeInfo.currentWorkTimeInMinutes < secondMaxWorkTimeInMinutes;
+        }
+
+        let workTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, rowNumber, employeesTableAs2DArray, timeIntervalInMinutes);
+        if(workTimeInfo.lastRestTimeInMinutes >= secondMinRestTimeInMinutes)
+        {
+            return true;
+        }
+        return false;
     }
 
     private ifEmployeeAlreadyWorks(employee: IEmployee, rowNumber: number, employeesAs2DArray: (IEmployee | undefined)[][]) {
@@ -230,26 +209,19 @@ export class EmployeesWhoCanWorkEvaluator {
         currentWorkTime: number,
         lastRestTime: number,
         lastWorkTime: number,
+        nextWorkTime: number,
         firstMaxWorkTime: number | undefined,
         secondMaxWorkTime: number,
         firstMinRestTimeInMinutes: number | undefined,
         secondMinRestTimeInMinutes: number,
         timeIntervalInMinutes: number): boolean {
 
-        // if ((firstMinRestTimeInMinutes && firstMaxWorkTime) &&
-        //     ((currentWorkTime  < firstMaxWorkTime) && lastRestTime >= firstMinRestTimeInMinutes)) {
-        //     return true;
-        // }
-        // if ((currentWorkTime === 0) && (lastWorkTime >= secondMaxWorkTime) && (lastRestTime >= secondMinRestTimeInMinutes)) {
-        //     return true;
-        // }
-        // else 
-
-        if (currentWorkTime < secondMaxWorkTime) {
-            if (lastRestTime >= secondMinRestTimeInMinutes) {
+        if (lastRestTime <= secondMinRestTimeInMinutes) {
+            if (currentWorkTime <= secondMaxWorkTime) {
                 return true;
             }
         }
+
         return false;
     }
 
