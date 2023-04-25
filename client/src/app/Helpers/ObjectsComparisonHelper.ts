@@ -1,5 +1,5 @@
 export class ObjectsComparisonHelper {
-    public ifTwoObjectsAreEqual(firstObject: object, secondObject: object): boolean {
+    public ifTwoObjectsAreEqual(firstObject: any, secondObject: any): boolean {
         return JSON.stringify(firstObject) == JSON.stringify(secondObject);
     }
 

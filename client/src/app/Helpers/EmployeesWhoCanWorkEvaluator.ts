@@ -68,6 +68,7 @@ export class EmployeesWhoCanWorkEvaluator {
         let lastRestTime: number = 0;
 
         let nextWorkTime: number = 0;
+        let nextRestTime: number = 0;
 
         //Total Work and Rest Time
         [totalWorkTime, totalRestTime] = this.calculateTotalWorkAndRestTime(employee, employeesTableAs2DArray, timeIntervalInMinutes);
@@ -78,7 +79,7 @@ export class EmployeesWhoCanWorkEvaluator {
         //CurrentWorkTime
         currentWorkTime = this.calculateCurrentWorkTime(employee, rowNumber, employeesTableAs2DArray, timeIntervalInMinutes);
 
-        nextWorkTime = this.calculateNextWorkTime(employee, rowNumber, employeesTableAs2DArray, timeIntervalInMinutes);
+        [nextWorkTime, nextRestTime] = this.calculateNextWorkTime(employee, rowNumber, employeesTableAs2DArray, timeIntervalInMinutes);
 
         let workAndRestInfo: IWorkAndRestTimeInfo =
         {
@@ -87,47 +88,13 @@ export class EmployeesWhoCanWorkEvaluator {
             totalRestTimeInMinutes: totalRestTime,
             totalWorkingTimeInMinutes: totalWorkTime,
             currentWorkTimeInMinutes: currentWorkTime,
-            nextWorkTimeInMinutes: nextWorkTime
+            nextWorkTimeInMinutes: nextWorkTime,
+            nextRestTimeInMinutes: nextRestTime
         }
         return workAndRestInfo;
     }
 
-    private calculateNextWorkTime(employee: IEmployee, rowNumber: number, employeesTableAs2DArray: (IEmployee | undefined)[][],
-        timeIntervalInMinutes: number): number {
-        let nextWorkTime: number = 0;
-        let nextRow = rowNumber + 1;
-        //Check if we are not the last row, if it is
-        //future work is always 0
-        if (nextRow >= employeesTableAs2DArray.length) {
-            return 0;
-        }
 
-        while (nextRow < employeesTableAs2DArray.length) {
-            //Check if the next row has employee
-            //if does, check next
-            if (this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[nextRow], employee)) {
-                nextRow += 1;
-            }
-            else {
-                //If it doesn't have
-                while (nextRow < employeesTableAs2DArray.length) {
-                    //Skip all rows that don't have an employee
-                    if (!this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[nextRow], employee)) {
-                        nextRow += 1;
-                    }
-                    //Find the row that has, and get it's current time of work
-                    else {
-                        return this.calculateCurrentWorkTime(employee, nextRow, employeesTableAs2DArray, timeIntervalInMinutes);
-                    }
-                }
-            }
-        }
-
-
-
-
-        return nextWorkTime;
-    }
 
     private ifEmployeeCanBeAddedForSelection(
         employee: IEmployee,
@@ -155,6 +122,7 @@ export class EmployeesWhoCanWorkEvaluator {
         //5 [e1, e2] 
         //Check if we do not exceed the boundaries of employeesAs2DArray
         //Then check if the next and the previous rows have the same employee 
+
         if ((previousRow >= 0 && nextRow < employeesTableAs2DArray.length) &&
             (this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[nextRow], employee)
                 && this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[previousRow], employee))) {
@@ -173,30 +141,40 @@ export class EmployeesWhoCanWorkEvaluator {
 
             return sumOfPreviousAndFutureWorkTime < secondMaxWorkTimeInMinutes;
         }
+        else if (nextRow < employeesTableAs2DArray.length && this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[nextRow], employee)) {
 
-        if (nextRow < employeesTableAs2DArray.length && this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[nextRow], employee)) {
-            
             let nextWorkTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, nextRow, employeesTableAs2DArray, timeIntervalInMinutes);
             let currentWorkTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, rowNumber, employeesTableAs2DArray, timeIntervalInMinutes);
-            
-            return nextWorkTimeInfo.currentWorkTimeInMinutes < secondMaxWorkTimeInMinutes && 
-            currentWorkTimeInfo.currentWorkTimeInMinutes < secondMaxWorkTimeInMinutes && 
-            currentWorkTimeInfo.lastRestTimeInMinutes >= secondMinRestTimeInMinutes;
-            
-          
-        }
 
-        if (previousRow >= 0 && this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[previousRow], employee)) {
+            if (nextWorkTimeInfo.currentWorkTimeInMinutes < secondMaxWorkTimeInMinutes) {
+                console.log(`ADDING ABOVE ${employee.name}, row ${rowNumber}, CW ${nextWorkTimeInfo.currentWorkTimeInMinutes}, LR ${nextWorkTimeInfo.lastRestTimeInMinutes}`);
+                return true;
+            }
+        }
+        else if (previousRow >= 0 && this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[previousRow], employee)) {
             let workTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, rowNumber, employeesTableAs2DArray, timeIntervalInMinutes);
+            if (workTimeInfo.currentWorkTimeInMinutes < secondMaxWorkTimeInMinutes) {
+                console.log(`ADDING BELOW ${employee.name}, NR ${workTimeInfo.nextRestTimeInMinutes}`);
+                return true;
+            }
+        }
+        else {
+            let workTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, rowNumber, employeesTableAs2DArray, timeIntervalInMinutes);
+            //let nextWorkTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, nextRow, employeesTableAs2DArray, timeIntervalInMinutes);
+            //let previousWorkTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, previousRow, employeesTableAs2DArray, timeIntervalInMinutes);
 
-            return workTimeInfo.currentWorkTimeInMinutes < secondMaxWorkTimeInMinutes;
+            if (workTimeInfo.nextWorkTimeInMinutes >= secondMaxWorkTimeInMinutes) {
+                if (workTimeInfo.nextRestTimeInMinutes >= secondMinRestTimeInMinutes) {
+                    console.log(`JUST ADDING ${employee.name}, row ${rowNumber}, CW ${workTimeInfo.currentWorkTimeInMinutes},  NW ${workTimeInfo.nextWorkTimeInMinutes}`);
+                    return true;
+                }
+            }
+            else {
+                console.log(`JUST ADDING ${employee.name}, row ${rowNumber}, CW ${workTimeInfo.currentWorkTimeInMinutes},  NW ${workTimeInfo.nextWorkTimeInMinutes}`);
+                return true;
+            }
         }
 
-        let workTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, rowNumber, employeesTableAs2DArray, timeIntervalInMinutes);
-        if(workTimeInfo.lastRestTimeInMinutes >= secondMinRestTimeInMinutes)
-        {
-            return true;
-        }
         return false;
     }
 
@@ -225,6 +203,43 @@ export class EmployeesWhoCanWorkEvaluator {
         return false;
     }
 
+
+    private calculateNextWorkTime(employee: IEmployee, rowNumber: number, employeesTableAs2DArray: (IEmployee | undefined)[][],
+        timeIntervalInMinutes: number): [number, number] {
+        let nextWorkTime: number = 0;
+        let nextRestTime: number = 0;
+        let nextRow = rowNumber + 1;
+        //Check if we are not the last row, if it is
+        //future work is always 0
+        if (nextRow >= employeesTableAs2DArray.length) {
+            return [0, 20];
+        }
+
+        while (nextRow < employeesTableAs2DArray.length) {
+            //Check if the next row has employee
+            //if does, check next
+            if (this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[nextRow], employee)) {
+                nextRow += 1;
+            }
+            else {
+                //If it doesn't have
+                while (nextRow < employeesTableAs2DArray.length) {
+                    //Skip all rows that don't have an employee (rest rows)
+                    if (!this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[nextRow], employee)) {
+                        nextRow += 1;
+                    }
+                    //Find the row that has, and get it's current time of work
+                    //And last rest time
+                    else {
+                        nextWorkTime = this.calculateCurrentWorkTime(employee, nextRow, employeesTableAs2DArray, timeIntervalInMinutes);
+                        nextRestTime = this.calculateLastWorkAndRestTime(employee, nextRow, employeesTableAs2DArray, timeIntervalInMinutes)[1];
+                        return [nextWorkTime, nextRestTime];
+                    }
+                }
+            }
+        }
+        return [nextWorkTime, 20];
+    }
 
     private calculateTotalWorkAndRestTime(
         employee: IEmployee,

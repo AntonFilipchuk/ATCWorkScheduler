@@ -174,9 +174,39 @@ export class TablesBuilderService implements OnInit {
     let rowToChange: (IEmployee | undefined)[] = this._employeesTableAs2DArray[rowNumber];
     let employeeToChange: IEmployee | undefined = rowToChange[columnNumber];
 
+    //Check in the employee already works on different sector at this time
     if (this._objComparisonHelper.ifArrayHasAnObject(rowToChange, employee)) {
       console.log(`Can not set ${employee.name} at the same time on different sector!`);
       return;
+    }
+    //Then check if we are trying to change the employee to another employee
+    //If the employee that we try to change is in the middle of work session:
+    //0 [e1, e2]
+    //1 [e1, e2] 
+    //2 [e1, e2]
+    //3 [e1, e2] <-- trying to change e1 to e3 here
+    //4 [e1, e2]
+    //5 [e1, e2] 
+    //Change all e1 after that to undefined:
+    //0 [e1, e2]
+    //1 [e1, e2] 
+    //2 [e1, e2]
+    //3 [e3, e2] <-- changed e1 to e3 here
+    //4 [undefined, e2]
+    //5 [undefined, e2] 
+    let previousRowNumber = rowNumber - 1;
+    let nextRowNumber = rowNumber + 1;
+    if (previousRowNumber >= 0 && nextRowNumber < this._employeesTableAs2DArray.length) {
+      let ifPreviousRowHasEmployeeToChange = this._objComparisonHelper.ifArrayHasAnObject(this._employeesTableAs2DArray[previousRowNumber], employeeToChange);
+      let ifNextRowHasEmployeeToChange = this._objComparisonHelper.ifArrayHasAnObject(this._employeesTableAs2DArray[nextRowNumber], employeeToChange);
+      if ((JSON.stringify(employeeToChange) !== JSON.stringify(employee)) &&
+        (ifPreviousRowHasEmployeeToChange && ifNextRowHasEmployeeToChange)) {
+        while (nextRowNumber < this._employeesTableAs2DArray.length && this._objComparisonHelper.ifArrayHasAnObject(this._employeesTableAs2DArray[nextRowNumber], employeeToChange)) {
+          const indexOfEmployeeToChange = this._employeesTableAs2DArray[nextRowNumber].findIndex(e => this._objComparisonHelper.ifTwoObjectsAreEqual(e, employeeToChange));
+          this._employeesTableAs2DArray[nextRowNumber][indexOfEmployeeToChange] = undefined;
+          nextRowNumber++;
+        }
+      }
     }
     if (JSON.stringify(employeeToChange) !== JSON.stringify(employee)) {
       employeeToChange = employee;
