@@ -1,16 +1,16 @@
 import { Injectable, OnInit } from '@angular/core';
-import { IEmployee } from '../models/IEmployee';
-import { IEmployeesRow } from '../models/IEmployeesRow';
+import { IEmployee } from '../../models/IEmployee';
+import { IEmployeesRow } from '../../models/IEmployeesRow';
 import { Observable, ReplaySubject, interval, timeInterval, withLatestFrom } from 'rxjs';
 import { CollectionViewer, DataSource } from '@angular/cdk/collections';
-import { TimeConfigurator } from '../Helpers/TimeConfigurator';
-import { ITableRow } from '../models/ITableRow';
-import { DefaultTableBuilder } from '../Helpers/DefaultTableBuilder';
-import { ISector } from '../models/ISector';
-import { ObjectsComparisonHelper } from '../Helpers/ObjectsComparisonHelper';
-import { IWorkAndRestTimeInfo } from '../models/ITimeOfWorkInfo';
+import { TimeConfigurator } from '../../Helpers/TimeConfigurator';
+import { ITableRow } from '../../models/ITableRow';
+import { DefaultTableBuilder } from '../../Helpers/DefaultTableBuilder';
+import { ISector } from '../../models/ISector';
+import { ObjectsComparisonHelper } from '../../Helpers/ObjectsComparisonHelper';
+import { IWorkAndRestTimeInfo } from '../../models/ITimeOfWorkInfo';
 import { StickyDirection } from '@angular/cdk/table';
-import { EmployeesWhoCanWorkEvaluator } from '../Helpers/EmployeesWhoCanWorkEvaluator';
+import { EmployeesWhoCanWorkEvaluator } from '../../Helpers/EmployeesWhoCanWorkEvaluator';
 
 
 /**
@@ -109,8 +109,8 @@ let e9: IEmployee = {
 let employees: IEmployee[] = [e1, e2, e3, e4, e5, e6, e7, e8, e9];
 
 let todayDate: Date = new Date();
-let shiftStartTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 21, 40);
-let shiftEndTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 4, 50);
+let shiftStartTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 8, 0);
+let shiftEndTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 14, 30);
 
 let testTime1: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 8, 0);
 let testTime2: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 9, 0);

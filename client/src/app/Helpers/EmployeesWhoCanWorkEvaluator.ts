@@ -117,15 +117,17 @@ export class EmployeesWhoCanWorkEvaluator {
             let nextWorkTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, nextRow, employeesTableAs2DArray, timeIntervalInMinutes);
             let currentWorkTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, rowNumber, employeesTableAs2DArray, timeIntervalInMinutes);
 
-            if (nextWorkTimeInfo.currentWorkTimeInMinutes < secondMaxWorkTimeInMinutes &&
-                currentWorkTimeInfo.lastRestTimeInMinutes >= secondMinRestTimeInMinutes) {
+            if (nextWorkTimeInfo.currentWorkTimeInMinutes < secondMaxWorkTimeInMinutes && 
+                (currentWorkTimeInfo.lastRestTimeInMinutes >= secondMinRestTimeInMinutes || currentWorkTimeInfo.lastWorkTimeInMinutes < secondMaxWorkTimeInMinutes)) {
                 return true;
             }
+
         }
         //Adding to the bottom of work session
         else if (previousRow >= 0 && this._objComparisonHelper.ifEmployeesRowHasEmployee(employeesTableAs2DArray[previousRow], employee)) {
             let workTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, rowNumber, employeesTableAs2DArray, timeIntervalInMinutes);
-            if (workTimeInfo.currentWorkTimeInMinutes < secondMaxWorkTimeInMinutes && workTimeInfo.nextRestTimeInMinutes >= secondMinRestTimeInMinutes) {
+            if (workTimeInfo.currentWorkTimeInMinutes < secondMaxWorkTimeInMinutes && 
+                (workTimeInfo.nextRestTimeInMinutes >= secondMinRestTimeInMinutes || workTimeInfo.nextWorkTimeInMinutes < secondMaxWorkTimeInMinutes)) {
                 return true;
             }
         }
@@ -176,24 +178,29 @@ export class EmployeesWhoCanWorkEvaluator {
             return [0, 20];
         }
 
+        //To correctly calculate *future* time of work and rest
+        //We need to get original table, put an employee into row in witch it *might* be put, and calculate time
+        let alternateRealityTable = structuredClone(employeesTableAs2DArray);
+        alternateRealityTable[rowNumber][0] = employee;
+
         while (nextRow < employeesTableAs2DArray.length) {
             //Check if the next row has employee
             //if does, check next
-            if (this._objComparisonHelper.ifEmployeesRowHasEmployee(employeesTableAs2DArray[nextRow], employee,)) {
+            if (this._objComparisonHelper.ifEmployeesRowHasEmployee(alternateRealityTable[nextRow], employee,)) {
                 nextRow += 1;
             }
             else {
                 //If it doesn't have
-                while (nextRow < employeesTableAs2DArray.length) {
+                while (nextRow < alternateRealityTable.length) {
                     //Skip all rows that don't have an employee (rest rows)
-                    if (!this._objComparisonHelper.ifEmployeesRowHasEmployee(employeesTableAs2DArray[nextRow], employee)) {
+                    if (!this._objComparisonHelper.ifEmployeesRowHasEmployee(alternateRealityTable[nextRow], employee)) {
                         nextRow += 1;
                     }
                     //Find the row that has, and get it's current time of work
                     //And last rest time
                     else {
-                        nextWorkTime = this.calculateCurrentWorkTime(employee, nextRow, employeesTableAs2DArray, timeIntervalInMinutes);
-                        nextRestTime = this.calculateLastWorkAndRestTime(employee, nextRow, employeesTableAs2DArray, timeIntervalInMinutes)[1];
+                        nextWorkTime = this.calculateCurrentWorkTime(employee, nextRow, alternateRealityTable, timeIntervalInMinutes);
+                        nextRestTime = this.calculateLastWorkAndRestTime(employee, nextRow, alternateRealityTable, timeIntervalInMinutes)[1];
                         return [nextWorkTime, nextRestTime];
                     }
                 }

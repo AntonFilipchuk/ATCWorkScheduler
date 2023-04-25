@@ -1,39 +1,28 @@
 <div
   class="selectable-element-container"
-  (click)="toggle()"
   [ngStyle]="{
-    border: showBorder ? '5px solid green' : '',
+    border: ifShowBorder || ifSelectorActive ? '5px solid green' : '',
     background: color ? color : 'grey'
   }"
-  (mouseenter)="toggleShowBorder()"
-  (mouseleave)="toggleShowBorder()"
+  (mouseenter)="toggleShowBorderAndSelector()"
+  (mouseleave)="toggleShowBorderAndSelector()"
 >
   <p>
     {{ employee ? employee.name : "" }}
-    <!-- {{ workAndRestTime ? "TW: " + workAndRestTime!.totalWorkingTimeInMinutes : "" }}
-    {{ workAndRestTime ? "LW: " + workAndRestTime!.lastWorkTimeInMinutes  : "" }}
-    {{ workAndRestTime ? "TR: " + workAndRestTime!.totalRestTimeInMinutes : "" }}
-    {{ workAndRestTime ? "LR: " + workAndRestTime!.lastRestTimeInMinutes : '' }}
-    {{ workAndRestTime ? "CW: " + workAndRestTime!.currentWorkTimeInMinutes : '' }}
-    {{ workAndRestTime ? "NW: " + workAndRestTime!.nextWorkTimeInMinutes : '' }}
-    {{ workAndRestTime ? "NR: " + workAndRestTime!.nextRestTimeInMinutes : '' }}
-    {{rowNumber}} -->
+    {{timeInfo ? 'LR ' + timeInfo.lastRestTimeInMinutes : ''}}
+    {{timeInfo ? 'NR ' + timeInfo.nextRestTimeInMinutes : ''}}
   </p>
 
-  <!-- <div
-    style="height: 50px; width: 100px; background-color: blue"
-    (click)="test()"
-  ></div> -->
   <mat-select
     class="selector"
-    *ngIf="showSelector"
-    (closed)="toggleSelection()"
+    *ngIf="ifShowSelector || ifSelectorActive"
+    (click)="toggleIfSelectorActive()"
+    (closed)="toggleIfSelectorActive()"
   >
     <mat-option
       (onSelectionChange)="onSelection($event)"
       *ngFor="let employee of employeesToSelectFrom"
       [value]="employee"
-      style="cursor: pointer"
     >
       {{ employee.name }}
     </mat-option>

@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, OnInit, ViewChild, ViewChildren } from '@angular/core';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
-import { TablesBuilderService } from 'src/app/Services/tables-builder.service';
+import { TablesBuilderService } from 'src/app/Services/TableBuilderService/tables-builder.service';
 import { IEmployee } from 'src/app/models/IEmployee';
 import { IEmployeesRow } from 'src/app/models/IEmployeesRow';
 import { ISector } from 'src/app/models/ISector';

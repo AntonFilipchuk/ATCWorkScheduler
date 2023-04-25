@@ -1,12 +1,13 @@
 import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { IEmployee } from 'src/app/models/IEmployee';
 import { MainTableComponent } from '../main-table.component';
-import { TablesBuilderService } from 'src/app/Services/tables-builder.service';
 import { MatOptionSelectionChange } from '@angular/material/core';
 import { BehaviorSubject } from 'rxjs';
 import { IEmployeesRow } from 'src/app/models/IEmployeesRow';
 import { ISector } from 'src/app/models/ISector';
 import { IWorkAndRestTimeInfo } from 'src/app/models/ITimeOfWorkInfo';
+import { EmployeeSetterService } from 'src/app/Services/EmployeeSetterService/employee-setter.service';
+import { TablesBuilderService } from 'src/app/Services/TableBuilderService/tables-builder.service';
 
 
 //Target: to display available employees for selection
@@ -16,82 +17,65 @@ import { IWorkAndRestTimeInfo } from 'src/app/models/ITimeOfWorkInfo';
 //display employees 
 
 
-
+//When mouse over - showBorder and showSelector set to true
+//If selector is clicked set selectorIsActive to true
+//Either showSelector or selectorIsActive are true - show selector
 @Component({
   selector: 'app-selectable-table-element',
   templateUrl: './selectable-table-element.component.html',
   styleUrls: ['./selectable-table-element.component.scss']
 })
-export class SelectableTableElementComponent implements OnInit, OnChanges {
+export class SelectableTableElementComponent implements OnInit {
 
   @Input() rowNumber!: number;
   @Input() columnNumber!: number;
   @Input() sector!: ISector;
 
-  public showSelector: boolean = false;
+  public ifShowSelector: boolean = false;
+  public ifSelectorActive: boolean = false;
+  public ifShowBorder: boolean = false;
   public ifSelected: boolean = false;
-  public showBorder: boolean = false;
+
+
   public employeesToSelectFrom: IEmployee[] = [];
   public employee: IEmployee | undefined;
   public color: string | undefined;
 
-  public workAndRestTime: IWorkAndRestTimeInfo | undefined;
-  public totalWorkTime: number = 0;
-  public lastWorkTime: number = 0;
-  public totalRestTime: number = 0;
-  public lastRestTime: number = 0;
+  public timeInfo: IWorkAndRestTimeInfo | undefined;
 
-  private _employeesForShift: IEmployee[] = [];
-
-
-  constructor(private planningTableService: TablesBuilderService) {
+  constructor(private planningTableService: TablesBuilderService, private employeeSetterService: EmployeeSetterService) {
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-  }
 
   ngOnInit(): void {
-    this._employeesForShift = this.planningTableService.employeesForShift;
+
     this.configureProperEmployees();
     this.employee = this.planningTableService.getEmployeeByRowAnColumnNumber(this.rowNumber, this.columnNumber);
     if (this.employee) {
       this.color = this.employee?.color;
-      this.workAndRestTime = this.planningTableService.getWorkAndRestTimeInfo(this.employee, this.rowNumber);
+      this.timeInfo = this.planningTableService.getWorkAndRestTimeInfo(this.employee!, this.rowNumber!);
     }
   }
 
-  getStyleForCell(): any {
-    return { 'background-color': 'yellow' }
+
+
+  toggleShowBorderAndSelector() {
+    this.ifShowBorder = !this.ifShowBorder;
+    this.ifShowSelector = !this.ifShowSelector;
   }
 
-  toggleShowBorder() {
-    this.showBorder = !this.showBorder;
+  public toggleIfSelectorActive() {
+    this.ifSelectorActive = !this.ifSelectorActive;
   }
 
-  toggle() {
-    if (!this.ifSelected) {
-      this.showSelector = true;
-    }
-    else {
-      this.showSelector = !this.showSelector;
-      this.ifSelected = false;
-    }
-  }
-
-  toggleSelection() {
-    this.ifSelected = true;
-    this.toggle();
-  }
-
+  //When we select an employee from a list
   onSelection($event: MatOptionSelectionChange) {
-    this.toggleSelection();
+    this.toggleIfSelectorActive();
     this.planningTableService.setEmployeeInRow($event.source.value, this.rowNumber!, this.columnNumber);
     this.employee = this.planningTableService.getEmployeeByRowAnColumnNumber(this.rowNumber, this.columnNumber);
   }
 
   configureProperEmployees() {
-    this.employeesToSelectFrom = this.planningTableService.getEmployeesForSelection(this.rowNumber, this.sector); 
-    //console.log(`Row ${this.rowNumber}, Column ${this.columnNumber}, Sector ${this.sector.name}`,this.employeesToSelectFrom);
-    
+    this.employeesToSelectFrom = this.planningTableService.getEmployeesForSelection(this.rowNumber, this.sector);
   }
 }
