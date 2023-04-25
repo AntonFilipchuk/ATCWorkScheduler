@@ -27,47 +27,90 @@ import { EmployeesWhoCanWorkEvaluator } from '../Helpers/EmployeesWhoCanWorkEval
 
 let g12r: ISector = { name: 'G12R' }
 let g12p: ISector = { name: 'G12P' }
+let g345r: ISector = { name: 'G345R' }
+let g345p: ISector = { name: 'G345P' }
 let t1R: ISector = { name: 'T1R' }
 let t1P: ISector = { name: 'T1P' }
-let sectors: ISector[] = [g12r, g12p]
+let sectors: ISector[] = [g12r, g12p, g345r, g345p]
 
 let e1: IEmployee = {
   id: 1,
-  name: 'Anton',
+  name: 'Filipchuk',
   totalTime: 0,
-  sectorPermits: [g12r,],
+  sectorPermits: [g12r, g12p, g345r, g345p],
   color: 'red'
 }
 
 let e2: IEmployee = {
   id: 2,
-  name: 'John',
+  name: 'Egorov',
   totalTime: 0,
-  sectorPermits: [g12r,],
+  sectorPermits: [g12r, g12p, g345r, g345p],
   color: 'green'
 }
 
 let e3: IEmployee = {
   id: 3,
-  name: 'Mary',
+  name: 'Gallyamov',
   totalTime: 0,
-  sectorPermits: [g12r, g12p],
+  sectorPermits: [g12r, g12p, g345r, g345p],
   color: 'yellow'
 }
 
 let e4: IEmployee = {
   id: 4,
-  name: 'Jane',
+  name: 'Nosenko',
   totalTime: 0,
-  sectorPermits: [g12r, g12p, t1R, t1P],
+  sectorPermits: [g12r, g12p, g345r, g345p],
   color: 'orange'
 }
 
-let employees: IEmployee[] = [e1, e2, e3, e4,];
+let e5: IEmployee = {
+  id: 5,
+  name: 'Mozjuhin',
+  totalTime: 0,
+  sectorPermits: [g12r, g12p, g345r, g345p],
+  color: 'Chocolate'
+}
+
+let e6: IEmployee = {
+  id: 6,
+  name: 'Boiko',
+  totalTime: 0,
+  sectorPermits: [g12r, g12p, g345r, g345p],
+  color: 'Aqua'
+}
+
+let e7: IEmployee = {
+  id: 7,
+  name: 'Fomin',
+  totalTime: 0,
+  sectorPermits: [g12r, g12p, g345r, g345p],
+  color: 'DarkMagenta '
+}
+
+let e8: IEmployee = {
+  id: 8,
+  name: 'Ignanin',
+  totalTime: 0,
+  sectorPermits: [g12r, g12p, g345r, g345p],
+  color: 'DarkBlue'
+}
+
+let e9: IEmployee = {
+  id: 9,
+  name: 'Chiglyakov',
+  totalTime: 0,
+  sectorPermits: [g12r, g12p, g345r, g345p],
+  color: 'Crimson '
+}
+
+
+let employees: IEmployee[] = [e1, e2, e3, e4, e5, e6, e7, e8, e9];
 
 let todayDate: Date = new Date();
-let shiftStartTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 8, 0);
-let shiftEndTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 14, 20);
+let shiftStartTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 21, 40);
+let shiftEndTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 4, 50);
 
 let testTime1: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 8, 0);
 let testTime2: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 9, 0);

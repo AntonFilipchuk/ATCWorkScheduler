@@ -94,8 +94,6 @@ export class EmployeesWhoCanWorkEvaluator {
         return workAndRestInfo;
     }
 
-
-
     private ifEmployeeCanBeAddedForSelection(
         employee: IEmployee,
         rowNumber: number,
@@ -112,65 +110,30 @@ export class EmployeesWhoCanWorkEvaluator {
 
         let previousRow = rowNumber - 1;
         let nextRow = rowNumber + 1;
-        //Check if trying to set an employee in the middle
-        // length = 6
-        //0 [e1, e2]
-        //1 [e1, e2] 
-        //2 [e1, e2]
-        //3 [undefined, undefined] <-- trying to set e1 here
-        //4 [e1, e2]
-        //5 [e1, e2] 
-        //Check if we do not exceed the boundaries of employeesAs2DArray
-        //Then check if the next and the previous rows have the same employee 
 
-        if ((previousRow >= 0 && nextRow < employeesTableAs2DArray.length) &&
-            (this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[nextRow], employee)
-                && this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[previousRow], employee))) {
-
-            let workTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, rowNumber, employeesTableAs2DArray, timeIntervalInMinutes);
-
-            //Check if the sum of workTime t1 + t2 and if 
-            //0 [e1, e2] -\
-            //1 [e1, e2] ---> t1
-            //2 [e1, e2] -/
-            //3 [undefined, undefined] <-- trying to set e1 here
-            //4 [e1, e2] -\ _> t2
-            //5 [e1, e2] -/ 
-            let sumOfPreviousAndFutureWorkTime: number =
-                workTimeInfo.currentWorkTimeInMinutes + workTimeInfo.nextWorkTimeInMinutes;
-
-            return sumOfPreviousAndFutureWorkTime < secondMaxWorkTimeInMinutes;
-        }
-        else if (nextRow < employeesTableAs2DArray.length && this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[nextRow], employee)) {
+        //Adding to the top of work session
+        if (nextRow < employeesTableAs2DArray.length && this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[nextRow], employee)) {
 
             let nextWorkTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, nextRow, employeesTableAs2DArray, timeIntervalInMinutes);
             let currentWorkTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, rowNumber, employeesTableAs2DArray, timeIntervalInMinutes);
 
-            if (nextWorkTimeInfo.currentWorkTimeInMinutes < secondMaxWorkTimeInMinutes) {
+            if (nextWorkTimeInfo.currentWorkTimeInMinutes < secondMaxWorkTimeInMinutes &&
+                currentWorkTimeInfo.lastRestTimeInMinutes >= secondMinRestTimeInMinutes) {
                 console.log(`ADDING ABOVE ${employee.name}, row ${rowNumber}, CW ${nextWorkTimeInfo.currentWorkTimeInMinutes}, LR ${nextWorkTimeInfo.lastRestTimeInMinutes}`);
                 return true;
             }
         }
+        //Adding to the bottom of work session
         else if (previousRow >= 0 && this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[previousRow], employee)) {
             let workTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, rowNumber, employeesTableAs2DArray, timeIntervalInMinutes);
-            if (workTimeInfo.currentWorkTimeInMinutes < secondMaxWorkTimeInMinutes) {
+            if (workTimeInfo.currentWorkTimeInMinutes < secondMaxWorkTimeInMinutes && workTimeInfo.nextRestTimeInMinutes >= secondMinRestTimeInMinutes) {
                 console.log(`ADDING BELOW ${employee.name}, NR ${workTimeInfo.nextRestTimeInMinutes}`);
                 return true;
             }
         }
         else {
             let workTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, rowNumber, employeesTableAs2DArray, timeIntervalInMinutes);
-            //let nextWorkTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, nextRow, employeesTableAs2DArray, timeIntervalInMinutes);
-            //let previousWorkTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, previousRow, employeesTableAs2DArray, timeIntervalInMinutes);
-
-            if (workTimeInfo.nextWorkTimeInMinutes >= secondMaxWorkTimeInMinutes) {
-                if (workTimeInfo.nextRestTimeInMinutes >= secondMinRestTimeInMinutes) {
-                    console.log(`JUST ADDING ${employee.name}, row ${rowNumber}, CW ${workTimeInfo.currentWorkTimeInMinutes},  NW ${workTimeInfo.nextWorkTimeInMinutes}`);
-                    return true;
-                }
-            }
-            else {
-                console.log(`JUST ADDING ${employee.name}, row ${rowNumber}, CW ${workTimeInfo.currentWorkTimeInMinutes},  NW ${workTimeInfo.nextWorkTimeInMinutes}`);
+            if (workTimeInfo.lastRestTimeInMinutes >= secondMinRestTimeInMinutes && workTimeInfo.nextRestTimeInMinutes >= secondMinRestTimeInMinutes) {
                 return true;
             }
         }
