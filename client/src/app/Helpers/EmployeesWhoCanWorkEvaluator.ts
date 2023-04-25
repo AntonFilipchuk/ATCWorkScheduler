@@ -112,22 +112,20 @@ export class EmployeesWhoCanWorkEvaluator {
         let nextRow = rowNumber + 1;
 
         //Adding to the top of work session
-        if (nextRow < employeesTableAs2DArray.length && this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[nextRow], employee)) {
+        if (nextRow < employeesTableAs2DArray.length && this._objComparisonHelper.ifEmployeesRowHasEmployee(employeesTableAs2DArray[nextRow], employee)) {
 
             let nextWorkTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, nextRow, employeesTableAs2DArray, timeIntervalInMinutes);
             let currentWorkTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, rowNumber, employeesTableAs2DArray, timeIntervalInMinutes);
 
             if (nextWorkTimeInfo.currentWorkTimeInMinutes < secondMaxWorkTimeInMinutes &&
                 currentWorkTimeInfo.lastRestTimeInMinutes >= secondMinRestTimeInMinutes) {
-                console.log(`ADDING ABOVE ${employee.name}, row ${rowNumber}, CW ${nextWorkTimeInfo.currentWorkTimeInMinutes}, LR ${nextWorkTimeInfo.lastRestTimeInMinutes}`);
                 return true;
             }
         }
         //Adding to the bottom of work session
-        else if (previousRow >= 0 && this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[previousRow], employee)) {
+        else if (previousRow >= 0 && this._objComparisonHelper.ifEmployeesRowHasEmployee(employeesTableAs2DArray[previousRow], employee)) {
             let workTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(employee, rowNumber, employeesTableAs2DArray, timeIntervalInMinutes);
             if (workTimeInfo.currentWorkTimeInMinutes < secondMaxWorkTimeInMinutes && workTimeInfo.nextRestTimeInMinutes >= secondMinRestTimeInMinutes) {
-                console.log(`ADDING BELOW ${employee.name}, NR ${workTimeInfo.nextRestTimeInMinutes}`);
                 return true;
             }
         }
@@ -142,7 +140,7 @@ export class EmployeesWhoCanWorkEvaluator {
     }
 
     private ifEmployeeAlreadyWorks(employee: IEmployee, rowNumber: number, employeesAs2DArray: (IEmployee | undefined)[][]) {
-        let ifRowAlreadyHasEmployee = this._objComparisonHelper.ifArrayHasAnObject(employeesAs2DArray[rowNumber], employee);
+        let ifRowAlreadyHasEmployee = this._objComparisonHelper.ifEmployeesRowHasEmployee(employeesAs2DArray[rowNumber], employee);
         return ifRowAlreadyHasEmployee;
     }
 
@@ -181,14 +179,14 @@ export class EmployeesWhoCanWorkEvaluator {
         while (nextRow < employeesTableAs2DArray.length) {
             //Check if the next row has employee
             //if does, check next
-            if (this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[nextRow], employee)) {
+            if (this._objComparisonHelper.ifEmployeesRowHasEmployee(employeesTableAs2DArray[nextRow], employee,)) {
                 nextRow += 1;
             }
             else {
                 //If it doesn't have
                 while (nextRow < employeesTableAs2DArray.length) {
                     //Skip all rows that don't have an employee (rest rows)
-                    if (!this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[nextRow], employee)) {
+                    if (!this._objComparisonHelper.ifEmployeesRowHasEmployee(employeesTableAs2DArray[nextRow], employee)) {
                         nextRow += 1;
                     }
                     //Find the row that has, and get it's current time of work
@@ -212,7 +210,7 @@ export class EmployeesWhoCanWorkEvaluator {
         let totalRestTime: number = 0;
 
         employeesTableAs2DArray.forEach(employeesRow => {
-            if (this._objComparisonHelper.ifArrayHasAnObject(employeesRow, employee)) {
+            if (this._objComparisonHelper.ifEmployeesRowHasEmployee(employeesRow, employee)) {
                 totalWorkTime += timeIntervalInMinutes;
             }
             else {
@@ -244,7 +242,7 @@ export class EmployeesWhoCanWorkEvaluator {
         //4 [e1, e2] 
         //5 [e3, e2] <-- end here
         while (rowWithLastTimeOfWork < employeesTableAs2DArray.length
-            && this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[rowWithLastTimeOfWork], employee)) {
+            && this._objComparisonHelper.ifEmployeesRowHasEmployee(employeesTableAs2DArray[rowWithLastTimeOfWork], employee)) {
             rowWithLastTimeOfWork += 1;
         }
 
@@ -262,7 +260,7 @@ export class EmployeesWhoCanWorkEvaluator {
         //3 [e1, e2] 
         //4 [e1, e2] <--start here
         //5 [e3, e2] 
-        while (rowWithLastTimeOfWork >= 0 && this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[rowWithLastTimeOfWork], employee)) {
+        while (rowWithLastTimeOfWork >= 0 && this._objComparisonHelper.ifEmployeesRowHasEmployee(employeesTableAs2DArray[rowWithLastTimeOfWork], employee)) {
             currentWorkTime += timeIntervalInMinutes;
             rowWithLastTimeOfWork -= 1;
         }
@@ -297,7 +295,7 @@ export class EmployeesWhoCanWorkEvaluator {
         //5 [e3, e2] 
 
 
-        while (rowNumber >= 0 && this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[rowNumber], employee)) {
+        while (rowNumber >= 0 && this._objComparisonHelper.ifEmployeesRowHasEmployee(employeesTableAs2DArray[rowNumber], employee)) {
             if (rowNumber === 0) {
                 return true;
             }
@@ -313,7 +311,7 @@ export class EmployeesWhoCanWorkEvaluator {
         //4 [e1, e2] 
         //5 [e3, e2] 
         //So we need to confirm that there are no more rows with employee
-        while (rowNumber >= 0 && !this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[rowNumber], employee)) {
+        while (rowNumber >= 0 && !this._objComparisonHelper.ifEmployeesRowHasEmployee(employeesTableAs2DArray[rowNumber], employee)) {
             if (rowNumber === 0) {
                 return true;
             }
@@ -350,8 +348,8 @@ export class EmployeesWhoCanWorkEvaluator {
         let row: number = rowNumber - 1;
         //1-1 = 0
         //skip
-        if (row > 0 && this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[row], employee)) {
-            while (this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[row], employee) && row > 0) {
+        if (row > 0 && this._objComparisonHelper.ifEmployeesRowHasEmployee(employeesTableAs2DArray[row], employee)) {
+            while (this._objComparisonHelper.ifEmployeesRowHasEmployee(employeesTableAs2DArray[row], employee) && row > 0) {
                 row = row - 1;
             }
         }
@@ -364,7 +362,7 @@ export class EmployeesWhoCanWorkEvaluator {
         //3 [e3, e2] <-- start here
         //4 [e1, e2]
         //skip
-        while (row >= 0 && !this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[row], employee)) {
+        while (row >= 0 && !this._objComparisonHelper.ifEmployeesRowHasEmployee(employeesTableAs2DArray[row], employee)) {
             lastRestTime += timeIntervalInMinutes;
             row = row - 1;
         }
@@ -375,7 +373,7 @@ export class EmployeesWhoCanWorkEvaluator {
         //2 [e1, e2]
         //3 [e1, e2] 
         //4 [e1, e2] <-- start here
-        while (row >= 0 && this._objComparisonHelper.ifArrayHasAnObject(employeesTableAs2DArray[row], employee)) {
+        while (row >= 0 && this._objComparisonHelper.ifEmployeesRowHasEmployee(employeesTableAs2DArray[row], employee)) {
             lastWorkTime += timeIntervalInMinutes;
             row = row - 1;
         }

@@ -218,7 +218,7 @@ export class TablesBuilderService implements OnInit {
     let employeeToChange: IEmployee | undefined = rowToChange[columnNumber];
 
     //Check in the employee already works on different sector at this time
-    if (this._objComparisonHelper.ifArrayHasAnObject(rowToChange, employee)) {
+    if (this._objComparisonHelper.ifEmployeesRowHasEmployee(rowToChange, employee)) {
       console.log(`Can not set ${employee.name} at the same time on different sector!`);
       return;
     }
@@ -240,11 +240,11 @@ export class TablesBuilderService implements OnInit {
     let previousRowNumber = rowNumber - 1;
     let nextRowNumber = rowNumber + 1;
     if (previousRowNumber >= 0 && nextRowNumber < this._employeesTableAs2DArray.length) {
-      let ifPreviousRowHasEmployeeToChange = this._objComparisonHelper.ifArrayHasAnObject(this._employeesTableAs2DArray[previousRowNumber], employeeToChange);
-      let ifNextRowHasEmployeeToChange = this._objComparisonHelper.ifArrayHasAnObject(this._employeesTableAs2DArray[nextRowNumber], employeeToChange);
+      let ifPreviousRowHasEmployeeToChange = this._objComparisonHelper.ifEmployeesRowHasEmployee(this._employeesTableAs2DArray[previousRowNumber], employeeToChange);
+      let ifNextRowHasEmployeeToChange = this._objComparisonHelper.ifEmployeesRowHasEmployee(this._employeesTableAs2DArray[nextRowNumber], employeeToChange);
       if ((JSON.stringify(employeeToChange) !== JSON.stringify(employee)) &&
         (ifPreviousRowHasEmployeeToChange && ifNextRowHasEmployeeToChange)) {
-        while (nextRowNumber < this._employeesTableAs2DArray.length && this._objComparisonHelper.ifArrayHasAnObject(this._employeesTableAs2DArray[nextRowNumber], employeeToChange)) {
+        while (nextRowNumber < this._employeesTableAs2DArray.length && this._objComparisonHelper.ifEmployeesRowHasEmployee(this._employeesTableAs2DArray[nextRowNumber], employeeToChange)) {
           const indexOfEmployeeToChange = this._employeesTableAs2DArray[nextRowNumber].findIndex(e => this._objComparisonHelper.ifTwoObjectsAreEqual(e, employeeToChange));
           this._employeesTableAs2DArray[nextRowNumber][indexOfEmployeeToChange] = undefined;
           nextRowNumber++;
