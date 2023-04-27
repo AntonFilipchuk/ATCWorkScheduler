@@ -33,6 +33,8 @@
         [rowNumber]="j"
         [columnNumber]="i"
         [sector]="sector"
+        [selectedColumnNumber]="selectedColumnNumber"
+        (selectedColumnNumberChange)="changeSelectedColumn($event)"
       ></app-selectable-table-element>
     </td>
   </ng-container>

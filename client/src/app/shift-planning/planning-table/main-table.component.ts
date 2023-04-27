@@ -17,28 +17,34 @@ export interface ITableRow {
   templateUrl: './main-table.component.html',
 })
 export class MainTableComponent implements OnInit {
-  sectorsForShift: ISector[] = [];
-  displayedColumns: string[] = [];
-  employees: IEmployee[] = [];
+  public sectorsForShift: ISector[] = [];
+  public displayedColumns: string[] = [];
+  public employees: IEmployee[] = [];
 
-  tableDataSource: MatTableDataSource<ITableRow> = new MatTableDataSource<ITableRow>();
+  public tableDataSource: MatTableDataSource<ITableRow> = new MatTableDataSource<ITableRow>();
 
-  @ViewChild(MatTable) table!: MatTable<ITableRow>;
+  public selectedColumnNumber: number = -1;
+
+
   constructor(private planningTableService: TablesBuilderService) {
   }
 
 
-  ngOnInit(): void {
-
+  ngOnInit(): void {    
     let pTS = this.planningTableService;
     this.displayedColumns = pTS.displayColumns;
     this.sectorsForShift = pTS.sectorsForShift;
 
-    this.getTableWithSubscription();
+    this.getTableForSubscription();
     this.employees = pTS.employeesForShift;
   }
 
-  getTableWithSubscription() {
+  public changeSelectedColumn(columnNumber : number) {
+    this.selectedColumnNumber = columnNumber;
+    console.log("Parent Changed", this.selectedColumnNumber); 
+  }
+
+  getTableForSubscription() {
     this.planningTableService.getTableForSubscription().subscribe(
       {
         next: (response: ITableRow[]) => {

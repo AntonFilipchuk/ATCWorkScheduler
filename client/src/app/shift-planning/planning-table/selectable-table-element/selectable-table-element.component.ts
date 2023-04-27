@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { IEmployee } from 'src/app/models/IEmployee';
 import { MainTableComponent } from '../main-table.component';
 import { MatOptionSelectionChange } from '@angular/material/core';
@@ -6,7 +6,6 @@ import { BehaviorSubject } from 'rxjs';
 import { IEmployeesRow } from 'src/app/models/IEmployeesRow';
 import { ISector } from 'src/app/models/ISector';
 import { IWorkAndRestTimeInfo } from 'src/app/models/ITimeOfWorkInfo';
-import { EmployeeSetterService } from 'src/app/Services/EmployeeSetterService/employee-setter.service';
 import { TablesBuilderService } from 'src/app/Services/TableBuilderService/tables-builder.service';
 
 
@@ -25,39 +24,61 @@ import { TablesBuilderService } from 'src/app/Services/TableBuilderService/table
   templateUrl: './selectable-table-element.component.html',
   styleUrls: ['./selectable-table-element.component.scss']
 })
-export class SelectableTableElementComponent implements OnInit {
+export class SelectableTableElementComponent implements OnInit, OnChanges {
 
   @Input() rowNumber!: number;
   @Input() columnNumber!: number;
   @Input() sector!: ISector;
 
+
+  @Input() selectedColumnNumber!: number;
+  @Output() selectedColumnNumberChange: EventEmitter<number> = new EventEmitter<number>();
+  @Output() employeeChange: EventEmitter<IEmployee | undefined> = new EventEmitter<IEmployee | undefined>();
+
   public ifShowSelector: boolean = false;
   public ifSelectorActive: boolean = false;
   public ifShowBorder: boolean = false;
   public ifSelected: boolean = false;
+  public ifCellDisabled: boolean = false;
 
 
   public employeesToSelectFrom: IEmployee[] = [];
   public employee: IEmployee | undefined;
   public color: string | undefined;
-
   public timeInfo: IWorkAndRestTimeInfo | undefined;
 
-  constructor(private planningTableService: TablesBuilderService, private employeeSetterService: EmployeeSetterService) {
+  //1) Click on cell
+  //2) Deactivate all columns except the one that was selected
+  //3) Select an employee
+  //4) Color all cells where the employee may be put
+  //5) Until the LMB is not pressed again - allow to select cells
+
+  constructor(private planningTableService: TablesBuilderService) {
+  }
+  ngOnChanges(): void {
+    if (this.selectedColumnNumber >= 0 && this.columnNumber !== this.selectedColumnNumber) {
+      this.color = 'lightGrey';
+      this.ifCellDisabled = true;
+    }
+    else if (this.employee) {
+      this.color = this.employee?.color;
+      this.timeInfo = this.planningTableService.getWorkAndRestTimeInfo(this.employee!, this.rowNumber!);
+    }
+    else {
+      this.color = 'grey';
+      this.ifCellDisabled = false;
+    }
   }
 
-
   ngOnInit(): void {
-
     this.configureProperEmployees();
     this.employee = this.planningTableService.getEmployeeByRowAnColumnNumber(this.rowNumber, this.columnNumber);
+
     if (this.employee) {
       this.color = this.employee?.color;
       this.timeInfo = this.planningTableService.getWorkAndRestTimeInfo(this.employee!, this.rowNumber!);
     }
   }
-
-
 
   toggleShowBorderAndSelector() {
     this.ifShowBorder = !this.ifShowBorder;
@@ -66,13 +87,33 @@ export class SelectableTableElementComponent implements OnInit {
 
   public toggleIfSelectorActive() {
     this.ifSelectorActive = !this.ifSelectorActive;
+    this.changeSelectedColumn();
   }
 
-  //When we select an employee from a list
+  public toggleOnSelectorClose() {
+    console.log("Closed!");
+    this.ifSelectorActive = !this.ifSelectorActive;
+    this.changeToDefault();
+  }
+
+  //When we select an employee from the list
   onSelection($event: MatOptionSelectionChange) {
+    this.changeToDefault();
     this.toggleIfSelectorActive();
-    this.planningTableService.setEmployeeInRow($event.source.value, this.rowNumber!, this.columnNumber);
+    let selectedEmployee = $event.source.value;
+    this.planningTableService.setEmployeeInRow(selectedEmployee, this.rowNumber!, this.columnNumber);
     this.employee = this.planningTableService.getEmployeeByRowAnColumnNumber(this.rowNumber, this.columnNumber);
+
+  }
+
+  changeSelectedColumn() {
+    console.log('Change column to', this.columnNumber)
+    this.selectedColumnNumberChange.emit(this.columnNumber);
+  }
+
+  changeToDefault() {
+    console.log('To default');
+    this.selectedColumnNumberChange.emit(-1);
   }
 
   configureProperEmployees() {
