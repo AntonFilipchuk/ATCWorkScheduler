@@ -10,8 +10,11 @@
 >
   <p>
     {{ employee ? employee.name : "" }}
+    {{timeInfo ? 'LW ' + timeInfo.lastWorkTimeInMinutes : ''}}
     {{timeInfo ? 'LR ' + timeInfo.lastRestTimeInMinutes : ''}}
     {{timeInfo ? 'NR ' + timeInfo.nextRestTimeInMinutes : ''}}
+    {{timeInfo ? 'NW ' + timeInfo.nextWorkTimeInMinutes : ''}}
+
   </p>
 
   <mat-select
