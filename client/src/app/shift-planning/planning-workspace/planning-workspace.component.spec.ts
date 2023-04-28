@@ -1,6 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { PlanningWorkspaceComponent } from './planning-workspace.component';
+import { CommonModule } from '@angular/common';
+import { MainTableModule } from '../planning-table/main-table.module';
+import { EmployeeInfoTableModule } from '../employee-info-table/employee-info-table.module';
 
 describe('PlanningWorkspaceComponent', () => {
   let component: PlanningWorkspaceComponent;
@@ -8,9 +11,12 @@ describe('PlanningWorkspaceComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ PlanningWorkspaceComponent ]
+      declarations: [PlanningWorkspaceComponent], 
+      imports: [CommonModule,
+        MainTableModule,
+        EmployeeInfoTableModule]
     })
-    .compileComponents();
+      .compileComponents();
 
     fixture = TestBed.createComponent(PlanningWorkspaceComponent);
     component = fixture.componentInstance;

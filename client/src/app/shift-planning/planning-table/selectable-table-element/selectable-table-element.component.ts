@@ -72,7 +72,7 @@ export class SelectableTableElementComponent implements OnInit, OnChanges {
 
   ngOnInit(): void {
     this.configureProperEmployees();
-    this.employee = this.planningTableService.getEmployeeByRowAnColumnNumber(this.rowNumber, this.columnNumber);
+    //this.employee = this.planningTableService.getEmployeeByRowAnColumnNumber(this.rowNumber, this.columnNumber);
 
     if (this.employee) {
       this.color = this.employee?.color;

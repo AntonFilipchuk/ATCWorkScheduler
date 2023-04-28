@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { EmployeeInfoTableComponent } from './employee-info-table.component';
+import { CommonModule } from '@angular/common';
+import { MatTableModule } from '@angular/material/table';
 
 describe('EmployeeInfoTableComponent', () => {
   let component: EmployeeInfoTableComponent;
@@ -8,7 +10,11 @@ describe('EmployeeInfoTableComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ EmployeeInfoTableComponent ]
+      declarations: [ EmployeeInfoTableComponent ],
+      imports: [
+        CommonModule, 
+        MatTableModule
+      ]
     })
     .compileComponents();
 
