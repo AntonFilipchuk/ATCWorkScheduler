@@ -73,12 +73,12 @@ export class DefaultTableBuilder {
         this.timeColumnAsStringArray = timeConfigurator.timeColumnAsStringArray;
         this.timeColumnAsDateArray = timeConfigurator.timeColumnAsDateArray;
         let ifDuplicatesInSectorsOrEmployees: boolean =
-            this.checkNoDuplicatesInArray(employees) &&
-            this.checkNoDuplicatesInArray(sectors);
+            this.ifNoDuplicatesInArray(employees) &&
+            this.ifNoDuplicatesInArray(sectors);
 
         if (
-            this.checkForMinimumAmountOfEmployees(sectors, employees) &&
-            this.checkIfAllEmployeesCanWorkAtLeastOnOneSectors(sectors) &&
+            this.ifMinimumAmountOfEmployees(sectors, employees) &&
+            this.ifAllEmployeesCanWorkAtLeastOnOneSectors(sectors) &&
             ifDuplicatesInSectorsOrEmployees
         ) {
             this.employeesForShift = employees;
@@ -139,7 +139,7 @@ export class DefaultTableBuilder {
         return employees2DTable;
     }
 
-    private checkNoDuplicatesInArray(array: any[]): boolean {
+    private ifNoDuplicatesInArray(array: any[]): boolean {
         const result: any[] = [];
         for (const item of array) {
             if (!result.includes(item)) {
@@ -158,7 +158,7 @@ export class DefaultTableBuilder {
 
     //employeesSectors = [{name: 'G12R'}, {name: 'G12P'}]
     //_sectors = [{name: 'G12R'}, {name: 'G12P'}, {name: 'G345R'}, {name: 'G345P'}]
-    private checkIfAllEmployeesCanWorkAtLeastOnOneSectors(
+    private ifAllEmployeesCanWorkAtLeastOnOneSectors(
         sectors: ISector[]
     ): boolean {
         let allCanWork = true;
@@ -190,7 +190,7 @@ export class DefaultTableBuilder {
     //Calculate if we have enough employees for the shift
     //We need at least 5 people for 4 workplaces
     //So if we have less then 1.25 people per sector => can't work
-    private checkForMinimumAmountOfEmployees(
+    private ifMinimumAmountOfEmployees(
         sectors: ISector[],
         employees: IEmployee[]
     ): boolean {

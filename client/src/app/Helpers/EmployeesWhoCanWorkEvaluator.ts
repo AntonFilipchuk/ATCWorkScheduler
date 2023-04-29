@@ -166,7 +166,6 @@ export class EmployeesWhoCanWorkEvaluator {
         return false;
     }
 
-
     private calculateNextWorkTime(employee: IEmployee, rowNumber: number, employeesTableAs2DArray: (IEmployee | undefined)[][],
         timeIntervalInMinutes: number): [number, number] {
         let nextWorkTime: number = 0;
