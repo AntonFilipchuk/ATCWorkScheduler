@@ -109,7 +109,7 @@ let e9: IEmployee = {
 let employees: IEmployee[] = [e1, e2, e3, e4, e5, e6, e7, e8, e9];
 
 let todayDate: Date = new Date();
-let shiftStartTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 8, 0);
+let shiftStartTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), -1, 0);
 let shiftEndTime: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 14, 30);
 
 let testTime1: Date = new Date(todayDate.getDate(), todayDate.getMonth(), todayDate.getDate(), 8, 0);

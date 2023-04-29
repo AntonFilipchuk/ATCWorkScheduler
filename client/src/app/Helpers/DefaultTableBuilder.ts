@@ -10,15 +10,13 @@
 //Full build default table for mat table to consume
 //
 
-import { IEmployee } from "../models/IEmployee";
-import { IEmployeesRow } from "../models/IEmployeesRow";
-import { ISector } from "../models/ISector";
-import { ITableRow } from "../models/ITableRow";
-import { ObjectsComparisonHelper } from "./ObjectsComparisonHelper";
-import { TimeConfigurator } from "./TimeConfigurator";
+import { IEmployee } from '../models/IEmployee';
+import { ISector } from '../models/ISector';
+import { ITableRow } from '../models/ITableRow';
+import { ObjectsComparisonHelper } from './ObjectsComparisonHelper';
+import { TimeConfigurator } from './TimeConfigurator';
 
 export class DefaultTableBuilder {
-
     public timeColumnAsStringArray: string[];
 
     public timeColumnAsDateArray: Date[][];
@@ -40,10 +38,10 @@ export class DefaultTableBuilder {
     //------------------------
     //Sectors - check if no duplicates and has at least 1 sector
     //------------------------
-    //Employees - check if no duplicates 
-    //Enough employees for the shift 
+    //Employees - check if no duplicates
+    //Enough employees for the shift
     //Employees have permits
-    //Enough employees for each sector 
+    //Enough employees for each sector
     //------------------------
     //ShiftDate - check if it's not in the past
     //ShiftStartTime - check if it's the same day as shiftDate and it's before ShiftEndTime
@@ -59,32 +57,42 @@ export class DefaultTableBuilder {
         private shiftStartTime: Date,
         private shiftEndTime: Date,
         private shiftDate: Date,
-        private intervalInMinutes: number) {
+        private intervalInMinutes: number
+    ) {
+        this._objComparisonHelper = new ObjectsComparisonHelper();
 
-        this._objComparisonHelper = new ObjectsComparisonHelper;
-
-        let timeConfigurator: TimeConfigurator = new TimeConfigurator
-            (shiftStartTime.getHours(),
-                shiftStartTime.getMinutes(),
-                shiftEndTime.getHours(),
-                shiftEndTime.getMinutes(),
-                shiftDate,
-                intervalInMinutes);
+        let timeConfigurator: TimeConfigurator = new TimeConfigurator(
+            shiftStartTime.getHours(),
+            shiftStartTime.getMinutes(),
+            shiftEndTime.getHours(),
+            shiftEndTime.getMinutes(),
+            shiftDate,
+            intervalInMinutes
+        );
         this.timeIntervalInMinutes = intervalInMinutes;
         this.timeColumnAsStringArray = timeConfigurator.timeColumnAsStringArray;
         this.timeColumnAsDateArray = timeConfigurator.timeColumnAsDateArray;
-        let ifDuplicatesInSectorsOrEmployees: boolean = this.checkNoDuplicatesInArray(employees) && this.checkNoDuplicatesInArray(sectors)
+        let ifDuplicatesInSectorsOrEmployees: boolean =
+            this.checkNoDuplicatesInArray(employees) &&
+            this.checkNoDuplicatesInArray(sectors);
 
-        if (this.checkForMinimumAmountOfEmployees(sectors, employees) &&
+        if (
+            this.checkForMinimumAmountOfEmployees(sectors, employees) &&
             this.checkIfAllEmployeesCanWorkAtLeastOnOneSectors(sectors) &&
-            ifDuplicatesInSectorsOrEmployees) {
+            ifDuplicatesInSectorsOrEmployees
+        ) {
             this.employeesForShift = employees;
             this.sectorsForShift = sectors;
-            this.tableForEmployeesAs2DArray = this.buildTableForEmployeesAs2DArray(sectors, this.timeColumnAsStringArray);
-            this.defaultTableForMatTable = this.buildDefaultTableForMatTable(this.timeColumnAsStringArray, this.tableForEmployeesAs2DArray);
+            this.tableForEmployeesAs2DArray = this.buildTableForEmployeesAs2DArray(
+                sectors,
+                this.timeColumnAsStringArray
+            );
+            this.defaultTableForMatTable = this.buildDefaultTableForMatTable(
+                this.timeColumnAsStringArray,
+                this.tableForEmployeesAs2DArray
+            );
             this.displayedColumns = this.buildDisplayedColumns(sectors);
-        }
-        else {
+        } else {
             throw Error();
         }
     }
@@ -93,7 +101,7 @@ export class DefaultTableBuilder {
     // ['time', 'G12R', ... , 'G345P']
     private buildDisplayedColumns(sectors: ISector[]): string[] {
         let sectorNames: string[] = [];
-        sectors.forEach(sector => {
+        sectors.forEach((sector) => {
             sectorNames.push(sector.name);
         });
         return ['time', ...sectorNames];
@@ -101,22 +109,31 @@ export class DefaultTableBuilder {
 
     //Table row:
     // {time: Date, undefined, undefined, ... , undefined}
-    private buildDefaultTableForMatTable(timeColumnAsStringArray: string[], tableForEmployeesAs2DArray: (IEmployee | undefined)[][]): ITableRow[] {
+    private buildDefaultTableForMatTable(
+        timeColumnAsStringArray: string[],
+        tableForEmployeesAs2DArray: (IEmployee | undefined)[][]
+    ): ITableRow[] {
         let table: ITableRow[] = [];
         for (let i = 0; i < this.timeColumnAsDateArray.length; i++) {
-            let defaultTableRow: ITableRow = { time: timeColumnAsStringArray[i], ...tableForEmployeesAs2DArray[i] }
-            table.push(defaultTableRow)
+            let defaultTableRow: ITableRow = {
+                time: timeColumnAsStringArray[i],
+                ...tableForEmployeesAs2DArray[i],
+            };
+            table.push(defaultTableRow);
         }
         return table;
     }
 
-    private buildTableForEmployeesAs2DArray(sectors: ISector[], timeColumn: string[] | Date[]): (IEmployee | undefined)[][] {
+    private buildTableForEmployeesAs2DArray(
+        sectors: ISector[],
+        timeColumn: string[] | Date[]
+    ): (IEmployee | undefined)[][] {
         let employees2DTable: (IEmployee | undefined)[][] = [];
-        timeColumn.forEach(time => {
+        timeColumn.forEach((time) => {
             let employeeRow: (IEmployee | undefined)[] = [];
-            sectors.forEach(sector => {
+            sectors.forEach((sector) => {
                 employeeRow.push(undefined);
-            })
+            });
             employees2DTable.push(employeeRow);
         });
         return employees2DTable;
@@ -127,9 +144,12 @@ export class DefaultTableBuilder {
         for (const item of array) {
             if (!result.includes(item)) {
                 result.push(item);
-            }
-            else {
-                console.log(`Error: an array ${JSON.stringify(array)} has a duplicate ${JSON.stringify(item)} !`);
+            } else {
+                console.log(
+                    `Error: an array ${JSON.stringify(
+                        array
+                    )} has a duplicate ${JSON.stringify(item)} !`
+                );
                 return false;
             }
         }
@@ -138,20 +158,28 @@ export class DefaultTableBuilder {
 
     //employeesSectors = [{name: 'G12R'}, {name: 'G12P'}]
     //_sectors = [{name: 'G12R'}, {name: 'G12P'}, {name: 'G345R'}, {name: 'G345P'}]
-    private checkIfAllEmployeesCanWorkAtLeastOnOneSectors(sectors: ISector[]): boolean {
+    private checkIfAllEmployeesCanWorkAtLeastOnOneSectors(
+        sectors: ISector[]
+    ): boolean {
         let allCanWork = true;
-        this.employees.forEach(employee => {
-            if (!sectors.some(sector => employee.sectorPermits.some(s => s.name === sector.name))) {
+        this.employees.forEach((employee) => {
+            if (
+                !sectors.some((sector) =>
+                    employee.sectorPermits.some((s) => s.name === sector.name)
+                )
+            ) {
                 let employeePermitsWhoCantWork: string[] = [];
-                employee.sectorPermits.forEach(sector => {
+                employee.sectorPermits.forEach((sector) => {
                     employeePermitsWhoCantWork.push(sector.name);
                 });
                 let neededPermits: string[] = [];
-                sectors.forEach(sector => {
+                sectors.forEach((sector) => {
                     neededPermits.push(sector.name);
                 });
                 console.log(`Employee ${employee.name} cannot work`);
-                console.log(`${employee.name}'s permits: ${employeePermitsWhoCantWork}`);
+                console.log(
+                    `${employee.name}'s permits: ${employeePermitsWhoCantWork}`
+                );
                 console.log(`Needed permits: ${neededPermits}`);
                 allCanWork = false;
             }
@@ -162,13 +190,19 @@ export class DefaultTableBuilder {
     //Calculate if we have enough employees for the shift
     //We need at least 5 people for 4 workplaces
     //So if we have less then 1.25 people per sector => can't work
-    private checkForMinimumAmountOfEmployees(sectors: ISector[], employees: IEmployee[]): boolean {
+    private checkForMinimumAmountOfEmployees(
+        sectors: ISector[],
+        employees: IEmployee[]
+    ): boolean {
         let numberOfSectors: number = sectors.length;
         let numberOfEmployees: number = employees.length;
         let ifCanWork: boolean = numberOfEmployees / numberOfSectors >= 1.25;
 
         if (!ifCanWork) {
-            console.log(`Not enough people for work! Coefficient : ${numberOfEmployees / numberOfSectors}`)
+            console.log(
+                `Not enough people for work! Coefficient : ${numberOfEmployees / numberOfSectors
+                }`
+            );
         }
         return ifCanWork;
     }
