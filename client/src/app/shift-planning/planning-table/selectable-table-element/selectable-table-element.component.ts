@@ -5,7 +5,7 @@ import { MatOptionSelectionChange } from '@angular/material/core';
 import { BehaviorSubject } from 'rxjs';
 import { IEmployeesRow } from 'src/app/models/IEmployeesRow';
 import { ISector } from 'src/app/models/ISector';
-import { IWorkAndRestTimeInfo } from 'src/app/models/ITimeOfWorkInfo';
+import { IWorkAndRestTimeInfo } from 'src/app/models/IWorkAndRestTimeInfo';
 import { TablesBuilderService } from 'src/app/Services/TableBuilderService/tables-builder.service';
 
 
@@ -56,11 +56,14 @@ export class SelectableTableElementComponent implements OnInit, OnChanges {
   constructor(private planningTableService: TablesBuilderService) {
   }
   ngOnChanges(): void {
+    
     if (this.selectedColumnNumber >= 0 && this.columnNumber !== this.selectedColumnNumber) {
       this.color = 'lightGrey';
       this.ifCellDisabled = true;
     }
     else if (this.employee) {
+      console.log('Employee');
+      
       this.color = this.employee?.color;
       this.timeInfo = this.planningTableService.getWorkAndRestTimeInfo(this.employee!, this.rowNumber!);
     }
@@ -72,7 +75,7 @@ export class SelectableTableElementComponent implements OnInit, OnChanges {
 
   ngOnInit(): void {
     this.configureProperEmployees();
-    //this.employee = this.planningTableService.getEmployeeByRowAnColumnNumber(this.rowNumber, this.columnNumber);
+    
 
     if (this.employee) {
       this.color = this.employee?.color;
@@ -91,7 +94,7 @@ export class SelectableTableElementComponent implements OnInit, OnChanges {
   }
 
   public toggleOnSelectorClose() {
-    console.log("Closed!");
+    //console.log("Closed!");
     this.ifSelectorActive = !this.ifSelectorActive;
     this.changeToDefault();
   }
@@ -103,20 +106,20 @@ export class SelectableTableElementComponent implements OnInit, OnChanges {
     let selectedEmployee = $event.source.value;
     this.planningTableService.setEmployeeInRow(selectedEmployee, this.rowNumber!, this.columnNumber);
     this.employee = this.planningTableService.getEmployeeByRowAnColumnNumber(this.rowNumber, this.columnNumber);
-
   }
 
   changeSelectedColumn() {
-    console.log('Change column to', this.columnNumber)
+    //console.log('Change column to', this.columnNumber)
     this.selectedColumnNumberChange.emit(this.columnNumber);
   }
 
   changeToDefault() {
-    console.log('To default');
+    //console.log('To default');
     this.selectedColumnNumberChange.emit(-1);
   }
 
   configureProperEmployees() {
     this.employeesToSelectFrom = this.planningTableService.getEmployeesForSelection(this.rowNumber, this.sector);
+    this.employee = this.planningTableService.getEmployeeByRowAnColumnNumber(this.rowNumber, this.columnNumber);
   }
 }

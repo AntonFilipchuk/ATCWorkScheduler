@@ -1,10 +1,9 @@
 import { IEmployee } from "../models/IEmployee";
 import { ISector } from "../models/ISector";
-import { IWorkAndRestTimeInfo } from "../models/ITimeOfWorkInfo";
+import { IWorkAndRestTimeInfo } from "../models/IWorkAndRestTimeInfo";
 import { ObjectsComparisonHelper } from "./ObjectsComparisonHelper";
 
 export class EmployeesWhoCanWorkEvaluator {
-    public employeesWhoCanWork: IEmployee[] = []
     private _objComparisonHelper = new ObjectsComparisonHelper();
 
     public getEmployeesWhoCanWork(

@@ -14,7 +14,7 @@ import { ITableRow } from '../../models/ITableRow';
 import { DefaultTableBuilder } from '../../Helpers/DefaultTableBuilder';
 import { ISector } from '../../models/ISector';
 import { ObjectsComparisonHelper } from '../../Helpers/ObjectsComparisonHelper';
-import { IWorkAndRestTimeInfo } from '../../models/ITimeOfWorkInfo';
+import { IWorkAndRestTimeInfo } from '../../models/IWorkAndRestTimeInfo';
 import { StickyDirection } from '@angular/cdk/table';
 import { EmployeesWhoCanWorkEvaluator } from '../../Helpers/EmployeesWhoCanWorkEvaluator';
 
@@ -124,24 +124,10 @@ let shiftEndTime: Date = new Date(
   todayDate.getDate(),
   todayDate.getMonth(),
   todayDate.getDate(),
-  14,
-  30
+  15,
+  0
 );
 
-let testTime1: Date = new Date(
-  todayDate.getDate(),
-  todayDate.getMonth(),
-  todayDate.getDate(),
-  8,
-  0
-);
-let testTime2: Date = new Date(
-  todayDate.getDate(),
-  todayDate.getMonth(),
-  todayDate.getDate(),
-  9,
-  0
-);
 
 @Injectable({
   providedIn: 'root',
@@ -195,7 +181,7 @@ export class TablesBuilderService implements OnInit {
     this.buildTable();
   }
 
-  buildDefaultTable(
+  private buildDefaultTable(
     sectors: ISector[],
     employees: IEmployee[],
     shiftStartTime: Date,
@@ -218,8 +204,8 @@ export class TablesBuilderService implements OnInit {
     this._timeColumnAsStringArray = defaultTableBuilder.timeColumnAsStringArray;
     this._timeIntervalInMinutes = defaultTableBuilder.timeIntervalInMinutes;
     this.displayColumns = defaultTableBuilder.displayedColumns;
-    this.employeesForShift = defaultTableBuilder.employeesForShift;
-    this.sectorsForShift = defaultTableBuilder.sectorsForShift;
+    this.employeesForShift = defaultTableBuilder.employees;
+    this.sectorsForShift = defaultTableBuilder.sectors;
   }
 
   //Call this method every time we change _employeesTableAs2DArray
@@ -366,6 +352,12 @@ export class TablesBuilderService implements OnInit {
     rowNumber: number,
     columnNumber: number
   ): IEmployee | undefined {
-    return this._employeesTableAs2DArray[rowNumber][columnNumber];
+    let row = this._employeesTableAs2DArray[rowNumber];
+    if(row === undefined)
+    {
+      console.log("NO CN");
+    }
+    let employee = row[columnNumber];
+    return employee;
   }
 }
