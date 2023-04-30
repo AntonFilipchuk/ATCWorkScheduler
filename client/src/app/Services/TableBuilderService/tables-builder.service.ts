@@ -1,4 +1,4 @@
-import { Injectable, OnInit } from '@angular/core';
+import { Inject, Injectable, OnInit } from '@angular/core';
 import { IEmployee } from '../../models/IEmployee';
 import { IEmployeesRow } from '../../models/IEmployeesRow';
 import {
@@ -17,6 +17,7 @@ import { ObjectsComparisonHelper } from '../../Helpers/ObjectsComparisonHelper';
 import { IWorkAndRestTimeInfo } from '../../models/IWorkAndRestTimeInfo';
 import { StickyDirection } from '@angular/cdk/table';
 import { EmployeesWhoCanWorkEvaluator } from '../../Helpers/EmployeesWhoCanWorkEvaluator';
+import { StartingDataEvaluatorService } from '../StartingDataEvaluatorService/starting-data-evaluator.service';
 
 /**
  *  _____________________
@@ -29,105 +30,6 @@ import { EmployeesWhoCanWorkEvaluator } from '../../Helpers/EmployeesWhoCanWorkE
  *
  *       | e1| e2| e3| e4| -> ISectorsRow
  */
-
-let g12r: ISector = { name: 'G12R' };
-let g12p: ISector = { name: 'G12P' };
-let g345r: ISector = { name: 'G345R' };
-let g345p: ISector = { name: 'G345P' };
-let t1R: ISector = { name: 'T1R' };
-let t1P: ISector = { name: 'T1P' };
-let sectors: ISector[] = [g12r, g12p, g345r, g345p];
-
-let e1: IEmployee = {
-  id: 1,
-  name: 'Filipchuk',
-  totalTime: 0,
-  sectorPermits: [g12r, g12p, g345r, g345p],
-  color: 'red',
-};
-
-let e2: IEmployee = {
-  id: 2,
-  name: 'Egorov',
-  totalTime: 0,
-  sectorPermits: [g12r, g12p, g345r, g345p],
-  color: 'green',
-};
-
-let e3: IEmployee = {
-  id: 3,
-  name: 'Gallyamov',
-  totalTime: 0,
-  sectorPermits: [g12r, g12p, g345r, g345p],
-  color: 'yellow',
-};
-
-let e4: IEmployee = {
-  id: 4,
-  name: 'Nosenko',
-  totalTime: 0,
-  sectorPermits: [g12r, g12p, g345r, g345p],
-  color: 'orange',
-};
-
-let e5: IEmployee = {
-  id: 5,
-  name: 'Mozjuhin',
-  totalTime: 0,
-  sectorPermits: [g12r, g12p, g345r, g345p],
-  color: 'Chocolate',
-};
-
-let e6: IEmployee = {
-  id: 6,
-  name: 'Boiko',
-  totalTime: 0,
-  sectorPermits: [g12r, g12p, g345r, g345p],
-  color: 'Aqua',
-};
-
-let e7: IEmployee = {
-  id: 7,
-  name: 'Fomin',
-  totalTime: 0,
-  sectorPermits: [g12r, g12p, g345r, g345p],
-  color: 'DarkMagenta ',
-};
-
-let e8: IEmployee = {
-  id: 8,
-  name: 'Ignanin',
-  totalTime: 0,
-  sectorPermits: [g12r, g12p, g345r, g345p],
-  color: 'DarkBlue',
-};
-
-let e9: IEmployee = {
-  id: 9,
-  name: 'Chiglyakov',
-  totalTime: 0,
-  sectorPermits: [g12r, g12p, g345r, g345p],
-  color: 'Crimson ',
-};
-
-let employees: IEmployee[] = [e1, e2, e3, e4, e5, e6, e7, e8, e9];
-
-let todayDate: Date = new Date();
-let shiftStartTime: Date = new Date(
-  todayDate.getDate(),
-  todayDate.getMonth(),
-  todayDate.getDate(),
-  8,
-  0
-);
-let shiftEndTime: Date = new Date(
-  todayDate.getDate(),
-  todayDate.getMonth(),
-  todayDate.getDate(),
-  15,
-  0
-);
-
 
 @Injectable({
   providedIn: 'root',
@@ -151,62 +53,37 @@ let shiftEndTime: Date = new Date(
 //3)A function that rebuild the table for the Mat table when we change the Employees table
 //4)A function that takes an employee, the position in the table and decides if and employee
 //can be set there.
-export class TablesBuilderService implements OnInit {
+export class TablesBuilderService {
   public $table = new ReplaySubject<ITableRow[]>();
   public displayColumns: string[] = [];
 
-  public employeesForShift: IEmployee[] = [];
-  public sectorsForShift: ISector[] = [];
+  public employees: IEmployee[] = [];
+  public sectors: ISector[] = [];
 
   private _employeesTableAs2DArray: (IEmployee | undefined)[][] = [];
   private _tableForMatTable: ITableRow[] = [];
   private _timeColumnAsStringArray: string[] = [];
   private _timeColumnAsDateArray: Date[][] = [];
   private _timeIntervalInMinutes: number = 0;
+  private _maxWorkTimeInMinutes: number = 0;
+  private _minWorkTimeInMinutes: number = 0;
 
   private _objComparisonHelper: ObjectsComparisonHelper;
 
-  constructor() {
-    this.buildDefaultTable(
-      sectors,
-      employees,
-      shiftStartTime,
-      shiftEndTime,
-      new Date(),
-      10
-    );
-    this._objComparisonHelper = new ObjectsComparisonHelper();
-  }
-  ngOnInit(): void {
-    this.buildTable();
-  }
+  constructor(private sde: StartingDataEvaluatorService) {
+    this.displayColumns = sde.displayedColumns;
+    this.employees = sde.employees;
+    this.sectors = sde.sectors;
+    this._employeesTableAs2DArray = sde.employeesTableAs2DArray;
+    this._tableForMatTable = sde.defaultTableForMatTable;
+    this._timeColumnAsStringArray = sde.timeColumnAsStringArray;
+    this._timeColumnAsDateArray = sde.timeColumnAsDateArray;
+    this._timeIntervalInMinutes = sde.timeIntervalInMinutes;
+    this._maxWorkTimeInMinutes = sde.maxWorkTimeInMinutes;
+    this._minWorkTimeInMinutes = sde.minRestTimeInMinutes;
 
-  private buildDefaultTable(
-    sectors: ISector[],
-    employees: IEmployee[],
-    shiftStartTime: Date,
-    shiftEndTime: Date,
-    shiftDate: Date,
-    timeIntervalInMinutes: number
-  ) {
-    let defaultTableBuilder = new DefaultTableBuilder(
-      sectors,
-      employees,
-      shiftStartTime,
-      shiftEndTime,
-      shiftDate,
-      timeIntervalInMinutes
-    );
-    this._employeesTableAs2DArray =
-      defaultTableBuilder.tableForEmployeesAs2DArray;
-      
-    this._tableForMatTable = defaultTableBuilder.defaultTableForMatTable;
-    this._timeColumnAsDateArray = defaultTableBuilder.timeColumnAsDateArray;
-    this._timeColumnAsStringArray = defaultTableBuilder.timeColumnAsStringArray;
-    this._timeIntervalInMinutes = defaultTableBuilder.timeIntervalInMinutes;
-    this.displayColumns = defaultTableBuilder.displayedColumns;
-    this.employeesForShift = defaultTableBuilder.employees;
-    this.sectorsForShift = defaultTableBuilder.sectors;
+    this._objComparisonHelper = new ObjectsComparisonHelper();
+    this.buildTable();
   }
 
   //Call this method every time we change _employeesTableAs2DArray
@@ -215,9 +92,8 @@ export class TablesBuilderService implements OnInit {
 
     for (let i = 0; i < this._timeColumnAsStringArray.length; i++) {
       let sectorsRow: IEmployeesRow = {};
-      for (let j = 0; j < this.sectorsForShift.length; j++) {
-        sectorsRow[this.sectorsForShift[j].name] =
-          this._employeesTableAs2DArray[i][j];
+      for (let j = 0; j < this.sectors.length; j++) {
+        sectorsRow[this.sectors[j].name] = this._employeesTableAs2DArray[i][j];
       }
       table.push({
         time: this._timeColumnAsStringArray[i],
@@ -325,12 +201,10 @@ export class TablesBuilderService implements OnInit {
     sector: ISector
   ): IEmployee[] {
     return new EmployeesWhoCanWorkEvaluator().getEmployeesWhoCanWork(
-      this.employeesForShift,
+      this.employees,
       rowNumber,
       this._employeesTableAs2DArray,
-      60,
       120,
-      10,
       20,
       this._timeIntervalInMinutes,
       sector

@@ -10,10 +10,8 @@ export class EmployeesWhoCanWorkEvaluator {
     employeesForShift: IEmployee[],
     rowNumber: number,
     employeesTableAs2DArray: (IEmployee | undefined)[][],
-    firstMaxWorkTimeInMinutes: number | undefined,
-    secondMaxWorkTimeInMinutes: number,
-    firstMinRestTimeInMinutes: number | undefined,
-    secondMinRestTimeInMinutes: number,
+    maxWorkTimeInMinutes: number,
+    minRestTimeInMinutes: number,
     timeIntervalInMinutes: number,
     sector: ISector
   ): IEmployee[] {
@@ -37,10 +35,8 @@ export class EmployeesWhoCanWorkEvaluator {
             employee,
             rowNumber,
             employeesTableAs2DArray,
-            firstMaxWorkTimeInMinutes,
-            secondMaxWorkTimeInMinutes,
-            firstMinRestTimeInMinutes,
-            secondMinRestTimeInMinutes,
+            maxWorkTimeInMinutes,
+            minRestTimeInMinutes,
             timeIntervalInMinutes
           );
 
@@ -117,10 +113,8 @@ export class EmployeesWhoCanWorkEvaluator {
     employee: IEmployee,
     rowNumber: number,
     employeesTableAs2DArray: (IEmployee | undefined)[][],
-    firstMaxWorkTimeInMinutes: number | undefined,
-    secondMaxWorkTimeInMinutes: number,
-    firstMinRestTimeInMinutes: number | undefined,
-    secondMinRestTimeInMinutes: number,
+    maxWorkTimeInMinutes: number,
+    minRestTimeInMinutes: number,
     timeIntervalInMinutes: number
   ): boolean {
     if (
@@ -156,8 +150,8 @@ export class EmployeesWhoCanWorkEvaluator {
 
       if (
         nextWorkTimeInfo.currentWorkTimeInMinutes <
-          secondMaxWorkTimeInMinutes &&
-        currentWorkTimeInfo.lastRestTimeInMinutes >= secondMinRestTimeInMinutes
+          maxWorkTimeInMinutes &&
+        currentWorkTimeInfo.lastRestTimeInMinutes >= minRestTimeInMinutes
       ) {
         return true;
       }
@@ -177,8 +171,8 @@ export class EmployeesWhoCanWorkEvaluator {
         timeIntervalInMinutes
       );
       if (
-        workTimeInfo.currentWorkTimeInMinutes < secondMaxWorkTimeInMinutes &&
-        workTimeInfo.nextRestTimeInMinutes >= secondMinRestTimeInMinutes
+        workTimeInfo.currentWorkTimeInMinutes < maxWorkTimeInMinutes &&
+        workTimeInfo.nextRestTimeInMinutes >= minRestTimeInMinutes
       ) {
         return true;
       }
@@ -190,8 +184,8 @@ export class EmployeesWhoCanWorkEvaluator {
         timeIntervalInMinutes
       );
       if (
-        workTimeInfo.lastRestTimeInMinutes >= secondMinRestTimeInMinutes &&
-        workTimeInfo.nextRestTimeInMinutes >= secondMinRestTimeInMinutes
+        workTimeInfo.lastRestTimeInMinutes >= minRestTimeInMinutes &&
+        workTimeInfo.nextRestTimeInMinutes >= minRestTimeInMinutes
       ) {
         return true;
       }

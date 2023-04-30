@@ -47,13 +47,20 @@ export class DefaultTableBuilder {
     return this._employees;
   }
 
-  public get sectors(): ISector[]
-  {
+  public get sectors(): ISector[] {
     return this._sectors;
   }
 
   public get timeIntervalInMinutes(): number {
     return this._intervalInMinutes;
+  }
+
+  public get maxWorkTimeInMinutes(): number {
+    return this._maxWorkTimeInMinutes;
+  }
+
+  public get minRestTimeInMinutes(): number {
+    return this._minRestTimeInMinutes;
   }
 
   private _objComparisonHelper: ObjectsComparisonHelper;
@@ -78,21 +85,24 @@ export class DefaultTableBuilder {
   constructor(
     private _sectors: ISector[],
     private _employees: IEmployee[],
-    private shiftStartTimeDate: Date,
-    private shiftEndTimeDate: Date,
-    private shiftDate: Date,
-    private _intervalInMinutes: number
+    private _shiftStartTimeDate: Date,
+    private _shiftEndTimeDate: Date,
+    private _shiftDate: Date,
+    private _intervalInMinutes: number,
+    private _maxWorkTimeInMinutes: number,
+    private _minRestTimeInMinutes: number
   ) {
-    
     this._objComparisonHelper = new ObjectsComparisonHelper();
 
     this._timeConfigurator = new TimeConfigurator(
-      shiftStartTimeDate.getHours(),
-      shiftStartTimeDate.getMinutes(),
-      shiftEndTimeDate.getHours(),
-      shiftEndTimeDate.getMinutes(),
-      shiftDate,
-      _intervalInMinutes
+      _shiftStartTimeDate.getHours(),
+      _shiftStartTimeDate.getMinutes(),
+      _shiftEndTimeDate.getHours(),
+      _shiftEndTimeDate.getMinutes(),
+      _shiftDate,
+      _intervalInMinutes,
+      _maxWorkTimeInMinutes,
+      _minRestTimeInMinutes
     );
 
     this.ifNoDuplicatesInArray(_employees);

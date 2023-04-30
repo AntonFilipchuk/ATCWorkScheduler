@@ -33,10 +33,10 @@ export class MainTableComponent implements OnInit {
   ngOnInit(): void {    
     let pTS = this.planningTableService;
     this.displayedColumns = pTS.displayColumns;
-    this.sectorsForShift = pTS.sectorsForShift;
+    this.sectorsForShift = pTS.sectors;
 
     this.getTableForSubscription();
-    this.employees = pTS.employeesForShift;
+    this.employees = pTS.employees;
   }
 
   public changeSelectedColumn(columnNumber : number) {

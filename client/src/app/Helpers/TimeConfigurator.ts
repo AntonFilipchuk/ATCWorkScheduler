@@ -11,7 +11,9 @@ export class TimeConfigurator {
     private _endingHour: number,
     private _endingMinutes: number,
     private _shiftDate: Date,
-    private _timeIntervalInMinutes: number
+    private _timeIntervalInMinutes: number,
+    private _maxWorkTimeInMinutes : number,
+    private _minRestTimeInMinutes : number
   ) {
 
     this.ifInputValuesValid();
@@ -29,7 +31,6 @@ export class TimeConfigurator {
     return this._timeColumnAsStringArray;
   }
 
-  
   public get timeColumnAsDateArray() : Date[][] {
     return this._timeColumnAsDateArray;
   }
@@ -48,6 +49,17 @@ export class TimeConfigurator {
     }
     if (this._endingMinutes < 0) {
       throw new Error('Ending minutes is less than 0!');
+    }
+    if (this._maxWorkTimeInMinutes < 0) {
+      throw new Error('Maximum work time in minutes is less than 0!');
+    }
+    if(this._minRestTimeInMinutes < 0)
+    {
+      throw new Error('Minimum rest time is less than 0!');
+    }
+    if(this._maxWorkTimeInMinutes <= this._minRestTimeInMinutes)
+    {
+      throw new Error('Maximum work time is less or equal to minimum rest time!');
     }
     if (this._timeIntervalInMinutes < 1) {
       throw new Error('Time interval in minutes is less than 1 minute!');
