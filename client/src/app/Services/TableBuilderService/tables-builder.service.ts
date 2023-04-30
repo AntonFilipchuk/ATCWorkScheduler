@@ -199,6 +199,7 @@ export class TablesBuilderService implements OnInit {
     );
     this._employeesTableAs2DArray =
       defaultTableBuilder.tableForEmployeesAs2DArray;
+      
     this._tableForMatTable = defaultTableBuilder.defaultTableForMatTable;
     this._timeColumnAsDateArray = defaultTableBuilder.timeColumnAsDateArray;
     this._timeColumnAsStringArray = defaultTableBuilder.timeColumnAsStringArray;
