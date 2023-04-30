@@ -42,7 +42,6 @@ describe('EmployeesWhoCanWorkEvaluator', () => {
     let eWKWE: EmployeesWhoCanWorkEvaluator =
       new EmployeesWhoCanWorkEvaluator();
 
-
     it('If the employee has no worked yet', () => {
       let employeesTableAs2DArray: (IEmployee | undefined)[][] = [
         [undefined, undefined],
@@ -351,10 +350,8 @@ describe('EmployeesWhoCanWorkEvaluator', () => {
 
   describe('getEmployeesWhoCanWork', () => {
     let employees: IEmployee[] = [e1, e2, e3, e4];
-    let firstMaxWorkTimeInMinutes: number = 60;
-    let secondMaxWorkTimeInMinutes: number = 120;
-    let firstMinRestTimeInMinutes: number = 10;
-    let secondMinRestTimeInMinutes: number = 20;
+    let maxWorkTimeInMinutes: number = 120;
+    let minRestTimeInMinutes: number = 20;
     let sector: ISector = g12r;
     let eWKWE: EmployeesWhoCanWorkEvaluator =
       new EmployeesWhoCanWorkEvaluator();
@@ -371,29 +368,24 @@ describe('EmployeesWhoCanWorkEvaluator', () => {
           employees,
           0,
           employeesTableAs2DArray,
-          firstMaxWorkTimeInMinutes,
-          secondMaxWorkTimeInMinutes,
-          firstMinRestTimeInMinutes,
-          secondMinRestTimeInMinutes,
+          maxWorkTimeInMinutes,
+          minRestTimeInMinutes,
           10,
           sector
         )
       ).toEqual(employees);
     });
 
-
     it('Employee should be excluded if he has no sector permit', () => {
-      
-      let eWithNoPermit : IEmployee = 
-      {
-        color : '',
-        id : 999,
-        name : 'No permit',
-        sectorPermits : [{name : 'T1'}],
-        totalTime : 0
-      }
+      let eWithNoPermit: IEmployee = {
+        color: '',
+        id: 999,
+        name: 'No permit',
+        sectorPermits: [{ name: 'T1' }],
+        totalTime: 0,
+      };
       let employeesWithEmployeeWhoHasNoPermit = [eWithNoPermit, ...employees];
-      
+
       let employeesTableAs2DArray: (IEmployee | undefined)[][] = [
         [undefined, undefined], // <-- check here
         [undefined, undefined],
@@ -406,10 +398,8 @@ describe('EmployeesWhoCanWorkEvaluator', () => {
           employeesWithEmployeeWhoHasNoPermit,
           3,
           employeesTableAs2DArray,
-          firstMaxWorkTimeInMinutes,
-          secondMaxWorkTimeInMinutes,
-          firstMinRestTimeInMinutes,
-          secondMinRestTimeInMinutes,
+          maxWorkTimeInMinutes,
+          minRestTimeInMinutes,
           10,
           sector
         )
@@ -429,10 +419,8 @@ describe('EmployeesWhoCanWorkEvaluator', () => {
           employees,
           3,
           employeesTableAs2DArray,
-          firstMaxWorkTimeInMinutes,
-          secondMaxWorkTimeInMinutes,
-          firstMinRestTimeInMinutes,
-          secondMinRestTimeInMinutes,
+          maxWorkTimeInMinutes,
+          minRestTimeInMinutes,
           10,
           sector
         )
@@ -452,10 +440,8 @@ describe('EmployeesWhoCanWorkEvaluator', () => {
           employees,
           1,
           employeesTableAs2DArray,
-          firstMaxWorkTimeInMinutes,
-          secondMaxWorkTimeInMinutes,
-          firstMinRestTimeInMinutes,
-          secondMinRestTimeInMinutes,
+          maxWorkTimeInMinutes,
+          minRestTimeInMinutes,
           10,
           sector
         )
@@ -475,10 +461,8 @@ describe('EmployeesWhoCanWorkEvaluator', () => {
           employees,
           0,
           employeesTableAs2DArray,
-          firstMaxWorkTimeInMinutes,
-          secondMaxWorkTimeInMinutes,
-          firstMinRestTimeInMinutes,
-          secondMinRestTimeInMinutes,
+          maxWorkTimeInMinutes,
+          minRestTimeInMinutes,
           10,
           sector
         )
@@ -510,16 +494,13 @@ describe('EmployeesWhoCanWorkEvaluator', () => {
           employees,
           12,
           employeesTableAs2DArray,
-          firstMaxWorkTimeInMinutes,
-          secondMaxWorkTimeInMinutes,
-          firstMinRestTimeInMinutes,
-          secondMinRestTimeInMinutes,
+          maxWorkTimeInMinutes,
+          minRestTimeInMinutes,
           10,
           sector
         )
       ).toEqual([e2, e3, e4]);
     });
-
 
     it('Exclude an employee if he has worked more then secondMaxWorkTimeInMinutes in previous work session and last rest time is less then secondMinRestTimeInMinutes', () => {
       let employeesTableAs2DArray: (IEmployee | undefined)[][] = [
@@ -535,7 +516,7 @@ describe('EmployeesWhoCanWorkEvaluator', () => {
         [e1, undefined],
         [e1, undefined],
         [e1, undefined],
-        [undefined, undefined], 
+        [undefined, undefined],
         [undefined, undefined], // <-- check here
         [undefined, undefined],
         [undefined, undefined],
@@ -546,10 +527,8 @@ describe('EmployeesWhoCanWorkEvaluator', () => {
           employees,
           13,
           employeesTableAs2DArray,
-          firstMaxWorkTimeInMinutes,
-          secondMaxWorkTimeInMinutes,
-          firstMinRestTimeInMinutes,
-          secondMinRestTimeInMinutes,
+          maxWorkTimeInMinutes,
+          minRestTimeInMinutes,
           10,
           sector
         )
@@ -581,10 +560,8 @@ describe('EmployeesWhoCanWorkEvaluator', () => {
           employees,
           3,
           employeesTableAs2DArray,
-          firstMaxWorkTimeInMinutes,
-          secondMaxWorkTimeInMinutes,
-          firstMinRestTimeInMinutes,
-          secondMinRestTimeInMinutes,
+          maxWorkTimeInMinutes,
+          minRestTimeInMinutes,
           10,
           sector
         )
@@ -596,7 +573,7 @@ describe('EmployeesWhoCanWorkEvaluator', () => {
         [undefined, undefined],
         [undefined, undefined],
         [undefined, undefined], // <-- check here
-        [undefined, undefined], 
+        [undefined, undefined],
         [e1, undefined],
         [e1, undefined],
         [e1, undefined],
@@ -616,10 +593,8 @@ describe('EmployeesWhoCanWorkEvaluator', () => {
           employees,
           2,
           employeesTableAs2DArray,
-          firstMaxWorkTimeInMinutes,
-          secondMaxWorkTimeInMinutes,
-          firstMinRestTimeInMinutes,
-          secondMinRestTimeInMinutes,
+          maxWorkTimeInMinutes,
+          minRestTimeInMinutes,
           10,
           sector
         )
@@ -650,10 +625,8 @@ describe('EmployeesWhoCanWorkEvaluator', () => {
           employees,
           3,
           employeesTableAs2DArray,
-          firstMaxWorkTimeInMinutes,
-          secondMaxWorkTimeInMinutes,
-          firstMinRestTimeInMinutes,
-          secondMinRestTimeInMinutes,
+          maxWorkTimeInMinutes,
+          minRestTimeInMinutes,
           10,
           sector
         )
@@ -676,7 +649,7 @@ describe('EmployeesWhoCanWorkEvaluator', () => {
         [undefined, undefined], // <-- check here (11)
         [undefined, undefined],
         [undefined, undefined],
-        [undefined, undefined], 
+        [undefined, undefined],
       ];
 
       expect(
@@ -684,10 +657,8 @@ describe('EmployeesWhoCanWorkEvaluator', () => {
           employees,
           11,
           employeesTableAs2DArray,
-          firstMaxWorkTimeInMinutes,
-          secondMaxWorkTimeInMinutes,
-          firstMinRestTimeInMinutes,
-          secondMinRestTimeInMinutes,
+          maxWorkTimeInMinutes,
+          minRestTimeInMinutes,
           10,
           sector
         )
@@ -710,7 +681,7 @@ describe('EmployeesWhoCanWorkEvaluator', () => {
         [undefined, undefined], // <-- check here (11)
         [undefined, undefined],
         [undefined, undefined],
-        [undefined, undefined], 
+        [undefined, undefined],
       ];
 
       expect(
@@ -718,16 +689,13 @@ describe('EmployeesWhoCanWorkEvaluator', () => {
           employees,
           11,
           employeesTableAs2DArray,
-          firstMaxWorkTimeInMinutes,
-          secondMaxWorkTimeInMinutes,
-          firstMinRestTimeInMinutes,
-          secondMinRestTimeInMinutes,
+          maxWorkTimeInMinutes,
+          minRestTimeInMinutes,
           10,
           sector
         )
       ).toEqual([e1, e2, e3, e4]);
     });
-
 
     it('Employee is excluded if he is added to the bottom of work session, but next work session is equal to secondMaxWorkTimeInMinutes and next rest time is equal to secondMinRestTimeInMinutes', () => {
       let employeesTableAs2DArray: (IEmployee | undefined)[][] = [
@@ -742,7 +710,7 @@ describe('EmployeesWhoCanWorkEvaluator', () => {
         [e1, undefined],
         [e1, undefined],
         [e1, undefined],
-        [e1, undefined],        
+        [e1, undefined],
         [e1, undefined],
         [e1, undefined],
         [e1, undefined],
@@ -758,10 +726,8 @@ describe('EmployeesWhoCanWorkEvaluator', () => {
           employees,
           6,
           employeesTableAs2DArray,
-          firstMaxWorkTimeInMinutes,
-          secondMaxWorkTimeInMinutes,
-          firstMinRestTimeInMinutes,
-          secondMinRestTimeInMinutes,
+          maxWorkTimeInMinutes,
+          minRestTimeInMinutes,
           10,
           sector
         )
@@ -781,7 +747,7 @@ describe('EmployeesWhoCanWorkEvaluator', () => {
         [e1, undefined],
         [e1, undefined],
         [e1, undefined],
-        [e1, undefined],        
+        [e1, undefined],
         [e1, undefined],
         [e1, undefined],
         [e1, undefined],
@@ -797,10 +763,8 @@ describe('EmployeesWhoCanWorkEvaluator', () => {
           employees,
           6,
           employeesTableAs2DArray,
-          firstMaxWorkTimeInMinutes,
-          secondMaxWorkTimeInMinutes,
-          firstMinRestTimeInMinutes,
-          secondMinRestTimeInMinutes,
+          maxWorkTimeInMinutes,
+          minRestTimeInMinutes,
           10,
           sector
         )
@@ -812,7 +776,7 @@ describe('EmployeesWhoCanWorkEvaluator', () => {
         [e1, undefined],
         [e1, undefined],
         [e1, undefined],
-        [e1, undefined],        
+        [e1, undefined],
         [e1, undefined],
         [e1, undefined],
         [e1, undefined],
@@ -836,14 +800,12 @@ describe('EmployeesWhoCanWorkEvaluator', () => {
           employees,
           13,
           employeesTableAs2DArray,
-          firstMaxWorkTimeInMinutes,
-          secondMaxWorkTimeInMinutes,
-          firstMinRestTimeInMinutes,
-          secondMinRestTimeInMinutes,
+          maxWorkTimeInMinutes,
+          minRestTimeInMinutes,
           10,
           sector
         )
-      ).toEqual([ e2, e3, e4]);
+      ).toEqual([e2, e3, e4]);
     });
 
     it('Employee is available if he is added to the top of work session, next work session is equal to secondMaxWorkTimeInMinutes and current rest time is equal to secondMinRestTimeInMinutes', () => {
@@ -851,7 +813,7 @@ describe('EmployeesWhoCanWorkEvaluator', () => {
         [e1, undefined],
         [e1, undefined],
         [e1, undefined],
-        [e1, undefined],        
+        [e1, undefined],
         [e1, undefined],
         [e1, undefined],
         [e1, undefined],
@@ -876,14 +838,12 @@ describe('EmployeesWhoCanWorkEvaluator', () => {
           employees,
           14,
           employeesTableAs2DArray,
-          firstMaxWorkTimeInMinutes,
-          secondMaxWorkTimeInMinutes,
-          firstMinRestTimeInMinutes,
-          secondMinRestTimeInMinutes,
+          maxWorkTimeInMinutes,
+          minRestTimeInMinutes,
           10,
           sector
         )
-      ).toEqual([ e1, e2, e3, e4]);
+      ).toEqual([e1, e2, e3, e4]);
     });
   });
 });

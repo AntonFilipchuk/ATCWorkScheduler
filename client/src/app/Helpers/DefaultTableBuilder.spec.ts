@@ -55,13 +55,17 @@ describe('DefaultTableBuilder', () => {
     9,
     0
   );
+  let maxWorkTimeInMinutes = 120;
+  let minRestTimeInMinutes = 20;
   let dTB = new DefaultTableBuilder(
     sectors,
     employees,
     shiftStartTime,
     shiftEndTime,
     todayDate,
-    10
+    10,
+    maxWorkTimeInMinutes,
+    minRestTimeInMinutes
   );
   it('should get tableForEmployeesAs2DArray', () => {
     let expectedTable: undefined[][] = [
@@ -110,7 +114,9 @@ describe('DefaultTableBuilder', () => {
           shiftStartTime,
           shiftEndTime,
           todayDate,
-          30
+          30,
+          maxWorkTimeInMinutes,
+          minRestTimeInMinutes
         )
     ).toThrowError(
       `An array ${JSON.stringify(
@@ -129,7 +135,9 @@ describe('DefaultTableBuilder', () => {
           shiftStartTime,
           shiftEndTime,
           todayDate,
-          30
+          30,
+          maxWorkTimeInMinutes,
+          minRestTimeInMinutes
         )
     ).toThrowError(
       `An array ${JSON.stringify(
@@ -148,7 +156,9 @@ describe('DefaultTableBuilder', () => {
           shiftStartTime,
           shiftEndTime,
           todayDate,
-          30
+          30,
+          maxWorkTimeInMinutes,
+          minRestTimeInMinutes
         )
     ).toThrowError(
       `Not enough people for work! Coefficient : ${
@@ -174,7 +184,9 @@ describe('DefaultTableBuilder', () => {
           shiftStartTime,
           shiftEndTime,
           todayDate,
-          30
+          30,
+          maxWorkTimeInMinutes,
+          minRestTimeInMinutes
         )
     ).toThrowError(
       `Employee ${e5.name} cannot work \n ${e5.name}'s permits: ${
