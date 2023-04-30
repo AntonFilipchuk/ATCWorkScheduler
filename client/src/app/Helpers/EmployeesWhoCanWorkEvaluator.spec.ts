@@ -41,6 +41,8 @@ describe('EmployeesWhoCanWorkEvaluator', () => {
 
     let eWKWE: EmployeesWhoCanWorkEvaluator =
       new EmployeesWhoCanWorkEvaluator();
+
+
     it('If the employee has no worked yet', () => {
       let employeesTableAs2DArray: (IEmployee | undefined)[][] = [
         [undefined, undefined],
@@ -368,6 +370,41 @@ describe('EmployeesWhoCanWorkEvaluator', () => {
         eWKWE.getEmployeesWhoCanWork(
           employees,
           0,
+          employeesTableAs2DArray,
+          firstMaxWorkTimeInMinutes,
+          secondMaxWorkTimeInMinutes,
+          firstMinRestTimeInMinutes,
+          secondMinRestTimeInMinutes,
+          10,
+          sector
+        )
+      ).toEqual(employees);
+    });
+
+
+    it('Employee should be excluded if he has no sector permit', () => {
+      
+      let eWithNoPermit : IEmployee = 
+      {
+        color : '',
+        id : 999,
+        name : 'No permit',
+        sectorPermits : [{name : 'T1'}],
+        totalTime : 0
+      }
+      let employeesWithEmployeeWhoHasNoPermit = [eWithNoPermit, ...employees];
+      
+      let employeesTableAs2DArray: (IEmployee | undefined)[][] = [
+        [undefined, undefined], // <-- check here
+        [undefined, undefined],
+        [undefined, undefined],
+        [undefined, undefined],
+      ];
+
+      expect(
+        eWKWE.getEmployeesWhoCanWork(
+          employeesWithEmployeeWhoHasNoPermit,
+          3,
           employeesTableAs2DArray,
           firstMaxWorkTimeInMinutes,
           secondMaxWorkTimeInMinutes,

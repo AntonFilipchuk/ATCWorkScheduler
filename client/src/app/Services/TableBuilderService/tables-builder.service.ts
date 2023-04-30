@@ -353,10 +353,6 @@ export class TablesBuilderService implements OnInit {
     columnNumber: number
   ): IEmployee | undefined {
     let row = this._employeesTableAs2DArray[rowNumber];
-    if(row === undefined)
-    {
-      console.log("NO CN");
-    }
     let employee = row[columnNumber];
     return employee;
   }
