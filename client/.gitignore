@@ -43,4 +43,4 @@ Thumbs.db
 *.deb
 *.deb.1
 #Project
-./client/cTest
+/cTest/*
