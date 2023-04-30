@@ -50,6 +50,7 @@ export class EmployeesWhoCanWorkEvaluator {
     return validEmployeesForSelection;
   }
 
+
   public getWorkAndRestTimeInfo(
     employee: IEmployee,
     rowNumber: number,

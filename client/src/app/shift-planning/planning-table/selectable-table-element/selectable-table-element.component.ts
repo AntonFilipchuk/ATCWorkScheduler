@@ -76,7 +76,6 @@ export class SelectableTableElementComponent implements OnInit, OnChanges {
   ngOnInit(): void {
     this.configureProperEmployees();
     
-
     if (this.employee) {
       this.color = this.employee?.color;
       this.timeInfo = this.planningTableService.getWorkAndRestTimeInfo(this.employee!, this.rowNumber!);
@@ -102,7 +101,7 @@ export class SelectableTableElementComponent implements OnInit, OnChanges {
   //When we select an employee from the list
   onSelection($event: MatOptionSelectionChange) {
     this.changeToDefault();
-    this.toggleIfSelectorActive();
+    //this.toggleIfSelectorActive();
     let selectedEmployee = $event.source.value;
     this.planningTableService.setEmployeeInRow(selectedEmployee, this.rowNumber!, this.columnNumber);
     this.employee = this.planningTableService.getEmployeeByRowAnColumnNumber(this.rowNumber, this.columnNumber);

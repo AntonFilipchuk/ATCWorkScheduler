@@ -54,7 +54,7 @@ import { StartingDataEvaluatorService } from '../StartingDataEvaluatorService/st
 //4)A function that takes an employee, the position in the table and decides if and employee
 //can be set there.
 export class TablesBuilderService {
-  public $table = new ReplaySubject<ITableRow[]>();
+  private _$table = new ReplaySubject<ITableRow[]>();
   public displayColumns: string[] = [];
 
   public employees: IEmployee[] = [];
@@ -66,7 +66,7 @@ export class TablesBuilderService {
   private _timeColumnAsDateArray: Date[][] = [];
   private _timeIntervalInMinutes: number = 0;
   private _maxWorkTimeInMinutes: number = 0;
-  private _minWorkTimeInMinutes: number = 0;
+  private _minRestTimeInMinutes: number = 0;
 
   private _objComparisonHelper: ObjectsComparisonHelper;
 
@@ -80,7 +80,7 @@ export class TablesBuilderService {
     this._timeColumnAsDateArray = sde.timeColumnAsDateArray;
     this._timeIntervalInMinutes = sde.timeIntervalInMinutes;
     this._maxWorkTimeInMinutes = sde.maxWorkTimeInMinutes;
-    this._minWorkTimeInMinutes = sde.minRestTimeInMinutes;
+    this._minRestTimeInMinutes = sde.minRestTimeInMinutes;
 
     this._objComparisonHelper = new ObjectsComparisonHelper();
     this.buildTable();
@@ -99,13 +99,13 @@ export class TablesBuilderService {
         time: this._timeColumnAsStringArray[i],
         ...sectorsRow,
       });
-      this.$table.next(table);
     }
+    this._$table.next(table);
   }
 
   public getTableForSubscription(): Observable<ITableRow[]> {
-    this.$table.next(this._tableForMatTable);
-    return this.$table;
+    this._$table.next(this._tableForMatTable);
+    return this._$table;
   }
 
   //Check if an employee is not at another sector at the same time
@@ -204,8 +204,8 @@ export class TablesBuilderService {
       this.employees,
       rowNumber,
       this._employeesTableAs2DArray,
-      120,
-      20,
+      this._maxWorkTimeInMinutes,
+      this._minRestTimeInMinutes,
       this._timeIntervalInMinutes,
       sector
     );

@@ -1,22 +1,21 @@
 <div
   class="selectable-element-container"
   [ngStyle]="{
-    'border': ifShowBorder || ifSelectorActive ? '5px solid green' : '',
-    'background': color ? color : 'grey',
-    'pointer-events' : ifCellDisabled ? 'none' : 'all'
+    border: ifShowBorder || ifSelectorActive ? '5px solid green' : '',
+    background: color ? color : 'grey',
+    'pointer-events': ifCellDisabled ? 'none' : 'all'
   }"
   (mouseenter)="toggleShowBorderAndSelector()"
   (mouseleave)="toggleShowBorderAndSelector()"
 >
-  <p>
-    {{ employee ? employee.name : "" }}
-    {{timeInfo ? 'LW ' + timeInfo.lastWorkTimeInMinutes : ''}}
-    {{timeInfo ? 'LR ' + timeInfo.lastRestTimeInMinutes : ''}}
-    {{timeInfo ? 'NR ' + timeInfo.nextRestTimeInMinutes : ''}}
-    {{timeInfo ? 'NW ' + timeInfo.nextWorkTimeInMinutes : ''}}
-    {{timeInfo ? 'TR ' + timeInfo.totalRestTimeInMinutes : ''}}
-    {{timeInfo ? 'TW ' + timeInfo.totalWorkingTimeInMinutes : ''}}
-  </p>
+  {{ employee ? employee.name : "" }}
+  {{ timeInfo ? "LW " + timeInfo.lastWorkTimeInMinutes : "" }}
+  {{ timeInfo ? "LR " + timeInfo.lastRestTimeInMinutes : "" }}
+  {{ timeInfo ? "NR " + timeInfo.nextRestTimeInMinutes : "" }}
+  {{ timeInfo ? "NW " + timeInfo.nextWorkTimeInMinutes : "" }}
+  {{ timeInfo ? "TR " + timeInfo.totalRestTimeInMinutes : "" }}
+  {{ timeInfo ? "TW " + timeInfo.totalWorkingTimeInMinutes : "" }}
+  {{ employeesToSelectFrom.length }}
 
   <mat-select
     class="selector"

@@ -164,5 +164,7 @@ export class StartingDataEvaluatorService {
     this.timeColumnAsDateArray = defaultTableBuilder.timeColumnAsDateArray;
     this.timeColumnAsStringArray = defaultTableBuilder.timeColumnAsStringArray;
     this.timeIntervalInMinutes = defaultTableBuilder.timeIntervalInMinutes;
+    this.maxWorkTimeInMinutes = defaultTableBuilder.maxWorkTimeInMinutes;
+    this.minRestTimeInMinutes = defaultTableBuilder.minRestTimeInMinutes;
   }
 }
