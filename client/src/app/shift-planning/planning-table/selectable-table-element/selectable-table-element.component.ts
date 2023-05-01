@@ -37,8 +37,10 @@ export class SelectableTableElementComponent implements OnInit, OnChanges {
   @Input() sector!: ISector;
 
   //
-  public columnNumberWhereSelectionIsActive: number = -1;
+  private _selectedEmployee: IEmployee | undefined;
   //
+
+  public ifEmployeeWhoWasChosenShouldBeSet: boolean = false;
 
   public ifShowSelector: boolean = false;
   public ifSelectorActive: boolean = false;
@@ -74,12 +76,25 @@ export class SelectableTableElementComponent implements OnInit, OnChanges {
   ngOnInit(): void {
     //console.log('OnInit');
     this.getColumnNumberWhereSelectionIsActive();
+    this.getEmployeeWhoWasChosenForSelection();
     this.employee = this.planningTableService.getEmployeeByRowAnColumnNumber(
       this.rowNumber,
       this.columnNumber
     );
 
     this.setEmployeeColor();
+  }
+
+  private getEmployeeWhoWasChosenForSelection() {
+    this.planningTableService.getEmployeeWhoWasChosenForSelection().subscribe({
+      next: (employee: IEmployee | undefined) => {
+        this._selectedEmployee = employee;
+        this.checkIfEmployeeWhoWasChosenShouldBeSet(employee);
+      },
+      error: (e) => {
+        console.log('Could not get an employee who was chosen for selection');
+      },
+    });
   }
 
   private getColumnNumberWhereSelectionIsActive() {
@@ -93,6 +108,16 @@ export class SelectableTableElementComponent implements OnInit, OnChanges {
           console.log(e);
         },
       });
+  }
+
+  private checkIfEmployeeWhoWasChosenShouldBeSet(
+    employee: IEmployee | undefined
+  ) {
+    if (employee) {
+      this.ifEmployeeWhoWasChosenShouldBeSet = true;
+    } else {
+      this.ifEmployeeWhoWasChosenShouldBeSet = false;
+    }
   }
 
   private checkIfCellShouldBeActive(columnNumber: number) {
@@ -121,8 +146,26 @@ export class SelectableTableElementComponent implements OnInit, OnChanges {
       );
   }
 
+  public setSelectedEmployee() {
+    if (this._selectedEmployee) {
+      if (this.employee?.id === this._selectedEmployee.id) {
+        return;
+      } else if (
+        this.planningTableService
+          .getEmployeesForSelection(this.rowNumber, this.sector)
+          .includes(this._selectedEmployee)
+      ) {
+        this.planningTableService.setEmployeeInRow(
+          this._selectedEmployee,
+          this.rowNumber,
+          this.columnNumber
+        );
+      }
+    }
+  }
+
   public onSelection(employee: IEmployee) {
-    this.resetColumnNumberWhereSelectionIsActive();
+    this.planningTableService.setEmployeeWhoWasChosenForSelection(employee);
     this.planningTableService.setEmployeeInRow(
       employee,
       this.rowNumber,
@@ -136,6 +179,12 @@ export class SelectableTableElementComponent implements OnInit, OnChanges {
     }
   }
 
+  public disableSelectionOfSelectedEmployee()
+  {
+    this.planningTableService.setEmployeeWhoWasChosenForSelection(undefined);
+    this.onSelectorClose();
+    this.selectionNotActive();
+  }
   public toggleBorderAndSelectorVisibility() {
     this.ifShowBorder = !this.ifShowBorder;
     this.ifShowSelector = !this.ifShowSelector;

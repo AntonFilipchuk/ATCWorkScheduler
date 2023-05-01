@@ -57,6 +57,12 @@ export class TablesBuilderService {
   private _$table = new ReplaySubject<ITableRow[]>();
   private _$columnNumberWhereSelectionIsActive: ReplaySubject<number> =
     new ReplaySubject<number>();
+
+  private _$employeeWhoWasChosenForSelection: ReplaySubject<IEmployee | undefined> =
+    new ReplaySubject<IEmployee | undefined>();
+
+
+
   public displayColumns: string[] = [];
   public employees: IEmployee[] = [];
   public sectors: ISector[] = [];
@@ -104,6 +110,16 @@ export class TablesBuilderService {
       });
     }
     this._$table.next(table);
+  }
+
+  public getEmployeeWhoWasChosenForSelection() : Observable<IEmployee | undefined> 
+  {
+    return this._$employeeWhoWasChosenForSelection;
+  }
+
+  public setEmployeeWhoWasChosenForSelection(employee : IEmployee | undefined)
+  {
+    this._$employeeWhoWasChosenForSelection.next(employee);
   }
 
   public getColumnNumberWhereSelectionIsActiveForSubscription(): Observable<number> {
