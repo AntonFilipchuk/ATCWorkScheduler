@@ -55,8 +55,9 @@ import { StartingDataEvaluatorService } from '../StartingDataEvaluatorService/st
 //can be set there.
 export class TablesBuilderService {
   private _$table = new ReplaySubject<ITableRow[]>();
+  private _$columnNumberWhereSelectionIsActive: ReplaySubject<number> =
+    new ReplaySubject<number>();
   public displayColumns: string[] = [];
-
   public employees: IEmployee[] = [];
   public sectors: ISector[] = [];
 
@@ -82,6 +83,8 @@ export class TablesBuilderService {
     this._maxWorkTimeInMinutes = sde.maxWorkTimeInMinutes;
     this._minRestTimeInMinutes = sde.minRestTimeInMinutes;
 
+    this._$columnNumberWhereSelectionIsActive.next(-1);
+
     this._objComparisonHelper = new ObjectsComparisonHelper();
     this.buildTable();
   }
@@ -101,6 +104,14 @@ export class TablesBuilderService {
       });
     }
     this._$table.next(table);
+  }
+
+  public getColumnNumberWhereSelectionIsActiveForSubscription(): Observable<number> {
+    return this._$columnNumberWhereSelectionIsActive;
+  }
+
+  public setColumnNumberWhereSelectionIsActive(columnNumber: number) {
+    this._$columnNumberWhereSelectionIsActive.next(columnNumber);
   }
 
   public getTableForSubscription(): Observable<ITableRow[]> {

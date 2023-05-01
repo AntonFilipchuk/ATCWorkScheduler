@@ -36,6 +36,10 @@ export class SelectableTableElementComponent implements OnInit, OnChanges {
   @Input() columnNumber!: number;
   @Input() sector!: ISector;
 
+  //
+  public columnNumberWhereSelectionIsActive: number = -1;
+  //
+
   public ifShowSelector: boolean = false;
   public ifSelectorActive: boolean = false;
   public ifShowBorder: boolean = false;
@@ -64,23 +68,45 @@ export class SelectableTableElementComponent implements OnInit, OnChanges {
 
   constructor(private planningTableService: TablesBuilderService) {}
   ngOnChanges(changes: SimpleChanges): void {
-    // console.log('OnChanges');
+    //console.log('OnChanges');
     // this.setEmployeeColor();
   }
   ngOnInit(): void {
-    //this.getEmployeesForSelection();
+    //console.log('OnInit');
+    this.getColumnNumberWhereSelectionIsActive();
     this.employee = this.planningTableService.getEmployeeByRowAnColumnNumber(
       this.rowNumber,
       this.columnNumber
     );
 
     this.setEmployeeColor();
-    this.setCellState();
+  }
+
+  private getColumnNumberWhereSelectionIsActive() {
+    this.planningTableService
+      .getColumnNumberWhereSelectionIsActiveForSubscription()
+      .subscribe({
+        next: (columnNumber: number) => {
+          this.checkIfCellShouldBeActive(columnNumber);
+        },
+        error: (e) => {
+          console.log(e);
+        },
+      });
+  }
+
+  private checkIfCellShouldBeActive(columnNumber: number) {
+    this.ifCellDisabled =
+      this.columnNumber !== columnNumber && columnNumber >= 0;
+  }
+
+  private setColumnNumberWhereSelectionIsActive() {
+    this.planningTableService.setColumnNumberWhereSelectionIsActive(
+      this.columnNumber
+    );
   }
 
   public getEmployeesForSelection() {
-    console.log('Get empoloyees');
-
     this.employeesForSelection =
       this.planningTableService.getEmployeesForSelection(
         this.rowNumber,
@@ -89,6 +115,7 @@ export class SelectableTableElementComponent implements OnInit, OnChanges {
   }
 
   public onSelection(employee: IEmployee) {
+    this.resetColumnNumberWhereSelectionIsActive();
     this.planningTableService.setEmployeeInRow(
       employee,
       this.rowNumber,
@@ -96,32 +123,34 @@ export class SelectableTableElementComponent implements OnInit, OnChanges {
     );
   }
 
-  private setCellState() {}
-
   private setEmployeeColor() {
     if (this.employee) {
       this.color = this.employee.color;
     }
   }
 
-  public activateAllColumns() {}
-
-  public setSelectedEmployee() {}
   public toggleBorderAndSelectorVisibility() {
-    this.toggleBorderVisibility();
-    this.toggleSelectorVisibility();
-  }
-  public toggleBorderVisibility() {
     this.ifShowBorder = !this.ifShowBorder;
-  }
-
-  public toggleSelectorVisibility() {
     this.ifShowSelector = !this.ifShowSelector;
   }
 
-  public toggleIfSelectionActive() {
+  private resetColumnNumberWhereSelectionIsActive() {
+    this.planningTableService.setColumnNumberWhereSelectionIsActive(-1);
+  }
+
+  public onSelectorClose() {
+    this.resetColumnNumberWhereSelectionIsActive();
+  }
+
+  public selectionActive() {
+    this.ifSelectorActive = !this.ifSelectorActive;
+    this.setColumnNumberWhereSelectionIsActive();
+  }
+
+  public selectionNotActive() {
     this.ifSelectorActive = !this.ifSelectorActive;
   }
+
   // ngOnChanges(): void {
   //   if (this.availableRows.includes(this.rowNumber)) {
   //     this.color = 'orange';

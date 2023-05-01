@@ -10,18 +10,25 @@ import { MatTableDataSource } from '@angular/material/table';
 })
 export class TestComponent implements OnInit {
   public value: number | undefined;
+  public color: string = 'red';
   constructor(private testService: TestService) {}
 
   ngOnInit() {
     this.testService.setValue(1);
     this.getValue();
-    console.log("OnInit", this.value);
+    console.log('OnInit', this.value);
   }
 
   private getValue() {
     this.testService.getValueForSubscription().subscribe({
       next: (response: number) => {
         this.value = response;
+        if (this.value != 1) {
+          this.color = 'yellow';
+        }
+        if (this.value === -1) {
+          this.color = 'orange';
+        }
       },
       error: (e: any) => {
         console.log(e);
@@ -29,8 +36,13 @@ export class TestComponent implements OnInit {
     });
   }
 
-  public changeValue() {
+  public increaseValue() {
     this.value!++;
+    this.testService.setValue(this.value!);
+  }
+
+  public decreaseValue() {
+    this.value!--;
     this.testService.setValue(this.value!);
   }
 }

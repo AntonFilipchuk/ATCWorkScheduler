@@ -13,12 +13,13 @@
     class="selector"
     *ngIf="ifShowSelector || ifSelectorActive"
     (mousedown)="getEmployeesForSelection()"
-    (click)="toggleIfSelectionActive()"
+    (click)="selectionActive()"
+    (closed)="onSelectorClose(); selectionNotActive()"
   >
     <mat-option
       *ngFor="let employee of employeesForSelection"
       [value]="employee"
-      (onSelectionChange)="onSelection($event.source.value)"
+      (onSelectionChange)="onSelection($event.source.value)"  
     >
       {{ employee.name }}
     </mat-option>
