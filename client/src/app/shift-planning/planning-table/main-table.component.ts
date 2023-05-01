@@ -28,42 +28,15 @@ export class MainTableComponent implements OnInit {
   public tableDataSource: MatTableDataSource<ITableRow> =
     new MatTableDataSource<ITableRow>();
 
-  public selectedColumnNumber: number = -1;
-
-  public availableRows: number[] = [];
-
-  public selectedEmployeeToSet: IEmployee | undefined;
-
-  public ifSelectionActive: boolean = false;
-
   constructor(private planningTableService: TablesBuilderService) {}
 
   ngOnInit(): void {
-    let pTS = this.planningTableService;
+    let pTS: TablesBuilderService = this.planningTableService;
     this.displayedColumns = pTS.displayColumns;
     this.sectorsForShift = pTS.sectors;
 
     this.getTableForSubscription();
     this.employees = pTS.employees;
-  }
-
-  public changeIfSelectionActive(state: boolean) {
-    this.ifSelectionActive = state;
-  }
-
-  public changeSelectedEmployeeToSet(employee: IEmployee) {
-    this.selectedEmployeeToSet = employee;
-    console.log('Selected Employee to set changed', employee.name);
-  }
-
-  public changeSelectedColumn(columnNumber: number) {
-    this.selectedColumnNumber = columnNumber;
-    console.log('Selected column changed', this.selectedColumnNumber);
-  }
-
-  public changeAvailableRows(availableRows: number[]) {
-    this.availableRows = availableRows;
-    console.log('AvailableRows Changed', this.availableRows);
   }
 
   getTableForSubscription() {

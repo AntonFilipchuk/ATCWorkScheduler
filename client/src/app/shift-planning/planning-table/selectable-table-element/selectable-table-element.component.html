@@ -8,22 +8,37 @@
   (mouseenter)="toggleBorderAndSelectorVisibility()"
   (mouseleave)="toggleBorderAndSelectorVisibility()"
 >
-  <mat-select
-    class="selector"
-    *ngIf="ifShowSelector || ifSelectorActive"
-    (mouseover)="ifEmployeeWhoWasChosenShouldBeSet ? setSelectedEmployee() : ''"
-    (mousedown)="getEmployeesForSelection()"
-    (click)="ifEmployeeWhoWasChosenShouldBeSet ? disableSelectionOfSelectedEmployee() : selectionActive()"
-    (closed)="onSelectorClose(); selectionNotActive()"
-  >
-    <mat-option
-      *ngFor="let employee of employeesForSelection"
-      [value]="employee"
-      (onSelectionChange)="onSelection($event.source.value)"
+  <div
+    *ngIf="ifEmployeeWhoWasChosenShouldBeSet; then content; else other_content"
+  ></div>
+
+  <ng-template #content
+    ><div
+      class="test"
+      [ngStyle]="{ background: color }"
+      (mouseenter)="setSelectedEmployee()"
+      (click)="disableSelectionOfSelectedEmployee()"
+    ></div
+  ></ng-template>
+
+  <ng-template #other_content>
+    <mat-select
+      class="selector"
+      *ngIf="ifShowSelector || ifSelectorActive"
+      [ngStyle]="{background: color}"
+      (mousedown)="getEmployeesForSelection()"
+      (click)="selectionActive()"
+      (closed)="onSelectorClose(); selectionNotActive()"
     >
-      {{ employee.name }}
-    </mat-option>
-  </mat-select>
+      <mat-option
+        *ngFor="let employee of employeesForSelection"
+        [value]="employee"
+        (onSelectionChange)="onSelection($event.source.value)"
+      >
+        {{ employee.name }}
+      </mat-option>
+    </mat-select>
+  </ng-template>
 </div>
 
 <!-- <div

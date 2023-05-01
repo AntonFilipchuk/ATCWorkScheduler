@@ -1,18 +1,11 @@
 import {
-  ChangeDetectorRef,
   Component,
   EventEmitter,
   Input,
-  OnChanges,
   OnInit,
   Output,
-  SimpleChanges,
 } from '@angular/core';
 import { IEmployee } from 'src/app/models/IEmployee';
-import { MainTableComponent } from '../main-table.component';
-import { MatOptionSelectionChange } from '@angular/material/core';
-import { BehaviorSubject } from 'rxjs';
-import { IEmployeesRow } from 'src/app/models/IEmployeesRow';
 import { ISector } from 'src/app/models/ISector';
 import { IWorkAndRestTimeInfo } from 'src/app/models/IWorkAndRestTimeInfo';
 import { TablesBuilderService } from 'src/app/Services/TableBuilderService/tables-builder.service';
@@ -31,11 +24,13 @@ import { TablesBuilderService } from 'src/app/Services/TableBuilderService/table
   templateUrl: './selectable-table-element.component.html',
   styleUrls: ['./selectable-table-element.component.scss'],
 })
-export class SelectableTableElementComponent implements OnInit, OnChanges {
+export class SelectableTableElementComponent implements OnInit {
   @Input() rowNumber!: number;
   @Input() columnNumber!: number;
   @Input() sector!: ISector;
 
+
+  @Output() ifEmployeeWasSet : EventEmitter<void> = new EventEmitter<void>();
   //
   private _selectedEmployee: IEmployee | undefined;
   //
@@ -69,12 +64,9 @@ export class SelectableTableElementComponent implements OnInit, OnChanges {
   //6) if employee is set and mouse is clicked - make other columns active again
 
   constructor(private planningTableService: TablesBuilderService) {}
-  ngOnChanges(changes: SimpleChanges): void {
-    //console.log('OnChanges');
-    // this.setEmployeeColor();
-  }
+
   ngOnInit(): void {
-    //console.log('OnInit');
+    console.log('OnInit');
     this.getColumnNumberWhereSelectionIsActive();
     this.getEmployeeWhoWasChosenForSelection();
     this.employee = this.planningTableService.getEmployeeByRowAnColumnNumber(
@@ -147,10 +139,12 @@ export class SelectableTableElementComponent implements OnInit, OnChanges {
   }
 
   public setSelectedEmployee() {
+    
     if (this._selectedEmployee) {
       if (this.employee?.id === this._selectedEmployee.id) {
         return;
       } else if (
+        
         this.planningTableService
           .getEmployeesForSelection(this.rowNumber, this.sector)
           .includes(this._selectedEmployee)
@@ -160,6 +154,8 @@ export class SelectableTableElementComponent implements OnInit, OnChanges {
           this.rowNumber,
           this.columnNumber
         );
+        this.employee = this._selectedEmployee;
+        this.setEmployeeColor();
       }
     }
   }
@@ -171,6 +167,9 @@ export class SelectableTableElementComponent implements OnInit, OnChanges {
       this.rowNumber,
       this.columnNumber
     );
+    this.employee = employee;
+    this.setEmployeeColor();
+    //this.ifEmployeeWasSet.emit();
   }
 
   private setEmployeeColor() {
