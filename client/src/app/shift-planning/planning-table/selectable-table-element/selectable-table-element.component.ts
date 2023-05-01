@@ -98,6 +98,13 @@ export class SelectableTableElementComponent implements OnInit, OnChanges {
   private checkIfCellShouldBeActive(columnNumber: number) {
     this.ifCellDisabled =
       this.columnNumber !== columnNumber && columnNumber >= 0;
+    if (this.employee) {
+      this.color = this.employee.color;
+    } else if (this.ifCellDisabled) {
+      this.color = 'lightgrey';
+    } else {
+      this.color = 'grey';
+    }
   }
 
   private setColumnNumberWhereSelectionIsActive() {
