@@ -127,7 +127,7 @@ export class TablesBuilderService {
       this._objComparisonHelper.ifEmployeesRowHasEmployee(rowToChange, employee)
     ) {
       console.log(
-        `Can not set ${employee.name} at the same time on different sector!`
+        `Can not set ${employee.name} at the same time on different sector! Row number: ${rowNumber}, Column Number ${columnNumber}`
       );
       return;
     }
@@ -194,6 +194,22 @@ export class TablesBuilderService {
       console.log('Error adding the same employee at the same time');
       return;
     }
+  }
+
+  public getRowsNumbers(
+    employee: IEmployee,
+    rowNumber: number,
+    columnNumber: number
+  ) {
+    return new EmployeesWhoCanWorkEvaluator().getRowsNumbersWereEmployeeCanBeSet(
+      employee,
+      rowNumber,
+      columnNumber,
+      this._employeesTableAs2DArray,
+      this._maxWorkTimeInMinutes,
+      this._minRestTimeInMinutes,
+      this._timeIntervalInMinutes
+    );
   }
 
   public getEmployeesForSelection(

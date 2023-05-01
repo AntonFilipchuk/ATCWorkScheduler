@@ -2,6 +2,33 @@
   class="selectable-element-container"
   [ngStyle]="{
     border: ifShowBorder || ifSelectorActive ? '5px solid green' : '',
+    background: color,
+    'pointer-events': ifCellDisabled ? 'none' : 'all'
+  }"
+  (mouseenter)="toggleBorderAndSelectorVisibility()"
+  (mouseleave)="toggleBorderAndSelectorVisibility()"
+  
+>
+  <mat-select
+    class="selector"
+    *ngIf="ifShowSelector || ifSelectorActive"
+    (mousedown)="getEmployeesForSelection()"
+    (click)="toggleIfSelectionActive()"
+  >
+    <mat-option
+      *ngFor="let employee of employeesForSelection"
+      [value]="employee"
+      (onSelectionChange)="onSelection($event.source.value)"
+    >
+      {{ employee.name }}
+    </mat-option>
+  </mat-select>
+</div>
+
+<!-- <div
+  class="selectable-element-container"
+  [ngStyle]="{
+    border: ifShowBorder || ifSelectorActive ? '5px solid green' : '',
     background: color ? color : 'grey',
     'pointer-events': ifCellDisabled ? 'none' : 'all'
   }"
@@ -15,7 +42,7 @@
   {{ timeInfo ? "NW " + timeInfo.nextWorkTimeInMinutes : "" }}
   {{ timeInfo ? "TR " + timeInfo.totalRestTimeInMinutes : "" }}
   {{ timeInfo ? "TW " + timeInfo.totalWorkingTimeInMinutes : "" }}
-  {{ employeesToSelectFrom.length }}
+  {{ rowNumber }}
 
   <mat-select
     class="selector"
@@ -31,4 +58,4 @@
       {{ employee.name }}
     </mat-option>
   </mat-select>
-</div>
+</div> -->

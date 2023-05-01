@@ -50,6 +50,68 @@ export class EmployeesWhoCanWorkEvaluator {
     return validEmployeesForSelection;
   }
 
+  public getRowsNumbersWereEmployeeCanBeSet(
+    employee: IEmployee,
+    rowNumber: number,
+    columnNumber: number,
+    employeesTableAs2DArray: (IEmployee | undefined)[][],
+    maxWorkTimeInMinutes: number,
+    minRestTimeInMinutes: number,
+    timeIntervalInMinutes: number
+  ): number[] {
+    let rowsNumbers: number[] = [];
+
+    let nextRow = rowNumber + 1;
+    let previousRow = rowNumber - 1;
+
+    let alternateRealityTableToFuture = structuredClone(
+      employeesTableAs2DArray
+    );
+    let alternateRealityTableToPast = structuredClone(employeesTableAs2DArray);
+    
+    alternateRealityTableToPast[rowNumber][columnNumber] = employee;
+    alternateRealityTableToFuture[rowNumber][columnNumber] = employee;
+
+    while (nextRow < employeesTableAs2DArray.length) {
+      if (
+        this.ifEmployeeCanBeAddedForSelection(
+          employee,
+          nextRow,
+          alternateRealityTableToFuture,
+          maxWorkTimeInMinutes,
+          minRestTimeInMinutes,
+          timeIntervalInMinutes
+        )
+      ) {
+        rowsNumbers.push(nextRow);
+        alternateRealityTableToFuture[nextRow][columnNumber] = employee;
+        nextRow++;
+      } else {
+        break;
+      }
+    }
+
+    while (previousRow >= 0) {
+       if (
+        this.ifEmployeeCanBeAddedForSelection(
+          employee,
+          previousRow,
+          alternateRealityTableToPast,
+          maxWorkTimeInMinutes,
+          minRestTimeInMinutes,
+          timeIntervalInMinutes
+        )
+      ) {
+        rowsNumbers.push(previousRow);
+        alternateRealityTableToPast[previousRow][columnNumber] = employee;
+        previousRow--;
+      } else {
+        break;
+      }
+    }
+
+    return rowsNumbers.sort((a, b) => a - b);
+  }
 
   public getWorkAndRestTimeInfo(
     employee: IEmployee,
@@ -150,8 +212,7 @@ export class EmployeesWhoCanWorkEvaluator {
         );
 
       if (
-        nextWorkTimeInfo.currentWorkTimeInMinutes <
-          maxWorkTimeInMinutes &&
+        nextWorkTimeInfo.currentWorkTimeInMinutes < maxWorkTimeInMinutes &&
         currentWorkTimeInfo.lastRestTimeInMinutes >= minRestTimeInMinutes
       ) {
         return true;

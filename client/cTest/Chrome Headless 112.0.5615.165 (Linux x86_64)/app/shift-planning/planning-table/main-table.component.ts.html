@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">82.35% </span>
+                <span class="strong">75% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>14/17</span>
+                <span class='fraction'>15/20</span>
             </div>
         
             
@@ -37,16 +37,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">66.66% </span>
+                <span class="strong">57.14% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>4/6</span>
+                <span class='fraction'>4/7</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">82.35% </span>
+                <span class="strong">75% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>14/17</span>
+                <span class='fraction'>15/20</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line high'></div>
+    <div class='status-line medium'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -121,7 +121,20 @@
 <a name='L56'></a><a href='#L56'>56</a>
 <a name='L57'></a><a href='#L57'>57</a>
 <a name='L58'></a><a href='#L58'>58</a>
-<a name='L59'></a><a href='#L59'>59</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L59'></a><a href='#L59'>59</a>
+<a name='L60'></a><a href='#L60'>60</a>
+<a name='L61'></a><a href='#L61'>61</a>
+<a name='L62'></a><a href='#L62'>62</a>
+<a name='L63'></a><a href='#L63'>63</a>
+<a name='L64'></a><a href='#L64'>64</a>
+<a name='L65'></a><a href='#L65'>65</a>
+<a name='L66'></a><a href='#L66'>66</a>
+<a name='L67'></a><a href='#L67'>67</a>
+<a name='L68'></a><a href='#L68'>68</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -146,12 +159,12 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
@@ -168,8 +181,13 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -179,18 +197,22 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { AfterViewInit, Component, OnInit, ViewChild, ViewChildren } from '@angular/core';
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import {
+  AfterViewInit,
+  Component,
+  OnInit,
+  ViewChild,
+  ViewChildren,
+} from '@angular/core';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
 import { TablesBuilderService } from 'src/app/Services/TableBuilderService/tables-builder.service';
 import { IEmployee } from 'src/app/models/IEmployee';
 import { IEmployeesRow } from 'src/app/models/IEmployeesRow';
 import { ISector } from 'src/app/models/ISector';
 &nbsp;
-&nbsp;
 export interface ITableRow {
   [key: string]: any;
 }
-&nbsp;
 &nbsp;
 @Component({
   selector: 'app-main-table',
@@ -202,16 +224,16 @@ export class MainTableComponent implements OnInit {
   public displayedColumns: string[] = [];
   public employees: IEmployee[] = [];
 &nbsp;
-  public tableDataSource: MatTableDataSource&lt;ITableRow&gt; = new MatTableDataSource&lt;ITableRow&gt;();
+  public tableDataSource: MatTableDataSource&lt;ITableRow&gt; =
+    new MatTableDataSource&lt;ITableRow&gt;();
 &nbsp;
   public selectedColumnNumber: number = -1;
 &nbsp;
+  public availableRows: number[] = [];
 &nbsp;
-  constructor(private planningTableService: TablesBuilderService) {
-  }
+  constructor(private planningTableService: TablesBuilderService) {}
 &nbsp;
-&nbsp;
-  ngOnInit(): void {    
+  ngOnInit(): void {
     let pTS = this.planningTableService;
     this.displayedColumns = pTS.displayColumns;
     this.sectorsForShift = pTS.sectors;
@@ -220,31 +242,36 @@ export class MainTableComponent implements OnInit {
     this.employees = pTS.employees;
   }
 &nbsp;
-  public <span class="fstat-no" title="function not covered" >changeSelectedColumn(</span>columnNumber : number) {
+  public <span class="fstat-no" title="function not covered" >changeSelectedColumn(</span>columnNumber: number) {
 <span class="cstat-no" title="statement not covered" >    this.selectedColumnNumber = columnNumber;</span>
-<span class="cstat-no" title="statement not covered" >    console.log("Parent Changed", this.selectedColumnNumber); </span>
+<span class="cstat-no" title="statement not covered" >    console.log('Parent Changed', this.selectedColumnNumber);</span>
+  }
+&nbsp;
+  public <span class="fstat-no" title="function not covered" >changeAvailableRows(</span>availableRows : number[])
+  {
+<span class="cstat-no" title="statement not covered" >    this.availableRows = availableRows;</span>
+<span class="cstat-no" title="statement not covered" >    console.log('AvailableRows Changed',  this.availableRows);</span>
   }
 &nbsp;
   getTableForSubscription() {
-    this.planningTableService.getTableForSubscription().subscribe(
-      {
-        next: (response: ITableRow[]) =&gt; {
-          this.tableDataSource.data = response;
-        },
-        error: <span class="fstat-no" title="function not covered" >(e</span>: any) =&gt; {
-<span class="cstat-no" title="statement not covered" >          console.log(e);</span>
-        }
-      }
-    );
+    this.planningTableService.getTableForSubscription().subscribe({
+      next: (response: ITableRow[]) =&gt; {
+        this.tableDataSource.data = response;
+      },
+      error: <span class="fstat-no" title="function not covered" >(e</span>: any) =&gt; {
+<span class="cstat-no" title="statement not covered" >        console.log(e);</span>
+      },
+    });
   }
-}</pre></td></tr></table></pre>
+}
+&nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2023-04-30T15:03:31.105Z
+                at 2023-04-30T15:31:10.214Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>
