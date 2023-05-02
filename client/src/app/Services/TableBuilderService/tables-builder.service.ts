@@ -326,6 +326,8 @@ export class TablesBuilderService
       {
         const row = this._employeesTableAs2DArray[j];
         let employeePositionInRow: number = this._objComparisonHelper.getPositionOfEmployeeInRow(row, employee);
+        
+        if (employeePositionInRow >= 0)
         {
           let startTime: string = this._timeColumnAsStringArray[j].slice(0, 5);
           while (this._objComparisonHelper.ifEmployeesRowHasEmployee(this._employeesTableAs2DArray[j + 1], employee))
