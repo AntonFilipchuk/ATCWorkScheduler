@@ -1,10 +1,11 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  OnInit,
-  Output,
-} from '@angular/core';
+import
+  {
+    Component,
+    EventEmitter,
+    Input,
+    OnInit,
+    Output,
+  } from '@angular/core';
 import { IEmployee } from 'src/app/models/IEmployee';
 import { ISector } from 'src/app/models/ISector';
 import { IWorkAndRestTimeInfo } from 'src/app/models/IWorkAndRestTimeInfo';
@@ -24,13 +25,14 @@ import { TablesBuilderService } from 'src/app/Services/TableBuilderService/table
   templateUrl: './selectable-table-element.component.html',
   styleUrls: ['./selectable-table-element.component.scss'],
 })
-export class SelectableTableElementComponent implements OnInit {
+export class SelectableTableElementComponent implements OnInit
+{
   @Input() rowNumber!: number;
   @Input() columnNumber!: number;
   @Input() sector!: ISector;
 
 
-  @Output() ifEmployeeWasSet : EventEmitter<void> = new EventEmitter<void>();
+  @Output() ifEmployeeWasSet: EventEmitter<void> = new EventEmitter<void>();
   //
   private _selectedEmployee: IEmployee | undefined;
   //
@@ -63,40 +65,63 @@ export class SelectableTableElementComponent implements OnInit {
   //5) when mouse enters where employee can be selected - set employee
   //6) if employee is set and mouse is clicked - make other columns active again
 
-  constructor(private planningTableService: TablesBuilderService) {}
+  constructor (private planningTableService: TablesBuilderService) { }
 
-  ngOnInit(): void {
+  ngOnInit(): void
+  {
     console.log('OnInit');
+    
     this.getColumnNumberWhereSelectionIsActive();
     this.getEmployeeWhoWasChosenForSelection();
-    this.employee = this.planningTableService.getEmployeeByRowAnColumnNumber(
-      this.rowNumber,
-      this.columnNumber
-    );
-
-    this.setEmployeeColor();
+    this.getEmployeesAs2DTable();
   }
 
-  private getEmployeeWhoWasChosenForSelection() {
-    this.planningTableService.getEmployeeWhoWasChosenForSelection().subscribe({
-      next: (employee: IEmployee | undefined) => {
+  private getEmployeesAs2DTable()
+  {
+    this.planningTableService.getEmployeesTableAs2DArrayForSubscription().subscribe(
+      {
+        next: (table: (IEmployee | undefined)[][]) => 
+        {
+          this.employee = table[this.rowNumber][this.columnNumber];
+          this.setEmployeeColor();
+        },
+        error: (e) =>
+        {
+          console.log(e);
+          this.employee = undefined;
+          this.color = 'grey';
+        }
+      }
+    );
+  }
+
+  private getEmployeeWhoWasChosenForSelection()
+  {
+    this.planningTableService.getEmployeeWhoWasChosenForSelectionForSubscription().subscribe({
+      next: (employee: IEmployee | undefined) =>
+      {
         this._selectedEmployee = employee;
         this.checkIfEmployeeWhoWasChosenShouldBeSet(employee);
       },
-      error: (e) => {
+      error: (e) =>
+      {
         console.log('Could not get an employee who was chosen for selection');
+        this._selectedEmployee = undefined;
       },
     });
   }
 
-  private getColumnNumberWhereSelectionIsActive() {
+  private getColumnNumberWhereSelectionIsActive()
+  {
     this.planningTableService
       .getColumnNumberWhereSelectionIsActiveForSubscription()
       .subscribe({
-        next: (columnNumber: number) => {
+        next: (columnNumber: number) =>
+        {
           this.checkIfCellShouldBeActive(columnNumber);
         },
-        error: (e) => {
+        error: (e) =>
+        {
           console.log(e);
         },
       });
@@ -104,33 +129,42 @@ export class SelectableTableElementComponent implements OnInit {
 
   private checkIfEmployeeWhoWasChosenShouldBeSet(
     employee: IEmployee | undefined
-  ) {
-    if (employee) {
+  )
+  {
+    if (employee)
+    {
       this.ifEmployeeWhoWasChosenShouldBeSet = true;
-    } else {
+    } else
+    {
       this.ifEmployeeWhoWasChosenShouldBeSet = false;
     }
   }
 
-  private checkIfCellShouldBeActive(columnNumber: number) {
+  private checkIfCellShouldBeActive(columnNumber: number)
+  {
     this.ifCellDisabled =
       this.columnNumber !== columnNumber && columnNumber >= 0;
-    if (this.employee) {
+    if (this.employee)
+    {
       this.color = this.employee.color;
-    } else if (this.ifCellDisabled) {
+    } else if (this.ifCellDisabled)
+    {
       this.color = 'lightgrey';
-    } else {
+    } else
+    {
       this.color = 'grey';
     }
   }
 
-  private setColumnNumberWhereSelectionIsActive() {
+  private setColumnNumberWhereSelectionIsActive()
+  {
     this.planningTableService.setColumnNumberWhereSelectionIsActive(
       this.columnNumber
     );
   }
 
-  public getEmployeesForSelection() {
+  public getEmployeesForSelection()
+  {
     this.employeesForSelection =
       this.planningTableService.getEmployeesForSelection(
         this.rowNumber,
@@ -138,43 +172,53 @@ export class SelectableTableElementComponent implements OnInit {
       );
   }
 
-  public setSelectedEmployee() {
-    
-    if (this._selectedEmployee) {
-      if (this.employee?.id === this._selectedEmployee.id) {
+  public setSelectedEmployee()
+  {
+
+    if (this._selectedEmployee)
+    {
+      if (this.employee?.id === this._selectedEmployee.id)
+      {
         return;
       } else if (
-        
+
         this.planningTableService
           .getEmployeesForSelection(this.rowNumber, this.sector)
           .includes(this._selectedEmployee)
-      ) {
+      )
+      {
         this.planningTableService.setEmployeeInRow(
           this._selectedEmployee,
           this.rowNumber,
           this.columnNumber
         );
-        this.employee = this._selectedEmployee;
-        this.setEmployeeColor();
+        // this.employee = this._selectedEmployee;
+        // this.setEmployeeColor();
       }
     }
   }
 
-  public onSelection(employee: IEmployee) {
+  public onSelection(employee: IEmployee)
+  {
     this.planningTableService.setEmployeeWhoWasChosenForSelection(employee);
     this.planningTableService.setEmployeeInRow(
       employee,
       this.rowNumber,
       this.columnNumber
     );
-    this.employee = employee;
-    this.setEmployeeColor();
-    //this.ifEmployeeWasSet.emit();
+    // this.employee = employee;
+    // this.setEmployeeColor();
   }
 
-  private setEmployeeColor() {
-    if (this.employee) {
+  private setEmployeeColor()
+  {
+    if (this.employee)
+    {
       this.color = this.employee.color;
+    }
+    else
+    {
+      this.color = 'grey';
     }
   }
 
@@ -184,25 +228,30 @@ export class SelectableTableElementComponent implements OnInit {
     this.onSelectorClose();
     this.selectionNotActive();
   }
-  public toggleBorderAndSelectorVisibility() {
+  public toggleBorderAndSelectorVisibility()
+  {
     this.ifShowBorder = !this.ifShowBorder;
     this.ifShowSelector = !this.ifShowSelector;
   }
 
-  private resetColumnNumberWhereSelectionIsActive() {
+  private resetColumnNumberWhereSelectionIsActive()
+  {
     this.planningTableService.setColumnNumberWhereSelectionIsActive(-1);
   }
 
-  public onSelectorClose() {
+  public onSelectorClose()
+  {
     this.resetColumnNumberWhereSelectionIsActive();
   }
 
-  public selectionActive() {
+  public selectionActive()
+  {
     this.ifSelectorActive = !this.ifSelectorActive;
     this.setColumnNumberWhereSelectionIsActive();
   }
 
-  public selectionNotActive() {
+  public selectionNotActive()
+  {
     this.ifSelectorActive = !this.ifSelectorActive;
   }
 

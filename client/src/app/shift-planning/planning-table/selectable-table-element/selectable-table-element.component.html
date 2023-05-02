@@ -9,19 +9,19 @@
   (mouseleave)="toggleBorderAndSelectorVisibility()"
 >
   <div
-    *ngIf="ifEmployeeWhoWasChosenShouldBeSet; then content; else other_content"
+    *ngIf="ifEmployeeWhoWasChosenShouldBeSet; then withoutSelector; else withSelector"
   ></div>
 
-  <ng-template #content
+  <ng-template #withoutSelector 
     ><div
-      class="test"
+      class="selector"
       [ngStyle]="{ background: color }"
       (mouseenter)="setSelectedEmployee()"
       (click)="disableSelectionOfSelectedEmployee()"
     ></div
   ></ng-template>
 
-  <ng-template #other_content>
+  <ng-template #withSelector>
     <mat-select
       class="selector"
       *ngIf="ifShowSelector || ifSelectorActive"

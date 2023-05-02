@@ -59,6 +59,8 @@ export class TablesBuilderService
   public sectors: ISector[] = [];
 
   private _employeesTableAs2DArray: (IEmployee | undefined)[][] = [];
+
+  private _$employeesTableAs2DArray: ReplaySubject<(IEmployee | undefined)[][]> = new ReplaySubject<(IEmployee | undefined)[][]>();
   private _tableForMatTable: ITableRow[] = [];
   private _timeColumnAsStringArray: string[] = [];
   private _timeColumnAsDateArray: Date[][] = [];
@@ -86,9 +88,13 @@ export class TablesBuilderService
     this._objComparisonHelper = new ObjectsComparisonHelper();
   }
 
-  public getEmployeeWhoWasChosenForSelection(): Observable<
-    IEmployee | undefined
-  >
+  public getEmployeesTableAs2DArrayForSubscription(): Observable<(IEmployee | undefined)[][]> 
+  {
+    this._$employeesTableAs2DArray.next(this._employeesTableAs2DArray);
+    return this._$employeesTableAs2DArray;
+  }
+
+  public getEmployeeWhoWasChosenForSelectionForSubscription(): Observable<IEmployee | undefined>
   {
     return this._$employeeWhoWasChosenForSelection;
   }
@@ -115,32 +121,15 @@ export class TablesBuilderService
   }
 
   private buildTable(
-    employee: IEmployee,
+    employee: IEmployee | undefined,
     rowNumber: number,
     columnNumber: number
   )
   {
     this._tableForMatTable[rowNumber][columnNumber] = employee;
+    this._employeesTableAs2DArray[rowNumber][columnNumber] = employee;
+    this._$employeesTableAs2DArray.next(this._employeesTableAs2DArray);
     this._$table.next(this._tableForMatTable);
-  }
-
-  private rebuildTable()
-  {
-    let table: ITableRow[] = this._tableForMatTable.slice(0, this._tableForMatTable.length);
-
-    // for (let i = 0; i < this._timeColumnAsStringArray.length; i++)
-    // {
-    //   let sectorsRow: IEmployeesRow = {};
-    //   for (let j = 0; j < this.sectors.length; j++)
-    //   {
-    //     sectorsRow[this.sectors[j].name] = this._employeesTableAs2DArray[i][j];
-    //   }
-    //   table.push({
-    //     time: this._timeColumnAsStringArray[i],
-    //     ...sectorsRow,
-    //   });
-    // }
-    this._$table.next(structuredClone(table));
   }
 
   public setEmployeeInRow(
@@ -212,14 +201,15 @@ export class TablesBuilderService
         )
         {
           const indexOfEmployeeToChange = this._employeesTableAs2DArray[nextRowNumber].
-            findIndex((e) => this._objComparisonHelper.ifIdOfEmployeesEqual(e, employeeToChange));
+            findIndex((e) => e?.id === employeeToChange?.id);
 
           this._employeesTableAs2DArray[nextRowNumber][indexOfEmployeeToChange] = undefined;
           this._tableForMatTable[nextRowNumber][indexOfEmployeeToChange] = undefined;
+          this.buildTable(undefined, rowNumber, columnNumber);
           nextRowNumber++;
         }
         this._employeesTableAs2DArray[rowNumber][columnNumber] = employeeToChange;
-        this.rebuildTable();
+        this.buildTable(employeeToChange, rowNumber, columnNumber);
         return;
       }
     }
