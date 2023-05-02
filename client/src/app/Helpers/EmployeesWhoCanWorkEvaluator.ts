@@ -3,7 +3,8 @@ import { ISector } from '../models/ISector';
 import { IWorkAndRestTimeInfo } from '../models/IWorkAndRestTimeInfo';
 import { ObjectsComparisonHelper } from './ObjectsComparisonHelper';
 
-export class EmployeesWhoCanWorkEvaluator {
+export class EmployeesWhoCanWorkEvaluator
+{
   private _objComparisonHelper = new ObjectsComparisonHelper();
 
   public getEmployeesWhoCanWork(
@@ -14,9 +15,11 @@ export class EmployeesWhoCanWorkEvaluator {
     minRestTimeInMinutes: number,
     timeIntervalInMinutes: number,
     sector: ISector
-  ): IEmployee[] {
+  ): IEmployee[]
+  {
     let validEmployeesForSelection: IEmployee[] = [];
-    for (let i = 0; i < employeesForShift.length; i++) {
+    for (let i = 0; i < employeesForShift.length; i++)
+    {
       const employee: IEmployee = employeesForShift[i];
 
       //Check if an employee has a permit for sector
@@ -27,9 +30,11 @@ export class EmployeesWhoCanWorkEvaluator {
           sector
         );
 
-      if (!ifEmployeeHasPermitForSector) {
+      if (!ifEmployeeHasPermitForSector)
+      {
         continue;
-      } else {
+      } else
+      {
         let ifEmployeeCanBeAddedForSelection =
           this.ifEmployeeCanBeAddedForSelection(
             employee,
@@ -40,9 +45,11 @@ export class EmployeesWhoCanWorkEvaluator {
             timeIntervalInMinutes
           );
 
-        if (ifEmployeeCanBeAddedForSelection) {
+        if (ifEmployeeCanBeAddedForSelection)
+        {
           validEmployeesForSelection.push(employee);
-        } else {
+        } else
+        {
           continue;
         }
       }
@@ -58,7 +65,8 @@ export class EmployeesWhoCanWorkEvaluator {
     maxWorkTimeInMinutes: number,
     minRestTimeInMinutes: number,
     timeIntervalInMinutes: number
-  ): number[] {
+  ): number[]
+  {
     let rowsNumbers: number[] = [];
 
     let nextRow = rowNumber + 1;
@@ -68,11 +76,12 @@ export class EmployeesWhoCanWorkEvaluator {
       employeesTableAs2DArray
     );
     let alternateRealityTableToPast = structuredClone(employeesTableAs2DArray);
-    
+
     alternateRealityTableToPast[rowNumber][columnNumber] = employee;
     alternateRealityTableToFuture[rowNumber][columnNumber] = employee;
 
-    while (nextRow < employeesTableAs2DArray.length) {
+    while (nextRow < employeesTableAs2DArray.length)
+    {
       if (
         this.ifEmployeeCanBeAddedForSelection(
           employee,
@@ -82,17 +91,20 @@ export class EmployeesWhoCanWorkEvaluator {
           minRestTimeInMinutes,
           timeIntervalInMinutes
         )
-      ) {
+      )
+      {
         rowsNumbers.push(nextRow);
         alternateRealityTableToFuture[nextRow][columnNumber] = employee;
         nextRow++;
-      } else {
+      } else
+      {
         break;
       }
     }
 
-    while (previousRow >= 0) {
-       if (
+    while (previousRow >= 0)
+    {
+      if (
         this.ifEmployeeCanBeAddedForSelection(
           employee,
           previousRow,
@@ -101,11 +113,13 @@ export class EmployeesWhoCanWorkEvaluator {
           minRestTimeInMinutes,
           timeIntervalInMinutes
         )
-      ) {
+      )
+      {
         rowsNumbers.push(previousRow);
         alternateRealityTableToPast[previousRow][columnNumber] = employee;
         previousRow--;
-      } else {
+      } else
+      {
         break;
       }
     }
@@ -118,7 +132,8 @@ export class EmployeesWhoCanWorkEvaluator {
     rowNumber: number,
     employeesTableAs2DArray: (IEmployee | undefined)[][],
     timeIntervalInMinutes: number
-  ): IWorkAndRestTimeInfo {
+  ): IWorkAndRestTimeInfo
+  {
     let currentWorkTime: number = 0;
 
     let totalWorkTime: number = 0;
@@ -179,10 +194,13 @@ export class EmployeesWhoCanWorkEvaluator {
     maxWorkTimeInMinutes: number,
     minRestTimeInMinutes: number,
     timeIntervalInMinutes: number
-  ): boolean {
+  ): boolean
+  {
+
     if (
       this.ifEmployeeAlreadyWorks(employee, rowNumber, employeesTableAs2DArray)
-    ) {
+    )
+    {
       return false;
     }
 
@@ -196,7 +214,8 @@ export class EmployeesWhoCanWorkEvaluator {
         employeesTableAs2DArray[nextRow],
         employee
       )
-    ) {
+    )
+    {
       let nextWorkTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(
         employee,
         nextRow,
@@ -214,7 +233,8 @@ export class EmployeesWhoCanWorkEvaluator {
       if (
         nextWorkTimeInfo.currentWorkTimeInMinutes < maxWorkTimeInMinutes &&
         currentWorkTimeInfo.lastRestTimeInMinutes >= minRestTimeInMinutes
-      ) {
+      )
+      {
         return true;
       }
     }
@@ -225,7 +245,8 @@ export class EmployeesWhoCanWorkEvaluator {
         employeesTableAs2DArray[previousRow],
         employee
       )
-    ) {
+    )
+    {
       let workTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(
         employee,
         rowNumber,
@@ -235,10 +256,12 @@ export class EmployeesWhoCanWorkEvaluator {
       if (
         workTimeInfo.currentWorkTimeInMinutes < maxWorkTimeInMinutes &&
         workTimeInfo.nextRestTimeInMinutes >= minRestTimeInMinutes
-      ) {
+      )
+      {
         return true;
       }
-    } else {
+    } else
+    {
       let workTimeInfo: IWorkAndRestTimeInfo = this.getWorkAndRestTimeInfo(
         employee,
         rowNumber,
@@ -248,7 +271,8 @@ export class EmployeesWhoCanWorkEvaluator {
       if (
         workTimeInfo.lastRestTimeInMinutes >= minRestTimeInMinutes &&
         workTimeInfo.nextRestTimeInMinutes >= minRestTimeInMinutes
-      ) {
+      )
+      {
         return true;
       }
     }
@@ -260,7 +284,8 @@ export class EmployeesWhoCanWorkEvaluator {
     employee: IEmployee,
     rowNumber: number,
     employeesAs2DArray: (IEmployee | undefined)[][]
-  ) {
+  )
+  {
     let ifRowAlreadyHasEmployee =
       this._objComparisonHelper.ifEmployeesRowHasEmployee(
         employeesAs2DArray[rowNumber],
@@ -274,13 +299,15 @@ export class EmployeesWhoCanWorkEvaluator {
     rowNumber: number,
     employeesTableAs2DArray: (IEmployee | undefined)[][],
     timeIntervalInMinutes: number
-  ): [number, number] {
+  ): [number, number]
+  {
     let nextWorkTime: number = 0;
     let nextRestTime: number = 0;
     let nextRow = rowNumber + 1;
     //Check if we are not the last row, if it is
     //future work is always 0
-    if (nextRow >= employeesTableAs2DArray.length) {
+    if (nextRow >= employeesTableAs2DArray.length)
+    {
       return [0, 20];
     }
 
@@ -289,7 +316,8 @@ export class EmployeesWhoCanWorkEvaluator {
     let alternateRealityTable = structuredClone(employeesTableAs2DArray);
     alternateRealityTable[rowNumber][0] = employee;
 
-    while (nextRow < employeesTableAs2DArray.length) {
+    while (nextRow < employeesTableAs2DArray.length)
+    {
       //Check if the next row has employee
       //if does, check next
       if (
@@ -297,23 +325,28 @@ export class EmployeesWhoCanWorkEvaluator {
           alternateRealityTable[nextRow],
           employee
         )
-      ) {
+      )
+      {
         nextRow += 1;
-      } else {
+      } else
+      {
         //If it doesn't have
-        while (nextRow < alternateRealityTable.length) {
+        while (nextRow < alternateRealityTable.length)
+        {
           //Skip all rows that don't have an employee (rest rows)
           if (
             !this._objComparisonHelper.ifEmployeesRowHasEmployee(
               alternateRealityTable[nextRow],
               employee
             )
-          ) {
+          )
+          {
             nextRow += 1;
           }
           //Find the row that has, and get it's current time of work
           //And last rest time
-          else {
+          else
+          {
             nextWorkTime = this.calculateCurrentWorkTime(
               employee,
               nextRow,
@@ -338,19 +371,23 @@ export class EmployeesWhoCanWorkEvaluator {
     employee: IEmployee,
     employeesTableAs2DArray: (IEmployee | undefined)[][],
     timeIntervalInMinutes: number
-  ): [number, number] {
+  ): [number, number]
+  {
     let totalWorkTime: number = 0;
     let totalRestTime: number = 0;
 
-    employeesTableAs2DArray.forEach((employeesRow) => {
+    employeesTableAs2DArray.forEach((employeesRow) =>
+    {
       if (
         this._objComparisonHelper.ifEmployeesRowHasEmployee(
           employeesRow,
           employee
         )
-      ) {
+      )
+      {
         totalWorkTime += timeIntervalInMinutes;
-      } else {
+      } else
+      {
         totalRestTime += timeIntervalInMinutes;
       }
     });
@@ -363,7 +400,8 @@ export class EmployeesWhoCanWorkEvaluator {
     rowNumber: number,
     employeesTableAs2DArray: (IEmployee | undefined)[][],
     timeIntervalInMinutes: number
-  ): number {
+  ): number
+  {
     //0 [e1, e2]
     //1 [e1, e2]
     //2 [e1, e2]
@@ -385,7 +423,8 @@ export class EmployeesWhoCanWorkEvaluator {
         employeesTableAs2DArray[rowWithLastTimeOfWork],
         employee
       )
-    ) {
+    )
+    {
       rowWithLastTimeOfWork += 1;
     }
 
@@ -409,7 +448,8 @@ export class EmployeesWhoCanWorkEvaluator {
         employeesTableAs2DArray[rowWithLastTimeOfWork],
         employee
       )
-    ) {
+    )
+    {
       currentWorkTime += timeIntervalInMinutes;
       rowWithLastTimeOfWork -= 1;
     }
@@ -421,13 +461,15 @@ export class EmployeesWhoCanWorkEvaluator {
     employee: IEmployee,
     rowNumber: number,
     employeesTableAs2DArray: (IEmployee | undefined)[][]
-  ): boolean {
+  ): boolean
+  {
     // This method checks for the edge case
     // The problem - can not calculate last work and rest time
     // if it's the fist work session
 
     //First check if it's the first row
-    if (rowNumber === 0) {
+    if (rowNumber === 0)
+    {
       return true;
     }
 
@@ -451,8 +493,10 @@ export class EmployeesWhoCanWorkEvaluator {
         employeesTableAs2DArray[rowNumber],
         employee
       )
-    ) {
-      if (rowNumber === 0) {
+    )
+    {
+      if (rowNumber === 0)
+      {
         return true;
       }
       rowNumber -= 1;
@@ -473,8 +517,10 @@ export class EmployeesWhoCanWorkEvaluator {
         employeesTableAs2DArray[rowNumber],
         employee
       )
-    ) {
-      if (rowNumber === 0) {
+    )
+    {
+      if (rowNumber === 0)
+      {
         return true;
       }
       rowNumber -= 1;
@@ -489,9 +535,11 @@ export class EmployeesWhoCanWorkEvaluator {
     rowNumber: number,
     employeesTableAs2DArray: (IEmployee | undefined)[][],
     timeIntervalInMinutes: number
-  ): [number, number] {
+  ): [number, number]
+  {
     //Check for edge case
-    if (this.ifFirstWorkSession(employee, rowNumber, employeesTableAs2DArray)) {
+    if (this.ifFirstWorkSession(employee, rowNumber, employeesTableAs2DArray))
+    {
       return [0, 20];
     }
 
@@ -515,14 +563,16 @@ export class EmployeesWhoCanWorkEvaluator {
         employeesTableAs2DArray[row],
         employee
       )
-    ) {
+    )
+    {
       while (
         this._objComparisonHelper.ifEmployeesRowHasEmployee(
           employeesTableAs2DArray[row],
           employee
         ) &&
         row > 0
-      ) {
+      )
+      {
         row = row - 1;
       }
     }
@@ -541,7 +591,8 @@ export class EmployeesWhoCanWorkEvaluator {
         employeesTableAs2DArray[row],
         employee
       )
-    ) {
+    )
+    {
       lastRestTime += timeIntervalInMinutes;
       row = row - 1;
     }
@@ -558,7 +609,8 @@ export class EmployeesWhoCanWorkEvaluator {
         employeesTableAs2DArray[row],
         employee
       )
-    ) {
+    )
+    {
       lastWorkTime += timeIntervalInMinutes;
       row = row - 1;
     }

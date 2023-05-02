@@ -1,9 +1,10 @@
 import { ISector } from "./ISector";
 
-export interface IEmployee {
-    id: number | undefined,
-    name: string | undefined,
-    totalTime: number | undefined,
-    sectorPermits : ISector[],
-    color : string;
+export interface IEmployee
+{
+    id: number,
+    name: string,
+    totalTime: number,
+    sectorPermits: ISector[],
+    color: string;
 }

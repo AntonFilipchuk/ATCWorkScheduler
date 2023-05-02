@@ -256,9 +256,11 @@ export class TablesBuilderService
     );
   }
 
-  public getEmployeesForSelection(rowNumber: number, sector: ISector): IEmployee[]
+  public getEmployeesForSelection(rowNumber: number, columnNumber: number, sector: ISector): IEmployee[]
   {
-    return new EmployeesWhoCanWorkEvaluator().getEmployeesWhoCanWork(
+    let employee = this._employeesTableAs2DArray[rowNumber][columnNumber];
+
+    let employeesWhoCanWork = new EmployeesWhoCanWorkEvaluator().getEmployeesWhoCanWork(
       this.employees,
       rowNumber,
       this._employeesTableAs2DArray,
@@ -267,6 +269,24 @@ export class TablesBuilderService
       this._timeIntervalInMinutes,
       sector
     );
+
+    //Add an employee when we select a cell were he is already present
+    if (employee)
+    {
+      employeesWhoCanWork = [employee, ...employeesWhoCanWork];
+    }
+    return employeesWhoCanWork.sort((e1, e2) => 
+    {
+      if (e1.name < e2.name)
+      {
+        return -1;
+      }
+      if (e1.name > e2.name)
+      {
+        return 1;
+      }
+      return 0;
+    });
   }
 
   public getWorkAndRestTimeInfo(

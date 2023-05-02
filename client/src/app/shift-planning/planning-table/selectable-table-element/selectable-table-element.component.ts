@@ -141,7 +141,7 @@ export class SelectableTableElementComponent implements OnInit
       },
       error: (e) =>
       {
-        console.log('Could not get an employee who was chosen for selection');
+        console.log('Could not get an employee who was chosen for selection', e);
         this._selectedEmployee = undefined;
       },
     });
@@ -204,6 +204,7 @@ export class SelectableTableElementComponent implements OnInit
     this.employeesForSelection =
       this.planningTableService.getEmployeesForSelection(
         this.rowNumber,
+        this.columnNumber,
         this.sector
       );
   }
@@ -231,7 +232,7 @@ export class SelectableTableElementComponent implements OnInit
         } else if (
 
           this.planningTableService
-            .getEmployeesForSelection(this.rowNumber, this.sector)
+            .getEmployeesForSelection(this.rowNumber, this.columnNumber, this.sector)
             .includes(this._selectedEmployee)
         )
         {

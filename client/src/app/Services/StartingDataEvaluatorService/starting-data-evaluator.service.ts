@@ -92,15 +92,15 @@ let shiftStartTime: Date = new Date(
   todayDate.getDate(),
   todayDate.getMonth(),
   todayDate.getDate(),
-  8,
-  0
+  21,
+  40
 );
 let shiftEndTime: Date = new Date(
   todayDate.getDate(),
   todayDate.getMonth(),
   todayDate.getDate(),
-  15,
-  0
+  8,
+  10
 );
 
 let timeIntervalInMinutes = 10;
