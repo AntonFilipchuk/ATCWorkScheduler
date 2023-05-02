@@ -1,10 +1,8 @@
 import
 {
   Component,
-  EventEmitter,
   Input,
   OnInit,
-  Output,
 } from '@angular/core';
 import { IEmployee } from 'src/app/models/IEmployee';
 import { ISector } from 'src/app/models/ISector';
@@ -31,8 +29,6 @@ export class SelectableTableElementComponent implements OnInit
   @Input() columnNumber!: number;
   @Input() sector!: ISector;
 
-
-  @Output() ifEmployeeWasSet: EventEmitter<void> = new EventEmitter<void>();
   //
   private _selectedEmployee: IEmployee | undefined;
   public selectedEmployeeRowNumber: number = -1;
@@ -44,28 +40,11 @@ export class SelectableTableElementComponent implements OnInit
   public ifShowSelector: boolean = false;
   public ifSelectorActive: boolean = false;
   public ifShowBorder: boolean = false;
-  public ifSelected: boolean = false;
   public ifCellDisabled: boolean = false;
 
   public employeesForSelection: IEmployee[] = [];
   public employee: IEmployee | undefined;
   public color: string = 'grey';
-  public timeInfo: IWorkAndRestTimeInfo | undefined;
-
-  //1) Click on cell
-  //2) Deactivate all columns except the one that was selected
-  //3) Select an employee
-  //4) Color all cells where the employee may be put
-  //5) Until the LMB is not pressed again - allow to select cells
-
-  //1) When mouse in not over cell - no border and selector
-  //2) When mouse in over cell - show border and selector
-  //3) When selector is clicked - deactivate other columns
-  //4) When employee is selected - keep other columns deactivated,
-  //  change status to selection is active,
-  //  if other cells are available for selection - change border color.
-  //5) when mouse enters where employee can be selected - set employee
-  //6) if employee is set and mouse is clicked - make other columns active again
 
   constructor (private planningTableService: TablesBuilderService) { }
 
@@ -79,6 +58,49 @@ export class SelectableTableElementComponent implements OnInit
     this.getIfMouseTouchedAgainRowWhereEmployeeWasSelected();
   }
 
+  private getEmployeesAs2DTable()
+  {
+    this.planningTableService.getEmployeesTableAs2DArrayForSubscription().subscribe(
+      {
+        next: (table: (IEmployee | undefined)[][]) => 
+        {
+          this.employee = table[this.rowNumber][this.columnNumber];
+          this.setCellColor();
+        },
+        error: (e) =>
+        {
+          console.log(e);
+          this.employee = undefined;
+          this.color = 'grey';
+        }
+      }
+    );
+  }
+
+  //Get the employee who was chosen for setting
+  //Switch the state of ifEmployeeWhoWasChosenShouldBeSet
+  private getEmployeeWhoWasChosenForSelection()
+  {
+    this.planningTableService.getEmployeeWhoWasChosenForSelectionForSubscription().subscribe({
+      next: (employee: IEmployee | undefined) =>
+      {
+        employee ?
+          this.ifEmployeeWhoWasChosenShouldBeSet = true
+          : this.ifEmployeeWhoWasChosenShouldBeSet = false;
+
+        this._selectedEmployee = employee;
+      },
+      error: (e) =>
+      {
+        console.log('Could not get an employee who was chosen for selection', e);
+        this._selectedEmployee = undefined;
+      },
+    });
+  }
+
+
+  //Also check if the mouse touched the row 
+  //Where the selected employee was initially selected
   private getIfMouseTouchedAgainRowWhereEmployeeWasSelected()
   {
     this.planningTableService.getIfMouseTouchedAgainRowWhereEmployeeWasSelected().subscribe(
@@ -96,6 +118,10 @@ export class SelectableTableElementComponent implements OnInit
     );
   }
 
+  //Get the row number of selected employee
+  //We need it to allow setting the employee 
+  //Only when the mouse touches again the row
+  //Where the employee was initially selected
   private getRowNumberOfSelectedEmployee()
   {
     this.planningTableService.getRowNumberOfSelectedEmployee().subscribe(
@@ -112,41 +138,8 @@ export class SelectableTableElementComponent implements OnInit
     );
   }
 
-  private getEmployeesAs2DTable()
-  {
-    this.planningTableService.getEmployeesTableAs2DArrayForSubscription().subscribe(
-      {
-        next: (table: (IEmployee | undefined)[][]) => 
-        {
-          this.employee = table[this.rowNumber][this.columnNumber];
-          this.setEmployeeColor();
-        },
-        error: (e) =>
-        {
-          console.log(e);
-          this.employee = undefined;
-          this.color = 'grey';
-        }
-      }
-    );
-  }
-
-  private getEmployeeWhoWasChosenForSelection()
-  {
-    this.planningTableService.getEmployeeWhoWasChosenForSelectionForSubscription().subscribe({
-      next: (employee: IEmployee | undefined) =>
-      {
-        this._selectedEmployee = employee;
-        this.checkIfEmployeeWhoWasChosenShouldBeSet(employee);
-      },
-      error: (e) =>
-      {
-        console.log('Could not get an employee who was chosen for selection', e);
-        this._selectedEmployee = undefined;
-      },
-    });
-  }
-
+  //Get the column number where selection/setting is active
+  //Deactivate other columns
   private getColumnNumberWhereSelectionIsActive()
   {
     this.planningTableService
@@ -163,42 +156,15 @@ export class SelectableTableElementComponent implements OnInit
       });
   }
 
-  private checkIfEmployeeWhoWasChosenShouldBeSet(
-    employee: IEmployee | undefined
-  )
-  {
-    if (employee)
-    {
-      this.ifEmployeeWhoWasChosenShouldBeSet = true;
-    } else
-    {
-      this.ifEmployeeWhoWasChosenShouldBeSet = false;
-    }
-  }
-
   private checkIfCellShouldBeActive(columnNumber: number)
   {
     this.ifCellDisabled =
       this.columnNumber !== columnNumber && columnNumber >= 0;
-    if (this.employee)
-    {
-      this.color = this.employee.color;
-    } else if (this.ifCellDisabled)
-    {
-      this.color = 'lightgrey';
-    } else
-    {
-      this.color = 'grey';
-    }
+    this.setCellColor();
   }
 
-  private setColumnNumberWhereSelectionIsActive()
-  {
-    this.planningTableService.setColumnNumberWhereSelectionIsActive(
-      this.columnNumber
-    );
-  }
 
+  //Called when mouse down on selector to load list of employees to chose from
   public getEmployeesForSelection()
   {
     this.employeesForSelection =
@@ -209,50 +175,55 @@ export class SelectableTableElementComponent implements OnInit
       );
   }
 
-  public mouseHasTouched()
+  //Check the state if the mouse touched cell where an employee was *initially* set
+  public mouseHasTouchedCellWhereEmployeeWasSelected()
   {
     if (this.rowNumber === this.selectedEmployeeRowNumber)
     {
-      console.log('Row', this.rowNumber, this.selectedEmployeeRowNumber);
       this.planningTableService.setIfMouseTouchedAgainRowWhereEmployeeWasSelected(true);
     }
   }
 
+  //Called when the setting of selected employee is active
+  //But before setting need to check if the mouse has touched the initial cell
   public setSelectedEmployee()
   {
-    if (this.ifMouseTouchedAgainRowWhereEmployeeWasSelected)
+    if (!this.ifMouseTouchedAgainRowWhereEmployeeWasSelected)
     {
-      console.log("Should set");
+      return;
+    }
 
-      if (this._selectedEmployee)
+    if (this._selectedEmployee)
+    {
+      //If employee is already set -> skip
+      if (this.employee?.id === this._selectedEmployee.id)
       {
-        if (this.employee?.id === this._selectedEmployee.id)
-        {
-          return;
-        } else if (
+        return;
+      }
 
-          this.planningTableService
-            .getEmployeesForSelection(this.rowNumber, this.columnNumber, this.sector)
-            .includes(this._selectedEmployee)
-        )
-        {
-          this.planningTableService.setEmployeeInRow(
-            this._selectedEmployee,
-            this.rowNumber,
-            this.columnNumber
-          );
-        }
+      if (
+        this.planningTableService
+          .getEmployeesForSelection(this.rowNumber, this.columnNumber, this.sector)
+          .includes(this._selectedEmployee)
+      )
+      {
+        this.planningTableService.setEmployeeInRow(
+          this._selectedEmployee,
+          this.rowNumber,
+          this.columnNumber
+        );
       }
     }
+
   }
 
+  //Called when employee from selector list is selected
   public onSelection(employee: IEmployee)
   {
     this.ifShowBorder = false;
     this.ifSelectorActive = false;
     this.planningTableService.setEmployeeWhoWasChosenForSelection(employee);
     this.planningTableService.setRowNumberOfSelectedEmployee(this.rowNumber);
-    // this.planningTableService.setColumnNumberWhereSelectionIsActive(this.columnNumber);
     this.planningTableService.setEmployeeInRow(
       employee,
       this.rowNumber,
@@ -260,7 +231,8 @@ export class SelectableTableElementComponent implements OnInit
     );
   }
 
-  private setEmployeeColor()
+  //Called every time when we get a new employeesTableAs2DArray
+  private setCellColor()
   {
     if (this.employee)
     {
@@ -276,6 +248,8 @@ export class SelectableTableElementComponent implements OnInit
     }
   }
 
+  //Called when setting of the selected employee is finished
+  //Reset all values
   public disableSelectionOfSelectedEmployee()
   {
     this.planningTableService.setEmployeeWhoWasChosenForSelection(undefined);
@@ -284,12 +258,17 @@ export class SelectableTableElementComponent implements OnInit
     this.onSelectorClose();
     this.selectionNotActive();
   }
+
+  //Called every time mouse is over the cell
   public toggleBorderAndSelectorVisibility()
   {
     this.ifShowBorder = !this.ifShowBorder;
     this.ifShowSelector = !this.ifShowSelector;
   }
 
+  //Called when selection list of employees is closed
+  //If we did't choose an employee to set ->
+  //Reset column where selection was active -> activate other columns
   public onSelectorClose()
   {
     if (!this.ifEmployeeWhoWasChosenShouldBeSet)
@@ -298,12 +277,15 @@ export class SelectableTableElementComponent implements OnInit
     }
   }
 
+  //Called when selector is clicked
+  //Tell service that selection is active -> deactivate other columns except active 
   public selectionActive()
   {
     this.ifSelectorActive = true;
-    this.setColumnNumberWhereSelectionIsActive();
+    this.planningTableService.setColumnNumberWhereSelectionIsActive(this.columnNumber);
   }
 
+  //Called when selector is closed
   public selectionNotActive()
   {
     this.ifSelectorActive = false;
