@@ -18,6 +18,7 @@
       [ngStyle]="{ 
         background: color,
       }"
+      (mouseover)="mouseHasTouched()"
       (mouseenter)="setSelectedEmployee()"
       (click)="disableSelectionOfSelectedEmployee()"
     ></div

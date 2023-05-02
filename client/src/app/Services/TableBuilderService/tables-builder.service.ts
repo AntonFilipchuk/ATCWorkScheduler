@@ -55,6 +55,9 @@ export class TablesBuilderService
   private _$employeeWhoWasChosenForSelection: ReplaySubject<IEmployee | undefined> =
     new ReplaySubject<IEmployee | undefined>();
 
+  private _$ifMouseTouchedAgainRowWhereEmployeeWasSelected: ReplaySubject<boolean> =
+    new ReplaySubject<boolean>();
+
   private _$employeesTableAs2DArray: ReplaySubject<(IEmployee | undefined)[][]> =
     new ReplaySubject<(IEmployee | undefined)[][]>();
 
@@ -94,6 +97,7 @@ export class TablesBuilderService
 
     this._$columnNumberWhereSelectionIsActive.next(-1);
     this._$rowNumberOfSelectedEmployee.next(-1);
+    this._$ifMouseTouchedAgainRowWhereEmployeeWasSelected.next(false);
 
     this._objComparisonHelper = new ObjectsComparisonHelper();
   }
@@ -102,6 +106,16 @@ export class TablesBuilderService
   {
     this._$employeesTableAs2DArray.next(this._employeesTableAs2DArray);
     return this._$employeesTableAs2DArray;
+  }
+
+  public getIfMouseTouchedAgainRowWhereEmployeeWasSelected(): Observable<boolean>
+  {
+    return this._$ifMouseTouchedAgainRowWhereEmployeeWasSelected;
+  }
+
+  public setIfMouseTouchedAgainRowWhereEmployeeWasSelected(state: boolean): void
+  {
+    this._$ifMouseTouchedAgainRowWhereEmployeeWasSelected.next(state);
   }
 
   public getEmployeeWhoWasChosenForSelectionForSubscription(): Observable<IEmployee | undefined>

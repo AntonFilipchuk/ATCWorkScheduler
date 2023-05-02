@@ -35,7 +35,7 @@ export class SelectableTableElementComponent implements OnInit
   @Output() ifEmployeeWasSet: EventEmitter<void> = new EventEmitter<void>();
   //
   private _selectedEmployee: IEmployee | undefined;
-  private _selectedEmployeeRowNumber: number = -1;
+  public selectedEmployeeRowNumber: number = -1;
   //
 
   public ifMouseTouchedAgainRowWhereEmployeeWasSelected: boolean = false;
@@ -71,12 +71,29 @@ export class SelectableTableElementComponent implements OnInit
 
   ngOnInit(): void
   {
-    console.log('OnInit');
 
     this.getColumnNumberWhereSelectionIsActive();
     this.getEmployeeWhoWasChosenForSelection();
     this.getEmployeesAs2DTable();
     this.getRowNumberOfSelectedEmployee();
+    this.getIfMouseTouchedAgainRowWhereEmployeeWasSelected();
+  }
+
+  private getIfMouseTouchedAgainRowWhereEmployeeWasSelected()
+  {
+    this.planningTableService.getIfMouseTouchedAgainRowWhereEmployeeWasSelected().subscribe(
+      {
+        next: (state: boolean) => 
+        {
+          this.ifMouseTouchedAgainRowWhereEmployeeWasSelected = state;
+        },
+        error: (e) => 
+        {
+          console.log(e);
+
+        }
+      }
+    );
   }
 
   private getRowNumberOfSelectedEmployee()
@@ -85,7 +102,7 @@ export class SelectableTableElementComponent implements OnInit
       {
         next: (rowNumber: number) => 
         {
-          this._selectedEmployeeRowNumber = rowNumber;
+          this.selectedEmployeeRowNumber = rowNumber;
         },
         error: (e) => 
         {
@@ -191,25 +208,39 @@ export class SelectableTableElementComponent implements OnInit
       );
   }
 
+  public mouseHasTouched()
+  {
+    if (this.rowNumber === this.selectedEmployeeRowNumber)
+    {
+      console.log('Row', this.rowNumber, this.selectedEmployeeRowNumber);
+      this.planningTableService.setIfMouseTouchedAgainRowWhereEmployeeWasSelected(true);
+    }
+  }
+
   public setSelectedEmployee()
   {
-    if (this._selectedEmployee)
+    if (this.ifMouseTouchedAgainRowWhereEmployeeWasSelected)
     {
-      if (this.employee?.id === this._selectedEmployee.id)
-      {
-        return;
-      } else if (
+      console.log("Should set");
 
-        this.planningTableService
-          .getEmployeesForSelection(this.rowNumber, this.sector)
-          .includes(this._selectedEmployee)
-      )
+      if (this._selectedEmployee)
       {
-        this.planningTableService.setEmployeeInRow(
-          this._selectedEmployee,
-          this.rowNumber,
-          this.columnNumber
-        );
+        if (this.employee?.id === this._selectedEmployee.id)
+        {
+          return;
+        } else if (
+
+          this.planningTableService
+            .getEmployeesForSelection(this.rowNumber, this.sector)
+            .includes(this._selectedEmployee)
+        )
+        {
+          this.planningTableService.setEmployeeInRow(
+            this._selectedEmployee,
+            this.rowNumber,
+            this.columnNumber
+          );
+        }
       }
     }
   }
@@ -248,6 +279,7 @@ export class SelectableTableElementComponent implements OnInit
   {
     this.planningTableService.setEmployeeWhoWasChosenForSelection(undefined);
     this.planningTableService.setRowNumberOfSelectedEmployee(-1);
+    this.planningTableService.setIfMouseTouchedAgainRowWhereEmployeeWasSelected(false);
     this.onSelectorClose();
     this.selectionNotActive();
   }
