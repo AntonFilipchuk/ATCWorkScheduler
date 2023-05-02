@@ -46,22 +46,31 @@ import { StartingDataEvaluatorService } from '../StartingDataEvaluatorService/st
 //can be set there.
 export class TablesBuilderService
 {
-  private _$table = new ReplaySubject<ITableRow[]>();
   private _$columnNumberWhereSelectionIsActive: ReplaySubject<number> =
     new ReplaySubject<number>();
 
-  private _$employeeWhoWasChosenForSelection: ReplaySubject<
-    IEmployee | undefined
-  > = new ReplaySubject<IEmployee | undefined>();
+  private _$rowNumberOfSelectedEmployee: ReplaySubject<number> =
+    new ReplaySubject<number>();
+
+  private _$employeeWhoWasChosenForSelection: ReplaySubject<IEmployee | undefined> =
+    new ReplaySubject<IEmployee | undefined>();
+
+  private _$employeesTableAs2DArray: ReplaySubject<(IEmployee | undefined)[][]> =
+    new ReplaySubject<(IEmployee | undefined)[][]>();
+
 
   public displayColumns: string[] = [];
   public employees: IEmployee[] = [];
   public sectors: ISector[] = [];
 
-  private _employeesTableAs2DArray: (IEmployee | undefined)[][] = [];
 
-  private _$employeesTableAs2DArray: ReplaySubject<(IEmployee | undefined)[][]> = new ReplaySubject<(IEmployee | undefined)[][]>();
   private _tableForMatTable: ITableRow[] = [];
+  public get tableForMatTable(): ITableRow[]
+  {
+    return this._tableForMatTable;
+  }
+
+  private _employeesTableAs2DArray: (IEmployee | undefined)[][] = [];
   private _timeColumnAsStringArray: string[] = [];
   private _timeColumnAsDateArray: Date[][] = [];
   private _timeIntervalInMinutes: number = 0;
@@ -84,6 +93,7 @@ export class TablesBuilderService
     this._minRestTimeInMinutes = sde.minRestTimeInMinutes;
 
     this._$columnNumberWhereSelectionIsActive.next(-1);
+    this._$rowNumberOfSelectedEmployee.next(-1);
 
     this._objComparisonHelper = new ObjectsComparisonHelper();
   }
@@ -99,9 +109,19 @@ export class TablesBuilderService
     return this._$employeeWhoWasChosenForSelection;
   }
 
-  public setEmployeeWhoWasChosenForSelection(employee: IEmployee | undefined)
+  public setEmployeeWhoWasChosenForSelection(employee: IEmployee | undefined): void
   {
     this._$employeeWhoWasChosenForSelection.next(employee);
+  }
+
+  public getRowNumberOfSelectedEmployee(): Observable<number> 
+  {
+    return this._$rowNumberOfSelectedEmployee;
+  }
+
+  public setRowNumberOfSelectedEmployee(rowNumber: number): void
+  {
+    this._$rowNumberOfSelectedEmployee.next(rowNumber);
   }
 
   public getColumnNumberWhereSelectionIsActiveForSubscription(): Observable<number>
@@ -109,16 +129,12 @@ export class TablesBuilderService
     return this._$columnNumberWhereSelectionIsActive;
   }
 
-  public setColumnNumberWhereSelectionIsActive(columnNumber: number)
+  public setColumnNumberWhereSelectionIsActive(columnNumber: number): void
   {
     this._$columnNumberWhereSelectionIsActive.next(columnNumber);
   }
 
-  public getTableForSubscription(): Observable<ITableRow[]>
-  {
-    this._$table.next(this._tableForMatTable);
-    return this._$table;
-  }
+
 
   private buildTable(
     employee: IEmployee | undefined,
@@ -126,10 +142,8 @@ export class TablesBuilderService
     columnNumber: number
   )
   {
-    this._tableForMatTable[rowNumber][columnNumber] = employee;
     this._employeesTableAs2DArray[rowNumber][columnNumber] = employee;
     this._$employeesTableAs2DArray.next(this._employeesTableAs2DArray);
-    this._$table.next(this._tableForMatTable);
   }
 
   public setEmployeeInRow(
@@ -138,9 +152,7 @@ export class TablesBuilderService
     columnNumber: number
   )
   {
-    let rowToChange: (IEmployee | undefined)[] =
-      this._employeesTableAs2DArray[rowNumber];
-    let employeeToChange: IEmployee | undefined = rowToChange[columnNumber];
+    let employeeToChange: IEmployee | undefined = this._employeesTableAs2DArray[rowNumber][columnNumber];
 
     this.checkIfTryingToAddInTheMiddle(
       employee,
@@ -200,11 +212,9 @@ export class TablesBuilderService
           this._objComparisonHelper.ifEmployeesRowHasEmployee(this._employeesTableAs2DArray[nextRowNumber], employeeToChange)
         )
         {
-          const indexOfEmployeeToChange = this._employeesTableAs2DArray[nextRowNumber].
-            findIndex((e) => e?.id === employeeToChange?.id);
+          const indexOfEmployeeToChange = this._employeesTableAs2DArray[nextRowNumber].findIndex((e) => e?.id === employeeToChange?.id);
 
           this._employeesTableAs2DArray[nextRowNumber][indexOfEmployeeToChange] = undefined;
-          this._tableForMatTable[nextRowNumber][indexOfEmployeeToChange] = undefined;
           this.buildTable(undefined, rowNumber, columnNumber);
           nextRowNumber++;
         }

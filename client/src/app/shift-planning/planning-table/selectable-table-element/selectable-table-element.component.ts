@@ -1,11 +1,11 @@
 import
-  {
-    Component,
-    EventEmitter,
-    Input,
-    OnInit,
-    Output,
-  } from '@angular/core';
+{
+  Component,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output,
+} from '@angular/core';
 import { IEmployee } from 'src/app/models/IEmployee';
 import { ISector } from 'src/app/models/ISector';
 import { IWorkAndRestTimeInfo } from 'src/app/models/IWorkAndRestTimeInfo';
@@ -35,8 +35,10 @@ export class SelectableTableElementComponent implements OnInit
   @Output() ifEmployeeWasSet: EventEmitter<void> = new EventEmitter<void>();
   //
   private _selectedEmployee: IEmployee | undefined;
+  private _selectedEmployeeRowNumber: number = -1;
   //
 
+  public ifMouseTouchedAgainRowWhereEmployeeWasSelected: boolean = false;
   public ifEmployeeWhoWasChosenShouldBeSet: boolean = false;
 
   public ifShowSelector: boolean = false;
@@ -70,10 +72,27 @@ export class SelectableTableElementComponent implements OnInit
   ngOnInit(): void
   {
     console.log('OnInit');
-    
+
     this.getColumnNumberWhereSelectionIsActive();
     this.getEmployeeWhoWasChosenForSelection();
     this.getEmployeesAs2DTable();
+    this.getRowNumberOfSelectedEmployee();
+  }
+
+  private getRowNumberOfSelectedEmployee()
+  {
+    this.planningTableService.getRowNumberOfSelectedEmployee().subscribe(
+      {
+        next: (rowNumber: number) => 
+        {
+          this._selectedEmployeeRowNumber = rowNumber;
+        },
+        error: (e) => 
+        {
+          console.log(e);
+        }
+      }
+    );
   }
 
   private getEmployeesAs2DTable()
@@ -174,7 +193,6 @@ export class SelectableTableElementComponent implements OnInit
 
   public setSelectedEmployee()
   {
-
     if (this._selectedEmployee)
     {
       if (this.employee?.id === this._selectedEmployee.id)
@@ -192,22 +210,22 @@ export class SelectableTableElementComponent implements OnInit
           this.rowNumber,
           this.columnNumber
         );
-        // this.employee = this._selectedEmployee;
-        // this.setEmployeeColor();
       }
     }
   }
 
   public onSelection(employee: IEmployee)
   {
+    this.ifShowBorder = false;
+    this.ifSelectorActive = false;
     this.planningTableService.setEmployeeWhoWasChosenForSelection(employee);
+    this.planningTableService.setRowNumberOfSelectedEmployee(this.rowNumber);
+    // this.planningTableService.setColumnNumberWhereSelectionIsActive(this.columnNumber);
     this.planningTableService.setEmployeeInRow(
       employee,
       this.rowNumber,
       this.columnNumber
     );
-    // this.employee = employee;
-    // this.setEmployeeColor();
   }
 
   private setEmployeeColor()
@@ -215,6 +233,10 @@ export class SelectableTableElementComponent implements OnInit
     if (this.employee)
     {
       this.color = this.employee.color;
+    }
+    else if (this.ifCellDisabled)
+    {
+      this.color = 'lightGrey';
     }
     else
     {
@@ -225,6 +247,7 @@ export class SelectableTableElementComponent implements OnInit
   public disableSelectionOfSelectedEmployee()
   {
     this.planningTableService.setEmployeeWhoWasChosenForSelection(undefined);
+    this.planningTableService.setRowNumberOfSelectedEmployee(-1);
     this.onSelectorClose();
     this.selectionNotActive();
   }
@@ -234,122 +257,22 @@ export class SelectableTableElementComponent implements OnInit
     this.ifShowSelector = !this.ifShowSelector;
   }
 
-  private resetColumnNumberWhereSelectionIsActive()
-  {
-    this.planningTableService.setColumnNumberWhereSelectionIsActive(-1);
-  }
-
   public onSelectorClose()
   {
-    this.resetColumnNumberWhereSelectionIsActive();
+    if (!this.ifEmployeeWhoWasChosenShouldBeSet)
+    {
+      this.planningTableService.setColumnNumberWhereSelectionIsActive(-1);
+    }
   }
 
   public selectionActive()
   {
-    this.ifSelectorActive = !this.ifSelectorActive;
+    this.ifSelectorActive = true;
     this.setColumnNumberWhereSelectionIsActive();
   }
 
   public selectionNotActive()
   {
-    this.ifSelectorActive = !this.ifSelectorActive;
+    this.ifSelectorActive = false;
   }
-
-  // ngOnChanges(): void {
-  //   if (this.availableRows.includes(this.rowNumber)) {
-  //     this.color = 'orange';
-  //   } else if (
-  //     this.selectedColumnNumber >= 0 &&
-  //     this.columnNumber !== this.selectedColumnNumber
-  //   ) {
-  //     this.color = 'lightGrey';
-  //     this.ifCellDisabled = true;
-  //   } else if (this.employee) {
-  //     this.color = this.employee?.color;
-  //     this.timeInfo = this.planningTableService.getWorkAndRestTimeInfo(
-  //       this.employee!,
-  //       this.rowNumber!
-  //     );
-  //   } else {
-  //     this.color = 'grey';
-  //     this.ifCellDisabled = false;
-  //   }
-  // }
-
-  // ngOnInit(): void {
-  //   this.configureProperEmployees();
-
-  //   if (this.employee) {
-  //     this.color = this.employee?.color;
-  //     this.timeInfo = this.planningTableService.getWorkAndRestTimeInfo(
-  //       this.employee!,
-  //       this.rowNumber!
-  //     );
-  //   }
-  // }
-
-  // toggleShowBorderAndSelector() {
-  //   this.ifShowBorder = !this.ifShowBorder;
-  //   this.ifShowSelector = !this.ifShowSelector;
-  // }
-
-  // public toggleIfSelectorActive() {
-  //   this.ifSelectorActive = !this.ifSelectorActive;
-  //   this.changeSelectedColumn();
-  // }
-
-  // public toggleOnSelectorClose() {
-  //   //console.log("Closed!");
-  //   this.ifSelectorActive = !this.ifSelectorActive;
-  //   this.changeToDefault();
-  // }
-
-  // //When we select an employee from the list
-  // onSelection($event: MatOptionSelectionChange) {
-  //   this.changeToDefault();
-  //   //this.toggleIfSelectorActive();
-  //   let selectedEmployee = $event.source.value;
-
-  //   this.employee = this.planningTableService.getEmployeeByRowAnColumnNumber(
-  //     this.rowNumber,
-  //     this.columnNumber
-  //   );
-
-  //   if (selectedEmployee) {
-  //     let rows = this.planningTableService.getRowsNumbers(
-  //       selectedEmployee,
-  //       this.rowNumber,
-  //       this.columnNumber
-  //     );
-  //     this.availableRowsChange.emit(rows);
-  //   }
-
-  //   this.planningTableService.setEmployeeInRow(
-  //     selectedEmployee,
-  //     this.rowNumber!,
-  //     this.columnNumber
-  //   );
-  // }
-
-  // changeSelectedColumn() {
-  //   //console.log('Change column to', this.columnNumber)
-  //   this.selectedColumnNumberChange.emit(this.columnNumber);
-  // }
-
-  // changeToDefault() {
-  //   //console.log('To default');
-  //   this.selectedColumnNumberChange.emit(-1);
-  // }
-
-  // configureProperEmployees() {
-  //   this.employeesToSelectFrom =
-  //     this.planningTableService.getEmployeesForSelection(
-  //       this.rowNumber,
-  //       this.sector
-  //     );
-  //   this.employee = this.planningTableService.getEmployeeByRowAnColumnNumber(
-  //     this.rowNumber,
-  //     this.columnNumber
-  //   );
-  // }
 }

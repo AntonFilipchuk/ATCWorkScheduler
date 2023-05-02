@@ -1,14 +1,10 @@
 import {
-  AfterViewInit,
   Component,
   OnInit,
-  ViewChild,
-  ViewChildren,
 } from '@angular/core';
-import { MatTable, MatTableDataSource } from '@angular/material/table';
+import {  MatTableDataSource } from '@angular/material/table';
 import { TablesBuilderService } from 'src/app/Services/TableBuilderService/tables-builder.service';
 import { IEmployee } from 'src/app/models/IEmployee';
-import { IEmployeesRow } from 'src/app/models/IEmployeesRow';
 import { ISector } from 'src/app/models/ISector';
 
 export interface ITableRow {
@@ -35,18 +31,7 @@ export class MainTableComponent implements OnInit {
     this.displayedColumns = pTS.displayColumns;
     this.sectorsForShift = pTS.sectors;
 
-    this.getTableForSubscription();
+    this.tableDataSource.data = this.planningTableService.tableForMatTable;
     this.employees = pTS.employees;
-  }
-
-  getTableForSubscription() {
-    this.planningTableService.getTableForSubscription().subscribe({
-      next: (response: ITableRow[]) => {
-        this.tableDataSource.data = response;
-      },
-      error: (e: any) => {
-        console.log(e);
-      },
-    });
   }
 }

@@ -15,7 +15,9 @@
   <ng-template #withoutSelector 
     ><div
       class="selector"
-      [ngStyle]="{ background: color }"
+      [ngStyle]="{ 
+        background: color,
+      }"
       (mouseenter)="setSelectedEmployee()"
       (click)="disableSelectionOfSelectedEmployee()"
     ></div

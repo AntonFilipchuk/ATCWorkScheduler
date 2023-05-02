@@ -22,7 +22,6 @@ describe('SelectableTableElementComponent', () => {
 
     fakeTableBuilderService = jasmine.createSpyObj<TablesBuilderService>('TablesBuilderService', 
     {
-      getTableForSubscription: undefined,
       setEmployeeInRow : undefined,
       getEmployeesForSelection : undefined,
       getWorkAndRestTimeInfo : undefined,
