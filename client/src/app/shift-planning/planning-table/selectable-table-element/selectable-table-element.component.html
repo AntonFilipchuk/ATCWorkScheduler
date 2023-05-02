@@ -44,37 +44,3 @@
   </ng-template>
 </div>
 
-<!-- <div
-  class="selectable-element-container"
-  [ngStyle]="{
-    border: ifShowBorder || ifSelectorActive ? '5px solid green' : '',
-    background: color ? color : 'grey',
-    'pointer-events': ifCellDisabled ? 'none' : 'all'
-  }"
-  (mouseenter)="toggleShowBorderAndSelector()"
-  (mouseleave)="toggleShowBorderAndSelector()"
->
-  {{ employee ? employee.name : "" }}
-  {{ timeInfo ? "LW " + timeInfo.lastWorkTimeInMinutes : "" }}
-  {{ timeInfo ? "LR " + timeInfo.lastRestTimeInMinutes : "" }}
-  {{ timeInfo ? "NR " + timeInfo.nextRestTimeInMinutes : "" }}
-  {{ timeInfo ? "NW " + timeInfo.nextWorkTimeInMinutes : "" }}
-  {{ timeInfo ? "TR " + timeInfo.totalRestTimeInMinutes : "" }}
-  {{ timeInfo ? "TW " + timeInfo.totalWorkingTimeInMinutes : "" }}
-  {{ rowNumber }}
-
-  <mat-select
-    class="selector"
-    *ngIf="ifShowSelector || ifSelectorActive"
-    (click)="toggleIfSelectorActive()"
-    (closed)="toggleOnSelectorClose()"
-  >
-    <mat-option
-      (onSelectionChange)="onSelection($event)"
-      *ngFor="let employee of employeesToSelectFrom"
-      [value]="employee"
-    >
-      {{ employee.name }}
-    </mat-option>
-  </mat-select>
-</div> -->

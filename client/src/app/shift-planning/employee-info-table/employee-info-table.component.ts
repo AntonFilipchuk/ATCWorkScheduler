@@ -1,23 +1,39 @@
-import { Component } from '@angular/core';
-
-export interface PeriodicElement {
-  name: string;
-  time : string;
-}
-
-const ELEMENT_DATA: PeriodicElement[] = [
-  { time: '8:10 - 9:10', name: 'R'},
-  { time: '9:40 - 10:30', name: 'R'},
-  { time: '11:00 - 11:40', name: 'P'},
-  { time: '12:10 - 13:10', name: 'R'},
-];
+import { Component, Input, OnInit } from '@angular/core';
+import { MatTableDataSource } from '@angular/material/table';
+import { TablesBuilderService } from 'src/app/Services/TableBuilderService/tables-builder.service';
+import { IEmployee } from 'src/app/models/IEmployee';
+import { ISmallTable } from 'src/app/models/ISmallTable';
+import { ISmallTableRow } from 'src/app/models/ISmallTableRow';
 
 @Component({
   selector: 'app-employee-info-table',
   templateUrl: './employee-info-table.component.html',
   styleUrls: ['./employee-info-table.component.scss']
 })
-export class EmployeeInfoTableComponent {
-  displayedColumns: string[] = ['Anton', 'G12'];
-  dataSource = ELEMENT_DATA;
+export class EmployeeInfoTableComponent implements OnInit
+{
+  @Input() employee!: IEmployee;
+
+  public displayedColumns: string[] = [];
+  public table: MatTableDataSource<ISmallTableRow> =
+  new MatTableDataSource<ISmallTableRow>();;
+  constructor (private tablesBuilderService: TablesBuilderService)
+  { }
+  ngOnInit(): void
+  {
+    console.log(this.employee.name);
+    
+    this.tablesBuilderService.getSmallTablesObservable().subscribe(
+      {
+        next: (tables: ISmallTable[]) =>
+        {
+          let smallTable = tables.find((t) => t.employeeId === this.employee.id)!;
+          this.table.data = smallTable.table;
+          this.displayedColumns = [this.employee.name, smallTable.sectors ? smallTable.sectors : "N/A"]
+        }
+      }
+    );
+  }
+
+
 }

@@ -23,6 +23,24 @@ export class ObjectsComparisonHelper
     return employee ? employeesRow.some((e) => this.ifIdOfEmployeesEqual(e, employee)) : false;
   }
 
+  public getPositionOfEmployeeInRow(
+    employeesRow: (IEmployee | undefined)[],
+    employee: IEmployee | undefined): number
+  {
+    for (let i = 0; i < employeesRow.length; i++)
+    {
+      let e = employeesRow[i];
+      if (e)
+      {
+        if (e.id === employee?.id)
+        {
+          return i;
+        }
+      }
+    }
+    return -1;
+  }
+
   public ifArrayHasAnObject(array: any[], obj: any): boolean
   {
     return array.filter((o) => this.ifTwoObjectsAreEqual(o, obj)).length > 0;

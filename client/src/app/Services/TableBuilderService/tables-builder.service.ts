@@ -9,6 +9,13 @@ import { ObjectsComparisonHelper } from '../../Helpers/ObjectsComparisonHelper';
 import { IWorkAndRestTimeInfo } from '../../models/IWorkAndRestTimeInfo';
 import { EmployeesWhoCanWorkEvaluator } from '../../Helpers/EmployeesWhoCanWorkEvaluator';
 import { StartingDataEvaluatorService } from '../StartingDataEvaluatorService/starting-data-evaluator.service';
+import { ISmallTableRow } from 'src/app/models/ISmallTableRow';
+import { ISmallTable } from 'src/app/models/ISmallTable';
+
+
+
+
+
 
 /**
  *  _____________________
@@ -26,24 +33,6 @@ import { StartingDataEvaluatorService } from '../StartingDataEvaluatorService/st
   providedIn: 'root',
 })
 
-//This service is for validating input,
-//building initial table
-//and performing actions with this table
-//The input:
-//1)Sectors - validate there are no duplicates
-//2)Employees - validate there are enough employees for the shift,
-//every employee can work at least at one sector,
-//there are no duplicate employees
-//3)Time - get the start end the end of the shift, also the time interval in minutes
-//for building a table
-//We will delegate validating input and building initial default tables to the external class
-//DefaultTableBuilder.ts
-//What we need:
-//1)A table for the Mat table to render
-//2)A table of employees as 2D Array - it's easier to perform actions in this way
-//3)A function that rebuild the table for the Mat table when we change the Employees table
-//4)A function that takes an employee, the position in the table and decides if and employee
-//can be set there.
 export class TablesBuilderService
 {
   private _$columnNumberWhereSelectionIsActive: ReplaySubject<number> =
@@ -61,11 +50,16 @@ export class TablesBuilderService
   private _$employeesTableAs2DArray: ReplaySubject<(IEmployee | undefined)[][]> =
     new ReplaySubject<(IEmployee | undefined)[][]>();
 
+  private _$smallTables: ReplaySubject<ISmallTable[]> =
+    new ReplaySubject<ISmallTable[]>();
+
 
   public displayColumns: string[] = [];
   public employees: IEmployee[] = [];
   public sectors: ISector[] = [];
 
+
+  public tablesForEachEmployee: ISmallTable[] = [];
 
   private _tableForMatTable: ITableRow[] = [];
   public get tableForMatTable(): ITableRow[]
@@ -84,6 +78,7 @@ export class TablesBuilderService
 
   constructor (private sde: StartingDataEvaluatorService)
   {
+    this._objComparisonHelper = new ObjectsComparisonHelper();
     this.displayColumns = sde.displayedColumns;
     this.employees = sde.employees;
     this.sectors = sde.sectors;
@@ -98,17 +93,22 @@ export class TablesBuilderService
     this._$columnNumberWhereSelectionIsActive.next(-1);
     this._$rowNumberOfSelectedEmployee.next(-1);
     this._$ifMouseTouchedAgainRowWhereEmployeeWasSelected.next(false);
+    this._$smallTables.next(this.buildSmallTables());
 
-    this._objComparisonHelper = new ObjectsComparisonHelper();
   }
 
-  public getEmployeesTableAs2DArrayForSubscription(): Observable<(IEmployee | undefined)[][]> 
+  public getSmallTablesObservable(): Observable<ISmallTable[]>
+  {
+    return this._$smallTables;
+  }
+
+  public getEmployeesTableAs2DArrayObservable(): Observable<(IEmployee | undefined)[][]> 
   {
     this._$employeesTableAs2DArray.next(this._employeesTableAs2DArray);
     return this._$employeesTableAs2DArray;
   }
 
-  public getIfMouseTouchedAgainRowWhereEmployeeWasSelected(): Observable<boolean>
+  public getIfMouseTouchedAgainRowWhereEmployeeWasSelectedObservable(): Observable<boolean>
   {
     return this._$ifMouseTouchedAgainRowWhereEmployeeWasSelected;
   }
@@ -118,7 +118,7 @@ export class TablesBuilderService
     this._$ifMouseTouchedAgainRowWhereEmployeeWasSelected.next(state);
   }
 
-  public getEmployeeWhoWasChosenForSelectionForSubscription(): Observable<IEmployee | undefined>
+  public getEmployeeWhoWasChosenForSelectionObservable(): Observable<IEmployee | undefined>
   {
     return this._$employeeWhoWasChosenForSelection;
   }
@@ -128,7 +128,7 @@ export class TablesBuilderService
     this._$employeeWhoWasChosenForSelection.next(employee);
   }
 
-  public getRowNumberOfSelectedEmployee(): Observable<number> 
+  public getRowNumberOfSelectedEmployeeObservable(): Observable<number> 
   {
     return this._$rowNumberOfSelectedEmployee;
   }
@@ -138,7 +138,7 @@ export class TablesBuilderService
     this._$rowNumberOfSelectedEmployee.next(rowNumber);
   }
 
-  public getColumnNumberWhereSelectionIsActiveForSubscription(): Observable<number>
+  public getColumnNumberWhereSelectionIsActiveObservable(): Observable<number>
   {
     return this._$columnNumberWhereSelectionIsActive;
   }
@@ -158,6 +158,7 @@ export class TablesBuilderService
   {
     this._employeesTableAs2DArray[rowNumber][columnNumber] = employee;
     this._$employeesTableAs2DArray.next(this._employeesTableAs2DArray);
+    this._$smallTables.next(this.buildSmallTables());
   }
 
   public setEmployeeInRow(
@@ -310,5 +311,69 @@ export class TablesBuilderService
     let row = this._employeesTableAs2DArray[rowNumber];
     let employee = row[columnNumber];
     return employee;
+  }
+
+
+  public buildSmallTables()
+  {
+    let tables: ISmallTable[] = [];
+    for (let i = 0; i < this.employees.length; i++)
+    {
+      const employee = this.employees[i];
+      let smallTable: ISmallTableRow[] = [];
+      let sectors: Set<string> = new Set<string>();
+      for (let j = 0; j < this._employeesTableAs2DArray.length; j++)
+      {
+        const row = this._employeesTableAs2DArray[j];
+        let employeePositionInRow: number = this._objComparisonHelper.getPositionOfEmployeeInRow(row, employee);
+        {
+          let startTime: string = this._timeColumnAsStringArray[j].slice(0, 5);
+          while (this._objComparisonHelper.ifEmployeesRowHasEmployee(this._employeesTableAs2DArray[j + 1], employee))
+          {
+            j++;
+          }
+          let endTime: string = this._timeColumnAsStringArray[j].slice(8, 13);
+          smallTable.push(
+            {
+              timeInterval: `${startTime} : ${endTime}`,
+              sector: this.sectors[employeePositionInRow].name
+            }
+          );
+          sectors.add(this.sectors[employeePositionInRow].name);
+        }
+      }
+
+      let sectorsAsString: string = '';
+      let setToArray: string[] = Array.from(sectors);
+
+      for (let n = 0; n < setToArray.length; n++)
+      {
+        const sector = setToArray[n];
+
+        if (n === 0 )  
+        {
+          sectorsAsString += `${sector}/`;
+        }
+        else if (n === setToArray.length-1)
+        {
+          sectorsAsString += `${sector}`;
+        }
+        else
+        {
+          sectorsAsString += `${sector}/`;
+        }
+
+      }
+
+      tables.push(
+        {
+          sectors: sectorsAsString,
+          employeeId: employee.id,
+          employeeName: employee.name,
+          table: smallTable
+        }
+      );
+    }
+    return tables;
   }
 }

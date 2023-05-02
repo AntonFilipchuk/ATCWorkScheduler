@@ -60,7 +60,7 @@ export class SelectableTableElementComponent implements OnInit
 
   private getEmployeesAs2DTable()
   {
-    this.planningTableService.getEmployeesTableAs2DArrayForSubscription().subscribe(
+    this.planningTableService.getEmployeesTableAs2DArrayObservable().subscribe(
       {
         next: (table: (IEmployee | undefined)[][]) => 
         {
@@ -81,7 +81,7 @@ export class SelectableTableElementComponent implements OnInit
   //Switch the state of ifEmployeeWhoWasChosenShouldBeSet
   private getEmployeeWhoWasChosenForSelection()
   {
-    this.planningTableService.getEmployeeWhoWasChosenForSelectionForSubscription().subscribe({
+    this.planningTableService.getEmployeeWhoWasChosenForSelectionObservable().subscribe({
       next: (employee: IEmployee | undefined) =>
       {
         employee ?
@@ -103,7 +103,7 @@ export class SelectableTableElementComponent implements OnInit
   //Where the selected employee was initially selected
   private getIfMouseTouchedAgainRowWhereEmployeeWasSelected()
   {
-    this.planningTableService.getIfMouseTouchedAgainRowWhereEmployeeWasSelected().subscribe(
+    this.planningTableService.getIfMouseTouchedAgainRowWhereEmployeeWasSelectedObservable().subscribe(
       {
         next: (state: boolean) => 
         {
@@ -124,7 +124,7 @@ export class SelectableTableElementComponent implements OnInit
   //Where the employee was initially selected
   private getRowNumberOfSelectedEmployee()
   {
-    this.planningTableService.getRowNumberOfSelectedEmployee().subscribe(
+    this.planningTableService.getRowNumberOfSelectedEmployeeObservable().subscribe(
       {
         next: (rowNumber: number) => 
         {
@@ -143,7 +143,7 @@ export class SelectableTableElementComponent implements OnInit
   private getColumnNumberWhereSelectionIsActive()
   {
     this.planningTableService
-      .getColumnNumberWhereSelectionIsActiveForSubscription()
+      .getColumnNumberWhereSelectionIsActiveObservable()
       .subscribe({
         next: (columnNumber: number) =>
         {
