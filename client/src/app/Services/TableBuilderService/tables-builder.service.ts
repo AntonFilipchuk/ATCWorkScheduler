@@ -329,6 +329,7 @@ export class TablesBuilderService
         if (employeePositionInRow >= 0)
         {
           let startTime: string = this._timeColumnAsStringArray[j].slice(0, 5);
+          let startTimeAsDate : Date = this._timeColumnAsDateArray[j][0];
           while (
             this._objComparisonHelper.ifEmployeesRowHasEmployee(this._employeesTableAs2DArray[j + 1], employee)
             && this._objComparisonHelper.getPositionOfEmployeeInRow(this._employeesTableAs2DArray[j + 1], employee) === employeePositionInRow)
@@ -336,9 +337,11 @@ export class TablesBuilderService
             j++;
           }
           let endTime: string = this._timeColumnAsStringArray[j].slice(8, 13);
+          let endTimeAsDate : Date = this._timeColumnAsDateArray[j][1];
           smallTable.push(
             {
-              timeInterval: `${startTime} : ${endTime}`,
+              timeIntervalAsDate : [startTimeAsDate, endTimeAsDate],
+              timeInterval: `${startTime} - ${endTime}`,
               sector: this.sectors[employeePositionInRow].name
             }
           );
@@ -378,5 +381,23 @@ export class TablesBuilderService
       );
     }
     return tables;
+  }
+  public getTotalWorkAndRestTimeForEmployee(employee: IEmployee): [number, number]
+  {
+    let workTime: number = 0;
+    let restTime: number = 0;
+    for (let i = 0; i < this._employeesTableAs2DArray.length; i++)
+    {
+      const row = this._employeesTableAs2DArray[i];
+      if (this._objComparisonHelper.ifEmployeesRowHasEmployee(row, employee))
+      {
+        workTime += this._timeIntervalInMinutes;
+      }
+      else
+      {
+        restTime += this._timeIntervalInMinutes;
+      }
+    }
+    return [workTime, restTime];
   }
 }

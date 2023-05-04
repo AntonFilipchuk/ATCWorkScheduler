@@ -4,6 +4,7 @@ import { TablesBuilderService } from 'src/app/Services/TableBuilderService/table
 import { IEmployee } from 'src/app/models/IEmployee';
 import { ISmallTable } from 'src/app/models/ISmallTable';
 import { ISmallTableRow } from 'src/app/models/ISmallTableRow';
+import { IWorkAndRestTimeInfo } from 'src/app/models/IWorkAndRestTimeInfo';
 
 @Component({
   selector: 'app-employee-info-table',
@@ -14,26 +15,49 @@ export class EmployeeInfoTableComponent implements OnInit
 {
   @Input() employee!: IEmployee;
 
+  public color: string = 'grey';
+
+  public totalWorkTime: string = '';
+  public totalRestTime: number = 0;
   public displayedColumns: string[] = [];
   public table: MatTableDataSource<ISmallTableRow> =
-  new MatTableDataSource<ISmallTableRow>();;
+    new MatTableDataSource<ISmallTableRow>();;
   constructor (private tablesBuilderService: TablesBuilderService)
   { }
   ngOnInit(): void
   {
-    console.log(this.employee.name);
-    
+    this.color = this.employee.color;
     this.tablesBuilderService.getSmallTablesObservable().subscribe(
       {
         next: (tables: ISmallTable[]) =>
         {
           let smallTable = tables.find((t) => t.employeeId === this.employee.id)!;
           this.table.data = smallTable.table;
-          this.displayedColumns = [this.employee.name, smallTable.sectors ? smallTable.sectors : "N/A"]
+          let workTimeForSessions: number[] = [];
+          for (let i = 0; i < smallTable.table.length; i++)
+          {
+            const row = smallTable.table[i];
+            workTimeForSessions.push((row.timeIntervalAsDate[1].getTime() - row.timeIntervalAsDate[0].getTime()) / 60000);
+          }
+          let totalWorkTimeInMinutes = workTimeForSessions.reduce((partialSum, a) => partialSum + a, 0);
+          if (totalWorkTimeInMinutes >= 60)
+          {
+            this.totalWorkTime = this.minutesToHoursAndMinutes(totalWorkTimeInMinutes);
+          }
+          else
+          {
+            this.totalWorkTime = `${totalWorkTimeInMinutes} minutes`;
+          }
+          this.displayedColumns = [this.employee.name, smallTable.sectors ? smallTable.sectors : "N/A"];
         }
       }
     );
   }
 
-
+  private minutesToHoursAndMinutes(totalMinutes: number): string
+  {
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return `${hours}:${minutes=== 0 ? '00' : minutes}`;
+  }
 }
