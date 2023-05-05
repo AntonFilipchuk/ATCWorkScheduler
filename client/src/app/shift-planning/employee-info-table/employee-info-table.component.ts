@@ -4,7 +4,6 @@ import { TablesBuilderService } from 'src/app/Services/TableBuilderService/table
 import { IEmployee } from 'src/app/models/IEmployee';
 import { ISmallTable } from 'src/app/models/ISmallTable';
 import { ISmallTableRow } from 'src/app/models/ISmallTableRow';
-import { IWorkAndRestTimeInfo } from 'src/app/models/IWorkAndRestTimeInfo';
 
 @Component({
   selector: 'app-employee-info-table',
