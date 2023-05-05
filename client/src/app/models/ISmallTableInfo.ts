@@ -1,6 +1,6 @@
 import { ISmallTableRow } from "./ISmallTableRow";
 
-export interface ISmallTable
+export interface ISmallTableInfo
 {
   sectors : string;
   employeeId : number;

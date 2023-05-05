@@ -10,7 +10,7 @@ import { IWorkAndRestTimeInfo } from '../../models/IWorkAndRestTimeInfo';
 import { EmployeesWhoCanWorkEvaluator } from '../../Helpers/EmployeesWhoCanWorkEvaluator';
 import { StartingDataEvaluatorService } from '../StartingDataEvaluatorService/starting-data-evaluator.service';
 import { ISmallTableRow } from 'src/app/models/ISmallTableRow';
-import { ISmallTable } from 'src/app/models/ISmallTable';
+import { ISmallTableInfo } from 'src/app/models/ISmallTableInfo';
 
 
 
@@ -50,8 +50,8 @@ export class TablesBuilderService
   private _$employeesTableAs2DArray: ReplaySubject<(IEmployee | undefined)[][]> =
     new ReplaySubject<(IEmployee | undefined)[][]>();
 
-  private _$smallTables: ReplaySubject<ISmallTable[]> =
-    new ReplaySubject<ISmallTable[]>();
+  private _$smallTables: ReplaySubject<ISmallTableInfo[]> =
+    new ReplaySubject<ISmallTableInfo[]>();
 
 
   public displayColumns: string[] = [];
@@ -59,7 +59,7 @@ export class TablesBuilderService
   public sectors: ISector[] = [];
 
 
-  public tablesForEachEmployee: ISmallTable[] = [];
+  public tablesForEachEmployee: ISmallTableInfo[] = [];
 
   private _tableForMatTable: ITableRow[] = [];
   public get tableForMatTable(): ITableRow[]
@@ -97,7 +97,7 @@ export class TablesBuilderService
 
   }
 
-  public getSmallTablesObservable(): Observable<ISmallTable[]>
+  public getSmallTablesObservable(): Observable<ISmallTableInfo[]>
   {
     return this._$smallTables;
   }
@@ -316,19 +316,21 @@ export class TablesBuilderService
 
   public buildSmallTables()
   {
-    let tables: ISmallTable[] = [];
+    let tablesInfo: ISmallTableInfo[] = [];
+
     for (let i = 0; i < this.employees.length; i++)
     {
       const employee = this.employees[i];
-      let smallTable: ISmallTableRow[] = [];
+      let smallTableInfo: ISmallTableRow[] = [];
       let sectors: Set<string> = new Set<string>();
+
       for (let j = 0; j < this._employeesTableAs2DArray.length; j++)
       {
         const row = this._employeesTableAs2DArray[j];
         let employeePositionInRow: number = this._objComparisonHelper.getPositionOfEmployeeInRow(row, employee);
         if (employeePositionInRow >= 0)
         {
-          let startTime: string = this._timeColumnAsStringArray[j].slice(0, 5);
+    
           let startTimeAsDate : Date = this._timeColumnAsDateArray[j][0];
           while (
             this._objComparisonHelper.ifEmployeesRowHasEmployee(this._employeesTableAs2DArray[j + 1], employee)
@@ -336,12 +338,11 @@ export class TablesBuilderService
           {
             j++;
           }
-          let endTime: string = this._timeColumnAsStringArray[j].slice(8, 13);
+         
           let endTimeAsDate : Date = this._timeColumnAsDateArray[j][1];
-          smallTable.push(
+          smallTableInfo.push(
             {
               timeIntervalAsDate : [startTimeAsDate, endTimeAsDate],
-              timeInterval: `${startTime} - ${endTime}`,
               sector: this.sectors[employeePositionInRow].name
             }
           );
@@ -371,33 +372,15 @@ export class TablesBuilderService
 
       }
 
-      tables.push(
+      tablesInfo.push(
         {
           sectors: sectorsAsString,
           employeeId: employee.id,
           employeeName: employee.name,
-          table: smallTable
+          table: smallTableInfo
         }
       );
     }
-    return tables;
-  }
-  public getTotalWorkAndRestTimeForEmployee(employee: IEmployee): [number, number]
-  {
-    let workTime: number = 0;
-    let restTime: number = 0;
-    for (let i = 0; i < this._employeesTableAs2DArray.length; i++)
-    {
-      const row = this._employeesTableAs2DArray[i];
-      if (this._objComparisonHelper.ifEmployeesRowHasEmployee(row, employee))
-      {
-        workTime += this._timeIntervalInMinutes;
-      }
-      else
-      {
-        restTime += this._timeIntervalInMinutes;
-      }
-    }
-    return [workTime, restTime];
+    return tablesInfo;
   }
 }

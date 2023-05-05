@@ -27,7 +27,10 @@
         {{ employee.name }}
       </div>
     </th>
-    <td mat-cell *matCellDef="let element">{{ element.timeInterval }}</td>
+    <td mat-cell *matCellDef="let element">
+      {{ element.timeIntervalAsDate[0] | date : "HH:mm" }} -
+      {{ element.timeIntervalAsDate[1] | date : "HH:mm" }}
+    </td>
   </ng-container>
 
   <ng-container matColumnDef="{{ displayedColumns[1] }}">
@@ -44,4 +47,6 @@
   [ngStyle]="{
     background: 'white'
   }"
->Total work: {{totalWorkTime}}</div>
+>
+  Total work: {{ totalWorkTime }}
+</div>
