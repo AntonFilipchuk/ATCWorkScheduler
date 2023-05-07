@@ -314,7 +314,7 @@ export class TablesBuilderService
   }
 
 
-  public buildSmallTables()
+  public buildSmallTables(): ISmallTableInfo[]
   {
     let tablesInfo: ISmallTableInfo[] = [];
 
@@ -330,19 +330,19 @@ export class TablesBuilderService
         let employeePositionInRow: number = this._objComparisonHelper.getPositionOfEmployeeInRow(row, employee);
         if (employeePositionInRow >= 0)
         {
-    
-          let startTimeAsDate : Date = this._timeColumnAsDateArray[j][0];
+
+          let startTimeAsDate: Date = this._timeColumnAsDateArray[j][0];
           while (
             this._objComparisonHelper.ifEmployeesRowHasEmployee(this._employeesTableAs2DArray[j + 1], employee)
             && this._objComparisonHelper.getPositionOfEmployeeInRow(this._employeesTableAs2DArray[j + 1], employee) === employeePositionInRow)
           {
             j++;
           }
-         
-          let endTimeAsDate : Date = this._timeColumnAsDateArray[j][1];
+
+          let endTimeAsDate: Date = this._timeColumnAsDateArray[j][1];
           smallTableInfo.push(
             {
-              timeIntervalAsDate : [startTimeAsDate, endTimeAsDate],
+              timeIntervalAsDate: [startTimeAsDate, endTimeAsDate],
               sector: this.sectors[employeePositionInRow].name
             }
           );
@@ -350,27 +350,7 @@ export class TablesBuilderService
         }
       }
 
-      let sectorsAsString: string = '';
-      let setToArray: string[] = Array.from(sectors);
-
-      for (let n = 0; n < setToArray.length; n++)
-      {
-        const sector = setToArray[n];
-
-        if (n === 0)  
-        {
-          sectorsAsString += `${sector}/`;
-        }
-        else if (n === setToArray.length - 1)
-        {
-          sectorsAsString += `${sector}`;
-        }
-        else
-        {
-          sectorsAsString += `${sector}/`;
-        }
-
-      }
+      let sectorsAsString: string = this.formatSectorNames(sectors);
 
       tablesInfo.push(
         {
@@ -382,5 +362,23 @@ export class TablesBuilderService
       );
     }
     return tablesInfo;
+  }
+
+
+  private formatSectorNames(sectors: Set<string>): string
+  {
+    let sectorsSetToArray: string[] = Array.from(sectors);
+
+    if (sectorsSetToArray.length === 1)
+    {
+      return sectorsSetToArray[0];
+    } else if (sectorsSetToArray.length > 2)
+    {
+      return 'Stand-in';
+    }
+    else 
+    {
+      return `${sectorsSetToArray[0]}/${sectorsSetToArray[1]}`;
+    }
   }
 }
