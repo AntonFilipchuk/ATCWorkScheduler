@@ -1,4 +1,4 @@
-<div class="planning-workspace">
+<!-- <div class="planning-workspace">
   <div class="main-table-container">
     <app-main-table style="width: 100%; display: flex"></app-main-table>
   </div>
@@ -6,5 +6,20 @@
     <ng-container *ngFor="let employee of employees">
       <app-employee-info-table [employee]="employee"></app-employee-info-table>
     </ng-container>
+  </div>
+</div> -->
+
+<div class="planning-workspace">
+  <div class="left-box">
+    <app-main-table></app-main-table>
+  </div>
+  <div class="right-box">
+    <div class="tables-for-each-employee-container">
+      <ng-container *ngFor="let employee of employees">
+        <app-employee-info-table
+          [employee]="employee"
+        ></app-employee-info-table>
+      </ng-container>
+    </div>
   </div>
 </div>

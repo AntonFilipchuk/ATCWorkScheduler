@@ -334,7 +334,6 @@ export class TablesBuilderService
         {
 
           let startTimeAsDate: Date = this._timeColumnAsDateArray[rowNumber][0];
-          rowNumber++;
           while (
             rowNumber < this._employeesTableAs2DArray.length - 1 &&
             this._objComparisonHelper.ifEmployeesRowHasEmployee(this._employeesTableAs2DArray[rowNumber + 1], employee)

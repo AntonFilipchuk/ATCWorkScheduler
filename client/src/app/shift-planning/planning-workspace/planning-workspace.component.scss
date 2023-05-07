@@ -2,14 +2,11 @@
   display: flex;
 }
 
-.main-table-container {
-  display: flex;
-  width: 60%;
-}
-
 .tables-for-each-employee-container {
   padding-left: 10px;
   display: flex;
+  position: fixed;
+  align-self: start;
   width: 40%;
   flex-wrap: wrap;
   flex-direction: row;
@@ -18,4 +15,14 @@
   align-content: flex-start;
   row-gap: 10px;
   gap: 10px;
+}
+
+.left-box {
+  width: 60%;
+}
+
+.right-box {
+  width: 40%;
+  position: sticky;
+  align-self: flex-start;
 }
