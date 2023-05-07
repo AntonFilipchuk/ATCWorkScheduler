@@ -6,6 +6,7 @@ import { ISector } from 'src/app/models/ISector';
 import { ISmallTableInfo } from 'src/app/models/ISmallTableInfo';
 import { ISmallTableRow } from 'src/app/models/ISmallTableRow';
 
+
 @Component({
   selector: 'app-employee-info-table',
   templateUrl: './employee-info-table.component.html',
@@ -20,6 +21,9 @@ export class EmployeeInfoTableComponent implements OnInit
   public totalRestTime: number = 0;
   public displayedColumns: string[] = [];
   public ifButtonActive: boolean = false;
+  public ifShowStartTimeSelector: boolean = false;
+
+  public availableStartTimeIntervals: Date[][] = [];
   public table: MatTableDataSource<ISmallTableRow> =
     new MatTableDataSource<ISmallTableRow>();;
   constructor (private tablesBuilderService: TablesBuilderService) { }
@@ -73,9 +77,24 @@ export class EmployeeInfoTableComponent implements OnInit
     this.ifButtonActive = !this.ifButtonActive;
   }
 
-  public deleteWorkSession(timeStartRowNumber: number, timeEndRowNumber: number, sectorName : string)
+  public deleteWorkSession(timeStartRowNumber: number, timeEndRowNumber: number, sectorName: string)
   {
     this.ifButtonActive = false;
     this.tablesBuilderService.deleteWorkSession(timeStartRowNumber, timeEndRowNumber, sectorName);
+  }
+
+  public showStartTimeSelector()
+  {
+    this.ifShowStartTimeSelector = true;
+  }
+
+  public cancelTimeSelection()
+  {
+    this.ifShowStartTimeSelector = false;
+  }
+
+  public getAvailableStartTimeIntervals()
+  {
+    this.availableStartTimeIntervals = this.tablesBuilderService.getTimeWhereEmployeeCanBeSet(this.employee);
   }
 }

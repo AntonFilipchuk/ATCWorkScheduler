@@ -240,23 +240,6 @@ export class TablesBuilderService
     }
   }
 
-  public getRowsNumbers(
-    employee: IEmployee,
-    rowNumber: number,
-    columnNumber: number
-  )
-  {
-    return new EmployeesWhoCanWorkEvaluator().getRowsNumbersWereEmployeeCanBeSet(
-      employee,
-      rowNumber,
-      columnNumber,
-      this._employeesTableAs2DArray,
-      this._maxWorkTimeInMinutes,
-      this._minRestTimeInMinutes,
-      this._timeIntervalInMinutes
-    );
-  }
-
   public getEmployeesForSelection(rowNumber: number, columnNumber: number, sector: ISector): IEmployee[]
   {
     let employee = this._employeesTableAs2DArray[rowNumber][columnNumber];
@@ -399,5 +382,26 @@ export class TablesBuilderService
     {
       this.setEmployeeAndUpdateTables(undefined, rowNumber, numberOfSector);
     }
+  }
+
+  public getTimeWhereEmployeeCanBeSet(employee: IEmployee): Date[][]
+  {
+    let timeIntervals: Date[][] = [];
+
+    for (let rowNumber = 0; rowNumber < this._employeesTableAs2DArray.length; rowNumber++)
+    {
+      const row = this._employeesTableAs2DArray[rowNumber];
+      if (new EmployeesWhoCanWorkEvaluator().ifEmployeeCanBeAddedForSelection(
+        employee,
+        rowNumber,
+        this._employeesTableAs2DArray,
+        this._maxWorkTimeInMinutes,
+        this._minRestTimeInMinutes,
+        this._timeIntervalInMinutes))
+      {
+        timeIntervals.push(this._timeColumnAsDateArray[rowNumber]);
+      }
+    }
+    return timeIntervals;
   }
 }

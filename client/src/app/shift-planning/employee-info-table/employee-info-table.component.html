@@ -31,7 +31,18 @@
     >
       <div *ngIf="ifButtonActive; then showButton; else showSectorName"></div>
       <ng-template #showButton>
-        <button type="button" (click)="deleteWorkSession(smallTableRow.timeStartRowNumber, smallTableRow.timeEndRowNumber, smallTableRow.sector)">Delete</button>
+        <button
+          type="button"
+          (click)="
+            deleteWorkSession(
+              smallTableRow.timeStartRowNumber,
+              smallTableRow.timeEndRowNumber,
+              smallTableRow.sector
+            )
+          "
+        >
+          Delete
+        </button>
       </ng-template>
       <ng-template #showSectorName>
         {{ smallTableRow.sector }}
@@ -42,6 +53,36 @@
   <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
   <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
 </table>
+
+<div *ngIf="ifShowStartTimeSelector">
+  <mat-select (mousedown)="getAvailableStartTimeIntervals()">
+    <mat-option *ngFor="let startTimeInterval of availableStartTimeIntervals">
+      {{ startTimeInterval[0] | date : "HH:mm" }} -
+      {{ startTimeInterval[1] | date : "HH:mm" }}
+    </mat-option>
+  </mat-select>
+</div>
+<div
+  [ngStyle]="{
+    background: 'green'
+  }"
+>
+  <button
+    type="button"
+    (click)="showStartTimeSelector()"
+    *ngIf="!ifShowStartTimeSelector"
+  >
+    Add
+  </button>
+  <button
+    type="button"
+    *ngIf="ifShowStartTimeSelector"
+    (click)="cancelTimeSelection()"
+  >
+    Cancel
+  </button>
+</div>
+
 <div
   [ngStyle]="{
     background: 'white'

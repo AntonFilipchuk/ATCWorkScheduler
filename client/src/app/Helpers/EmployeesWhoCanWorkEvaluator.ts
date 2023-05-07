@@ -187,7 +187,7 @@ export class EmployeesWhoCanWorkEvaluator
     return workAndRestInfo;
   }
 
-  private ifEmployeeCanBeAddedForSelection(
+  public ifEmployeeCanBeAddedForSelection(
     employee: IEmployee,
     rowNumber: number,
     employeesTableAs2DArray: (IEmployee | undefined)[][],
