@@ -150,7 +150,7 @@ export class TablesBuilderService
 
 
 
-  private buildTable(
+  private setEmployeeAndUpdateTables(
     employee: IEmployee | undefined,
     rowNumber: number,
     columnNumber: number
@@ -180,7 +180,7 @@ export class TablesBuilderService
     {
       employeeToChange = employee;
       this._employeesTableAs2DArray[rowNumber][columnNumber] = employeeToChange;
-      this.buildTable(employee, rowNumber, columnNumber);
+      this.setEmployeeAndUpdateTables(employee, rowNumber, columnNumber);
     }
   }
 
@@ -230,11 +230,11 @@ export class TablesBuilderService
           const indexOfEmployeeToChange = this._employeesTableAs2DArray[nextRowNumber].findIndex((e) => e?.id === employeeToChange?.id);
 
           this._employeesTableAs2DArray[nextRowNumber][indexOfEmployeeToChange] = undefined;
-          this.buildTable(undefined, rowNumber, columnNumber);
+          this.setEmployeeAndUpdateTables(undefined, rowNumber, columnNumber);
           nextRowNumber++;
         }
         this._employeesTableAs2DArray[rowNumber][columnNumber] = employeeToChange;
-        this.buildTable(employeeToChange, rowNumber, columnNumber);
+        this.setEmployeeAndUpdateTables(employeeToChange, rowNumber, columnNumber);
         return;
       }
     }
@@ -332,7 +332,7 @@ export class TablesBuilderService
         let employeePositionInRow: number = this._objComparisonHelper.getPositionOfEmployeeInRow(row, employee);
         if (employeePositionInRow >= 0)
         {
-
+          const startTimeRowNumber: number = rowNumber;
           let startTimeAsDate: Date = this._timeColumnAsDateArray[rowNumber][0];
           while (
             rowNumber < this._employeesTableAs2DArray.length - 1 &&
@@ -342,9 +342,12 @@ export class TablesBuilderService
             rowNumber++;
           }
 
+          const endTimeRowNumber: number = rowNumber;
           let endTimeAsDate: Date = this._timeColumnAsDateArray[rowNumber][1];
           smallTableInfo.push(
             {
+              timeStartRowNumber: startTimeRowNumber,
+              timeEndRowNumber: endTimeRowNumber,
               timeIntervalAsDate: [startTimeAsDate, endTimeAsDate],
               sector: this.sectors[employeePositionInRow].name
             }
@@ -385,6 +388,16 @@ export class TablesBuilderService
     else 
     {
       return `${sectorsSetToArray[0]}/${sectorsSetToArray[1]}`;
+    }
+  }
+
+
+  public deleteWorkSession(timeStartRowNumber: number, timeEndRowNumber: number, sectorName: string)
+  {
+    let numberOfSector = this.sectors.findIndex((s) => s.name === sectorName);
+    for (let rowNumber = timeStartRowNumber; rowNumber <= timeEndRowNumber; rowNumber++)
+    {
+      this.setEmployeeAndUpdateTables(undefined, rowNumber, numberOfSector);
     }
   }
 }

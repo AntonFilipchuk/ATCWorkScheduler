@@ -2,6 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { TablesBuilderService } from 'src/app/Services/TableBuilderService/tables-builder.service';
 import { IEmployee } from 'src/app/models/IEmployee';
+import { ISector } from 'src/app/models/ISector';
 import { ISmallTableInfo } from 'src/app/models/ISmallTableInfo';
 import { ISmallTableRow } from 'src/app/models/ISmallTableRow';
 
@@ -15,14 +16,14 @@ export class EmployeeInfoTableComponent implements OnInit
   @Input() employee!: IEmployee;
 
   public color: string = 'grey';
-
   public totalWorkTime: string = '';
   public totalRestTime: number = 0;
   public displayedColumns: string[] = [];
+  public ifButtonActive: boolean = false;
   public table: MatTableDataSource<ISmallTableRow> =
     new MatTableDataSource<ISmallTableRow>();;
-  constructor (private tablesBuilderService: TablesBuilderService)
-  { }
+  constructor (private tablesBuilderService: TablesBuilderService) { }
+
   ngOnInit(): void
   {
     this.color = this.employee.color;
@@ -65,5 +66,16 @@ export class EmployeeInfoTableComponent implements OnInit
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
     return `${hours}:${minutes === 0 ? '00' : minutes}`;
+  }
+
+  public toggleIfButtonActive()
+  {
+    this.ifButtonActive = !this.ifButtonActive;
+  }
+
+  public deleteWorkSession(timeStartRowNumber: number, timeEndRowNumber: number, sectorName : string)
+  {
+    this.ifButtonActive = false;
+    this.tablesBuilderService.deleteWorkSession(timeStartRowNumber, timeEndRowNumber, sectorName);
   }
 }

@@ -1,5 +1,7 @@
 export interface ISmallTableRow
 {
-  timeIntervalAsDate : Date[],
+  timeStartRowNumber: number;
+  timeEndRowNumber: number;
+  timeIntervalAsDate: Date[],
   sector: string;
 }

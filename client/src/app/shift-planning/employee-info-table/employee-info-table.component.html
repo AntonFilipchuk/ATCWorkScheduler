@@ -22,7 +22,21 @@
     <th mat-header-cell *matHeaderCellDef class="fifty-column">
       {{ displayedColumns[1] }}
     </th>
-    <td mat-cell *matCellDef="let element" class="fifty-column">{{ element.sector }}</td>
+    <td
+      mat-cell
+      *matCellDef="let smallTableRow"
+      class="fifty-column"
+      (mouseenter)="toggleIfButtonActive()"
+      (mouseleave)="toggleIfButtonActive()"
+    >
+      <div *ngIf="ifButtonActive; then showButton; else showSectorName"></div>
+      <ng-template #showButton>
+        <button type="button" (click)="deleteWorkSession(smallTableRow.timeStartRowNumber, smallTableRow.timeEndRowNumber, smallTableRow.sector)">Delete</button>
+      </ng-template>
+      <ng-template #showSectorName>
+        {{ smallTableRow.sector }}
+      </ng-template>
+    </td>
   </ng-container>
 
   <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
