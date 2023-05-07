@@ -10,7 +10,7 @@ import { IWorkAndRestTimeInfo } from '../../models/IWorkAndRestTimeInfo';
 import { EmployeesWhoCanWorkEvaluator } from '../../Helpers/EmployeesWhoCanWorkEvaluator';
 import { StartingDataEvaluatorService } from '../StartingDataEvaluatorService/starting-data-evaluator.service';
 import { ISmallTableRow } from 'src/app/models/ISmallTableRow';
-import { ISmallTable } from 'src/app/models/ISmallTable';
+import { ISmallTableInfo } from 'src/app/models/ISmallTableInfo';
 
 
 
@@ -50,8 +50,8 @@ export class TablesBuilderService
   private _$employeesTableAs2DArray: ReplaySubject<(IEmployee | undefined)[][]> =
     new ReplaySubject<(IEmployee | undefined)[][]>();
 
-  private _$smallTables: ReplaySubject<ISmallTable[]> =
-    new ReplaySubject<ISmallTable[]>();
+  private _$smallTables: ReplaySubject<ISmallTableInfo[]> =
+    new ReplaySubject<ISmallTableInfo[]>();
 
 
   public displayColumns: string[] = [];
@@ -59,7 +59,7 @@ export class TablesBuilderService
   public sectors: ISector[] = [];
 
 
-  public tablesForEachEmployee: ISmallTable[] = [];
+  public tablesForEachEmployee: ISmallTableInfo[] = [];
 
   private _tableForMatTable: ITableRow[] = [];
   public get tableForMatTable(): ITableRow[]
@@ -97,7 +97,7 @@ export class TablesBuilderService
 
   }
 
-  public getSmallTablesObservable(): Observable<ISmallTable[]>
+  public getSmallTablesObservable(): Observable<ISmallTableInfo[]>
   {
     return this._$smallTables;
   }
@@ -276,6 +276,8 @@ export class TablesBuilderService
     {
       employeesWhoCanWork = [employee, ...employeesWhoCanWork];
     }
+
+    //Sort by name
     return employeesWhoCanWork.sort((e1, e2) => 
     {
       if (e1.name < e2.name)
@@ -314,34 +316,35 @@ export class TablesBuilderService
   }
 
 
-  public buildSmallTables()
+  public buildSmallTables(): ISmallTableInfo[]
   {
-    let tables: ISmallTable[] = [];
+    let tablesInfo: ISmallTableInfo[] = [];
+
     for (let i = 0; i < this.employees.length; i++)
     {
       const employee = this.employees[i];
-      let smallTable: ISmallTableRow[] = [];
+      let smallTableInfo: ISmallTableRow[] = [];
       let sectors: Set<string> = new Set<string>();
+
       for (let j = 0; j < this._employeesTableAs2DArray.length; j++)
       {
         const row = this._employeesTableAs2DArray[j];
         let employeePositionInRow: number = this._objComparisonHelper.getPositionOfEmployeeInRow(row, employee);
         if (employeePositionInRow >= 0)
         {
-          let startTime: string = this._timeColumnAsStringArray[j].slice(0, 5);
-          let startTimeAsDate : Date = this._timeColumnAsDateArray[j][0];
+
+          let startTimeAsDate: Date = this._timeColumnAsDateArray[j][0];
           while (
             this._objComparisonHelper.ifEmployeesRowHasEmployee(this._employeesTableAs2DArray[j + 1], employee)
             && this._objComparisonHelper.getPositionOfEmployeeInRow(this._employeesTableAs2DArray[j + 1], employee) === employeePositionInRow)
           {
             j++;
           }
-          let endTime: string = this._timeColumnAsStringArray[j].slice(8, 13);
-          let endTimeAsDate : Date = this._timeColumnAsDateArray[j][1];
-          smallTable.push(
+
+          let endTimeAsDate: Date = this._timeColumnAsDateArray[j][1];
+          smallTableInfo.push(
             {
-              timeIntervalAsDate : [startTimeAsDate, endTimeAsDate],
-              timeInterval: `${startTime} - ${endTime}`,
+              timeIntervalAsDate: [startTimeAsDate, endTimeAsDate],
               sector: this.sectors[employeePositionInRow].name
             }
           );
@@ -349,55 +352,38 @@ export class TablesBuilderService
         }
       }
 
-      let sectorsAsString: string = '';
-      let setToArray: string[] = Array.from(sectors);
+      let sectorsAsString: string = this.formatSectorNames(sectors);
 
-      for (let n = 0; n < setToArray.length; n++)
-      {
-        const sector = setToArray[n];
-
-        if (n === 0)  
-        {
-          sectorsAsString += `${sector}/`;
-        }
-        else if (n === setToArray.length - 1)
-        {
-          sectorsAsString += `${sector}`;
-        }
-        else
-        {
-          sectorsAsString += `${sector}/`;
-        }
-
-      }
-
-      tables.push(
+      tablesInfo.push(
         {
           sectors: sectorsAsString,
           employeeId: employee.id,
           employeeName: employee.name,
-          table: smallTable
+          table: smallTableInfo
         }
       );
     }
-    return tables;
+    return tablesInfo;
   }
-  public getTotalWorkAndRestTimeForEmployee(employee: IEmployee): [number, number]
+
+
+  private formatSectorNames(sectors: Set<string>): string
   {
-    let workTime: number = 0;
-    let restTime: number = 0;
-    for (let i = 0; i < this._employeesTableAs2DArray.length; i++)
+    let sectorsSetToArray: string[] = Array.from(sectors);
+    if (sectorsSetToArray.length == 0)
     {
-      const row = this._employeesTableAs2DArray[i];
-      if (this._objComparisonHelper.ifEmployeesRowHasEmployee(row, employee))
-      {
-        workTime += this._timeIntervalInMinutes;
-      }
-      else
-      {
-        restTime += this._timeIntervalInMinutes;
-      }
+      return 'N/A';
     }
-    return [workTime, restTime];
+    else if (sectorsSetToArray.length === 1)
+    {
+      return sectorsSetToArray[0];
+    } else if (sectorsSetToArray.length > 2)
+    {
+      return 'Stand-in';
+    }
+    else 
+    {
+      return `${sectorsSetToArray[0]}/${sectorsSetToArray[1]}`;
+    }
   }
 }
