@@ -320,28 +320,30 @@ export class TablesBuilderService
   {
     let tablesInfo: ISmallTableInfo[] = [];
 
-    for (let i = 0; i < this.employees.length; i++)
+    for (let employeeNumber = 0; employeeNumber < this.employees.length; employeeNumber++)
     {
-      const employee = this.employees[i];
+      const employee = this.employees[employeeNumber];
       let smallTableInfo: ISmallTableRow[] = [];
       let sectors: Set<string> = new Set<string>();
 
-      for (let j = 0; j < this._employeesTableAs2DArray.length; j++)
+      for (let rowNumber = 0; rowNumber < this._employeesTableAs2DArray.length; rowNumber++)
       {
-        const row = this._employeesTableAs2DArray[j];
+        const row = this._employeesTableAs2DArray[rowNumber];
         let employeePositionInRow: number = this._objComparisonHelper.getPositionOfEmployeeInRow(row, employee);
         if (employeePositionInRow >= 0)
         {
 
-          let startTimeAsDate: Date = this._timeColumnAsDateArray[j][0];
+          let startTimeAsDate: Date = this._timeColumnAsDateArray[rowNumber][0];
+          rowNumber++;
           while (
-            this._objComparisonHelper.ifEmployeesRowHasEmployee(this._employeesTableAs2DArray[j + 1], employee)
-            && this._objComparisonHelper.getPositionOfEmployeeInRow(this._employeesTableAs2DArray[j + 1], employee) === employeePositionInRow)
+            rowNumber < this._employeesTableAs2DArray.length - 1 &&
+            this._objComparisonHelper.ifEmployeesRowHasEmployee(this._employeesTableAs2DArray[rowNumber + 1], employee)
+            && this._objComparisonHelper.getPositionOfEmployeeInRow(this._employeesTableAs2DArray[rowNumber + 1], employee) === employeePositionInRow)
           {
-            j++;
+            rowNumber++;
           }
 
-          let endTimeAsDate: Date = this._timeColumnAsDateArray[j][1];
+          let endTimeAsDate: Date = this._timeColumnAsDateArray[rowNumber][1];
           smallTableInfo.push(
             {
               timeIntervalAsDate: [startTimeAsDate, endTimeAsDate],
