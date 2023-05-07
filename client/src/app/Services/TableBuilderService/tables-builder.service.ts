@@ -276,6 +276,8 @@ export class TablesBuilderService
     {
       employeesWhoCanWork = [employee, ...employeesWhoCanWork];
     }
+
+    //Sort by name
     return employeesWhoCanWork.sort((e1, e2) => 
     {
       if (e1.name < e2.name)
@@ -368,8 +370,11 @@ export class TablesBuilderService
   private formatSectorNames(sectors: Set<string>): string
   {
     let sectorsSetToArray: string[] = Array.from(sectors);
-
-    if (sectorsSetToArray.length === 1)
+    if (sectorsSetToArray.length == 0)
+    {
+      return 'N/A';
+    }
+    else if (sectorsSetToArray.length === 1)
     {
       return sectorsSetToArray[0];
     } else if (sectorsSetToArray.length > 2)

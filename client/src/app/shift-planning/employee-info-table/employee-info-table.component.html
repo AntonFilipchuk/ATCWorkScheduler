@@ -1,29 +1,14 @@
-<table
-  mat-table
-  [dataSource]="table"
-  class="mat-elevation-z8"
-  [ngStyle]="{
-    width: '250px'
-  }"
->
+<table mat-table [dataSource]="table" class="mat-elevation-z8">
   <ng-container matColumnDef="{{ employee.name }}">
     <th
       mat-header-cell
       *matHeaderCellDef
+      class="fifty-column"
       [ngStyle]="{
         background: color,
       }"
     >
-      <div
-        [ngStyle]="{
-          display: 'flex',
-          'justify-content': 'center',
-          'align-items': 'center',
-          background: 'white',
-          padding: '1px',
-          'border-radius': '10%'
-        }"
-      >
+      <div class="name-container">
         {{ employee.name }}
       </div>
     </th>
@@ -34,7 +19,7 @@
   </ng-container>
 
   <ng-container matColumnDef="{{ displayedColumns[1] }}">
-    <th mat-header-cell *matHeaderCellDef [ngStyle]="{ width: '50%' }">
+    <th mat-header-cell *matHeaderCellDef class="fifty-column">
       {{ displayedColumns[1] }}
     </th>
     <td mat-cell *matCellDef="let element">{{ element.sector }}</td>
