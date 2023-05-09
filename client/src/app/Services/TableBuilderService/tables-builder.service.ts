@@ -384,7 +384,7 @@ export class TablesBuilderService
     }
   }
 
-  public getTimeWhereEmployeeCanBeSet(employee: IEmployee): Date[][]
+  public getAvailableStartTimeIntervals(employee: IEmployee): Date[][]
   {
     let timeIntervals: Date[][] = [];
 
@@ -402,6 +402,26 @@ export class TablesBuilderService
         timeIntervals.push(this._timeColumnAsDateArray[rowNumber]);
       }
     }
+    return timeIntervals;
+  }
+
+  public getAvailableEndTimeIntervals(employee: IEmployee, selectedStartTimeInterval: Date[], sector: ISector): Date[][]
+  {
+    let timeIntervals: Date[][] = [];
+    let rowNumber: number = this._timeColumnAsDateArray.findIndex((timeInterval) => timeInterval === selectedStartTimeInterval);
+    let columnNumber: number = this.sectors.findIndex((s) => s.name === sector.name);
+    let rowsWhereCanBeSet: number[] = new EmployeesWhoCanWorkEvaluator().getRowsNumbersWereEmployeeCanBeSet(
+      employee,
+      rowNumber,
+      columnNumber,
+      this._employeesTableAs2DArray,
+      this._maxWorkTimeInMinutes,
+      this._minRestTimeInMinutes,
+      this._timeIntervalInMinutes);
+    console.log(rowsWhereCanBeSet);
+    rowsWhereCanBeSet.forEach((n) => timeIntervals.push(this._timeColumnAsDateArray[n]));
+    console.log(timeIntervals);
+
     return timeIntervals;
   }
 }

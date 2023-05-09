@@ -20,10 +20,17 @@ export class EmployeeInfoTableComponent implements OnInit
   public totalWorkTime: string = '';
   public totalRestTime: number = 0;
   public displayedColumns: string[] = [];
+
+  public selectedStartTimeInterval: Date[] | undefined;
+
+  public selectedSectorToSetEmployee : ISector | undefined = { name: 'G12R' };
+
+  public ifFirstTimeSelected: boolean = false;
   public ifButtonActive: boolean = false;
   public ifShowStartTimeSelector: boolean = false;
 
   public availableStartTimeIntervals: Date[][] = [];
+  public availableEndTimeIntervals: Date[][] = [];
   public table: MatTableDataSource<ISmallTableRow> =
     new MatTableDataSource<ISmallTableRow>();;
   constructor (private tablesBuilderService: TablesBuilderService) { }
@@ -91,10 +98,16 @@ export class EmployeeInfoTableComponent implements OnInit
   public cancelTimeSelection()
   {
     this.ifShowStartTimeSelector = false;
+    this.ifFirstTimeSelected = false;
   }
 
   public getAvailableStartTimeIntervals()
   {
-    this.availableStartTimeIntervals = this.tablesBuilderService.getTimeWhereEmployeeCanBeSet(this.employee);
+    this.availableStartTimeIntervals = this.tablesBuilderService.getAvailableStartTimeIntervals(this.employee);
+  }
+
+  public getAvailableEndTimeIntervals()
+  {
+    this.availableEndTimeIntervals = this.tablesBuilderService.getAvailableEndTimeIntervals(this.employee, this.selectedStartTimeInterval!, this.selectedSectorToSetEmployee!);
   }
 }

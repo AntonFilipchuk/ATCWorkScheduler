@@ -55,8 +55,40 @@
 </table>
 
 <div *ngIf="ifShowStartTimeSelector">
-  <mat-select (mousedown)="getAvailableStartTimeIntervals()">
-    <mat-option *ngFor="let startTimeInterval of availableStartTimeIntervals">
+  <mat-select
+    (mousedown)="getAvailableStartTimeIntervals()"
+    [ngStyle]="{
+      background: 'grey',
+      color: 'black'
+    }"
+  >
+    <mat-option
+      *ngFor="let startTimeInterval of availableStartTimeIntervals"
+      [value]="startTimeInterval"
+      (onSelectionChange)="
+        ifFirstTimeSelected = true;
+        selectedStartTimeInterval = startTimeInterval
+      "
+    >
+      {{ startTimeInterval[0] | date : "HH:mm" }} -
+      {{ startTimeInterval[1] | date : "HH:mm" }}
+    </mat-option>
+  </mat-select>
+</div>
+
+<div *ngIf="ifFirstTimeSelected">
+  <mat-select
+    (mousedown)="getAvailableEndTimeIntervals()"
+    [ngStyle]="{
+      background: 'grey',
+      color: 'black'
+    }"
+  >
+    <mat-option
+      *ngFor="let startTimeInterval of availableStartTimeIntervals"
+      [value]="startTimeInterval"
+      (onSelectionChange)="ifFirstTimeSelected = true"
+    >
       {{ startTimeInterval[0] | date : "HH:mm" }} -
       {{ startTimeInterval[1] | date : "HH:mm" }}
     </mat-option>
