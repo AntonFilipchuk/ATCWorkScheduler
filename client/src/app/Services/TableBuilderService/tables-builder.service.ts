@@ -1,8 +1,6 @@
 import { Injectable } from '@angular/core';
 import { IEmployee } from '../../models/IEmployee';
-import { IEmployeesRow } from '../../models/IEmployeesRow';
 import { Observable, ReplaySubject } from 'rxjs';
-
 import { ITableRow } from '../../models/ITableRow';
 import { ISector } from '../../models/ISector';
 import { ObjectsComparisonHelper } from '../../Helpers/ObjectsComparisonHelper';
@@ -11,23 +9,6 @@ import { EmployeesWhoCanWorkEvaluator } from '../../Helpers/EmployeesWhoCanWorkE
 import { StartingDataEvaluatorService } from '../StartingDataEvaluatorService/starting-data-evaluator.service';
 import { ISmallTableRow } from 'src/app/models/ISmallTableRow';
 import { ISmallTableInfo } from 'src/app/models/ISmallTableInfo';
-
-
-
-
-
-
-/**
- *  _____________________
- *  |time| S1| S2| S3| S4|
- *  ⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻
- *  |  1 | e1| e2| e3| e4| -> ITableRow
- *  ⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻
- *  |  2 | e1| e2| e3| e4|
- *  ⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻
- *
- *       | e1| e2| e3| e4| -> ISectorsRow
- */
 
 @Injectable({
   providedIn: 'root',
