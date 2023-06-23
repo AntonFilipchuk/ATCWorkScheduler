@@ -22,10 +22,16 @@ export class EmployeeInfoTableComponent implements OnInit
   public displayedColumns: string[] = [];
 
   public selectedStartTimeInterval: Date[] | undefined;
+  public selectedEndTimeInterval: Date[] | undefined;
 
-  public selectedSectorToSetEmployee : ISector | undefined = { name: 'G12R' };
+  public selectedSectorToSetEmployee: ISector | undefined = { name: 'G12R' };
 
+  //Logic to add time from table
+  public selectedSector: ISector | undefined;
+  public ifShowSectorSelector: boolean = false;
+  public ifSectorIsSelected: boolean = false;
   public ifFirstTimeSelected: boolean = false;
+  public ifSecondTimeSelected: boolean = false;
   public ifButtonActive: boolean = false;
   public ifShowStartTimeSelector: boolean = false;
 
@@ -90,6 +96,12 @@ export class EmployeeInfoTableComponent implements OnInit
     this.tablesBuilderService.deleteWorkSession(timeStartRowNumber, timeEndRowNumber, sectorName);
   }
 
+  public addWorkSession()
+  {
+    this.tablesBuilderService.addWorkSession(this.selectedStartTimeInterval, this.selectedEndTimeInterval, this.selectedSector?.name!, this.employee);
+    this.cancelTimeSelection();
+  }
+
   public showStartTimeSelector()
   {
     this.ifShowStartTimeSelector = true;
@@ -99,15 +111,23 @@ export class EmployeeInfoTableComponent implements OnInit
   {
     this.ifShowStartTimeSelector = false;
     this.ifFirstTimeSelected = false;
+    this.ifShowSectorSelector = false;
+    this.ifSecondTimeSelected = false;
+    this.ifSectorIsSelected = false;
   }
 
   public getAvailableStartTimeIntervals()
   {
+    console.log("Trying to select start time");
+
     this.availableStartTimeIntervals = this.tablesBuilderService.getAvailableStartTimeIntervals(this.employee);
   }
 
   public getAvailableEndTimeIntervals()
   {
-    this.availableEndTimeIntervals = this.tablesBuilderService.getAvailableEndTimeIntervals(this.employee, this.selectedStartTimeInterval!, this.selectedSectorToSetEmployee!);
+    console.log("Trying to select end time");
+    this.availableEndTimeIntervals =
+      this.tablesBuilderService.
+        getAvailableEndTimeIntervals(this.employee, this.selectedStartTimeInterval!, this.selectedSectorToSetEmployee!);
   }
 }

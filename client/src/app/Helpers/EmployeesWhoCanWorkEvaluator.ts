@@ -57,9 +57,9 @@ export class EmployeesWhoCanWorkEvaluator
     return validEmployeesForSelection;
   }
 
-  public getRowsNumbersWereEmployeeCanBeSet(
+  public getRowNumbersWereEmployeeCanBeSet(
     employee: IEmployee,
-    rowNumber: number,
+    startRowNumber: number,
     columnNumber: number,
     employeesTableAs2DArray: (IEmployee | undefined)[][],
     maxWorkTimeInMinutes: number,
@@ -69,16 +69,13 @@ export class EmployeesWhoCanWorkEvaluator
   {
     let rowsNumbers: number[] = [];
 
-    let nextRow = rowNumber + 1;
-    let previousRow = rowNumber - 1;
+    let nextRow = startRowNumber + 1;
 
     let alternateRealityTableToFuture = structuredClone(
       employeesTableAs2DArray
     );
-    let alternateRealityTableToPast = structuredClone(employeesTableAs2DArray);
-
-    alternateRealityTableToPast[rowNumber][columnNumber] = employee;
-    alternateRealityTableToFuture[rowNumber][columnNumber] = employee;
+  
+    alternateRealityTableToFuture[startRowNumber][columnNumber] = employee;
 
     while (nextRow < employeesTableAs2DArray.length)
     {
@@ -102,27 +99,6 @@ export class EmployeesWhoCanWorkEvaluator
       }
     }
 
-    while (previousRow >= 0)
-    {
-      if (
-        this.ifEmployeeCanBeAddedForSelection(
-          employee,
-          previousRow,
-          alternateRealityTableToPast,
-          maxWorkTimeInMinutes,
-          minRestTimeInMinutes,
-          timeIntervalInMinutes
-        )
-      )
-      {
-        rowsNumbers.push(previousRow);
-        alternateRealityTableToPast[previousRow][columnNumber] = employee;
-        previousRow--;
-      } else
-      {
-        break;
-      }
-    }
 
     return rowsNumbers.sort((a, b) => a - b);
   }

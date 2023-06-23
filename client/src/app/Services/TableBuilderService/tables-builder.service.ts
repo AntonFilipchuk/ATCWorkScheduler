@@ -375,23 +375,36 @@ export class TablesBuilderService
   }
 
 
-  public deleteWorkSession(timeStartRowNumber: number, timeEndRowNumber: number, sectorName: string)
+  public deleteWorkSession(startTimeRowNumber: number, endTimeRowNumber: number, sectorName: string)
   {
     let numberOfSector = this.sectors.findIndex((s) => s.name === sectorName);
-    for (let rowNumber = timeStartRowNumber; rowNumber <= timeEndRowNumber; rowNumber++)
+    for (let rowNumber = startTimeRowNumber; rowNumber <= endTimeRowNumber; rowNumber++)
     {
       this.setEmployeeAndUpdateTables(undefined, rowNumber, numberOfSector);
+    }
+  }
+
+  public addWorkSession(startTime: Date[] | undefined, endTime: Date[] | undefined, sectorName: string, employee: IEmployee)
+  {
+    let numberOfSector = this.sectors.findIndex((s) => s.name === sectorName);
+
+    let startTimeRowNumber = this._timeColumnAsDateArray.findIndex((t) => t === startTime);
+    let endTimeRowNumber = this._timeColumnAsDateArray.findIndex((t) => t === endTime);
+
+    for (let rowNumber = startTimeRowNumber; rowNumber <= endTimeRowNumber; rowNumber++)
+    {
+      this.setEmployeeAndUpdateTables(employee, rowNumber, numberOfSector);
     }
   }
 
   public getAvailableStartTimeIntervals(employee: IEmployee): Date[][]
   {
     let timeIntervals: Date[][] = [];
+    let evaluator = new EmployeesWhoCanWorkEvaluator();
 
     for (let rowNumber = 0; rowNumber < this._employeesTableAs2DArray.length; rowNumber++)
     {
-      const row = this._employeesTableAs2DArray[rowNumber];
-      if (new EmployeesWhoCanWorkEvaluator().ifEmployeeCanBeAddedForSelection(
+      if (evaluator.ifEmployeeCanBeAddedForSelection(
         employee,
         rowNumber,
         this._employeesTableAs2DArray,
@@ -410,7 +423,10 @@ export class TablesBuilderService
     let timeIntervals: Date[][] = [];
     let rowNumber: number = this._timeColumnAsDateArray.findIndex((timeInterval) => timeInterval === selectedStartTimeInterval);
     let columnNumber: number = this.sectors.findIndex((s) => s.name === sector.name);
-    let rowsWhereCanBeSet: number[] = new EmployeesWhoCanWorkEvaluator().getRowsNumbersWereEmployeeCanBeSet(
+
+    let evaluator = new EmployeesWhoCanWorkEvaluator();
+
+    let rowsWhereCanBeSet: number[] = evaluator.getRowNumbersWereEmployeeCanBeSet(
       employee,
       rowNumber,
       columnNumber,
@@ -418,10 +434,7 @@ export class TablesBuilderService
       this._maxWorkTimeInMinutes,
       this._minRestTimeInMinutes,
       this._timeIntervalInMinutes);
-    console.log(rowsWhereCanBeSet);
     rowsWhereCanBeSet.forEach((n) => timeIntervals.push(this._timeColumnAsDateArray[n]));
-    console.log(timeIntervals);
-
     return timeIntervals;
   }
 }

@@ -54,11 +54,31 @@
   <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
 </table>
 
-<div *ngIf="ifShowStartTimeSelector">
+<div *ngIf="ifShowSectorSelector">
+  <mat-select
+    [ngStyle]="{
+      background: 'grey',
+      color: 'black'
+    }"
+  >
+    <mat-option
+      *ngFor="let sector of employee.sectorPermits"
+      [value]="sector"
+      (onSelectionChange)="ifSectorIsSelected = true; selectedSector = sector"
+    >
+      {{ sector.name }}
+    </mat-option>
+  </mat-select>
+</div>
+
+<!--Start time of work session selector
+Only show it when sector is selected-->
+
+<div *ngIf="ifSectorIsSelected">
   <mat-select
     (mousedown)="getAvailableStartTimeIntervals()"
     [ngStyle]="{
-      background: 'grey',
+      background: 'darkseagreen',
       color: 'black'
     }"
   >
@@ -76,24 +96,30 @@
   </mat-select>
 </div>
 
+<!--End time of work session selector
+Only show it when start time of work is selected-->
 <div *ngIf="ifFirstTimeSelected">
   <mat-select
     (mousedown)="getAvailableEndTimeIntervals()"
     [ngStyle]="{
-      background: 'grey',
+      background: 'darkorange',
       color: 'black'
     }"
   >
     <mat-option
-      *ngFor="let startTimeInterval of availableStartTimeIntervals"
-      [value]="startTimeInterval"
-      (onSelectionChange)="ifFirstTimeSelected = true"
+      *ngFor="let endTimeInterval of availableEndTimeIntervals"
+      [value]="endTimeInterval"
+      (onSelectionChange)="
+        ifSecondTimeSelected = true; selectedEndTimeInterval = endTimeInterval
+      "
     >
-      {{ startTimeInterval[0] | date : "HH:mm" }} -
-      {{ startTimeInterval[1] | date : "HH:mm" }}
+      {{ endTimeInterval[0] | date : "HH:mm" }} -
+      {{ endTimeInterval[1] | date : "HH:mm" }}
     </mat-option>
   </mat-select>
 </div>
+
+<!--Buttons to cancel or add work session-->
 <div
   [ngStyle]="{
     background: 'green'
@@ -101,20 +127,24 @@
 >
   <button
     type="button"
-    (click)="showStartTimeSelector()"
-    *ngIf="!ifShowStartTimeSelector"
+    *ngIf="!ifShowSectorSelector"
+    (click)="ifShowSectorSelector = true"
   >
     Add
   </button>
   <button
     type="button"
-    *ngIf="ifShowStartTimeSelector"
+    *ngIf="ifShowSectorSelector"
     (click)="cancelTimeSelection()"
   >
     Cancel
   </button>
+  <button type="button" *ngIf="ifSecondTimeSelected" (click)="addWorkSession()">
+    Add work session
+  </button>
 </div>
 
+<!--Total work time-->
 <div
   [ngStyle]="{
     background: 'white'
