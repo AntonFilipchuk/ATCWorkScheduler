@@ -387,7 +387,6 @@ export class TablesBuilderService
   public addWorkSession(startTime: Date[] | undefined, endTime: Date[] | undefined, sectorName: string, employee: IEmployee)
   {
     let numberOfSector = this.sectors.findIndex((s) => s.name === sectorName);
-
     let startTimeRowNumber = this._timeColumnAsDateArray.findIndex((t) => t === startTime);
     let endTimeRowNumber = this._timeColumnAsDateArray.findIndex((t) => t === endTime);
 

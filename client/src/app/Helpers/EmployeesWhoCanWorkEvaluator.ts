@@ -69,13 +69,13 @@ export class EmployeesWhoCanWorkEvaluator
   {
     let rowsNumbers: number[] = [];
 
-    let nextRow = startRowNumber + 1;
+    let nextRow = startRowNumber;
 
     let alternateRealityTableToFuture = structuredClone(
       employeesTableAs2DArray
     );
-  
-    alternateRealityTableToFuture[startRowNumber][columnNumber] = employee;
+
+
 
     while (nextRow < employeesTableAs2DArray.length)
     {
@@ -98,7 +98,8 @@ export class EmployeesWhoCanWorkEvaluator
         break;
       }
     }
-
+    
+    alternateRealityTableToFuture[startRowNumber][columnNumber] = employee;
 
     return rowsNumbers.sort((a, b) => a - b);
   }
