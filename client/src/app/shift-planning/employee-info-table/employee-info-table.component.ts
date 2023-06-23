@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
+import { ReplaySubject } from 'rxjs';
 import { TablesBuilderService } from 'src/app/Services/TableBuilderService/tables-builder.service';
 import { IEmployee } from 'src/app/models/IEmployee';
 import { ISector } from 'src/app/models/ISector';
@@ -35,6 +36,8 @@ export class EmployeeInfoTableComponent implements OnInit
   public ifButtonActive: boolean = false;
   public ifShowStartTimeSelector: boolean = false;
 
+  public ifMouse! : ReplaySubject<boolean>;
+
   public availableStartTimeIntervals: Date[][] = [];
   public availableEndTimeIntervals: Date[][] = [];
   public table: MatTableDataSource<ISmallTableRow> =
@@ -57,6 +60,17 @@ export class EmployeeInfoTableComponent implements OnInit
         }
       }
     );
+
+    //This subscription is used to disable all selection from all small tables
+    //When user decides to set work session in main table
+    this.tablesBuilderService.getIfMouseTouchedAgainRowWhereEmployeeWasSelectedObservable().subscribe(
+      {
+        next:() => 
+        {
+          this.cancelTimeSelection();
+        }
+      }
+    )
   }
 
   private getWorkTime(table: ISmallTableRow[])

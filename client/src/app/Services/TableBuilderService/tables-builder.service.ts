@@ -35,12 +35,15 @@ export class TablesBuilderService
     new ReplaySubject<ISmallTableInfo[]>();
 
 
+  //This variable is to check if work session is being set in the main table
+  //If true, we need to deactivate all selections from small tables 
+  public _$ifSelectionInMainTableInProgress: ReplaySubject<boolean> = new ReplaySubject<boolean>();
+
   public displayColumns: string[] = [];
   public employees: IEmployee[] = [];
   public sectors: ISector[] = [];
 
 
-  public tablesForEachEmployee: ISmallTableInfo[] = [];
 
   private _tableForMatTable: ITableRow[] = [];
   public get tableForMatTable(): ITableRow[]
@@ -75,7 +78,7 @@ export class TablesBuilderService
     this._$rowNumberOfSelectedEmployee.next(-1);
     this._$ifMouseTouchedAgainRowWhereEmployeeWasSelected.next(false);
     this._$smallTables.next(this.buildSmallTables());
-
+   
   }
 
   public getSmallTablesObservable(): Observable<ISmallTableInfo[]>

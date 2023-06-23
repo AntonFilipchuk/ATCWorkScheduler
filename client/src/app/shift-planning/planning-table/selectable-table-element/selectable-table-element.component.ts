@@ -112,7 +112,6 @@ export class SelectableTableElementComponent implements OnInit
         error: (e) => 
         {
           console.log(e);
-
         }
       }
     );
